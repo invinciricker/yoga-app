@@ -38,3 +38,11 @@ Thumbs.db
 .idea/
 .vscode/
 npm-debug.*
+
+# Expo and Metro leftovers
+expo-env.d.ts
+.kotlin/
+.metro-health-check*
+*.orig.*
+*.key
+*.mobileprovision

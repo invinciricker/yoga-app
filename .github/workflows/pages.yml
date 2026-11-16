@@ -1,0 +1,55 @@
+# PAGES (the public website and the web preview)
+# When it runs: every time something is merged into main. It can also be run by hand.
+# What it does: builds the small website and the web version of the app, and publishes them at
+#   https://invinciricker.github.io/yoga-app/        (the website)
+#   https://invinciricker.github.io/yoga-app/app/    (the web preview of the app)
+# A red cross means: the website was NOT updated (the old one stays online, nothing is broken).
+#   Most often: GitHub Pages is not set to "GitHub Actions" (Settings → Pages → Source).
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build the web preview of the app
+        run: npm run build:web
+        env:
+          # The preview lives in a sub-folder of the website.
+          WEB_BASE_URL: /yoga-app/app
+      - name: Put the website together
+        run: npm run build:site
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist-site
+          # Keep .nojekyll (a file whose name starts with a dot).
+          include-hidden-files: true
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

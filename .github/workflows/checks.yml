@@ -1,0 +1,27 @@
+# CHECKS
+# When it runs: on every pull request, and every time something is merged into main.
+# What it does: checks the code (types, style, tests, database rules) and that the web version builds.
+# A red cross means: the code has a mistake. Do not merge; tell Claude Code "the checks are red".
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build:web

@@ -61,6 +61,11 @@ Later (`docs/phases/later.md`): our own video hosting with offline downloads, Ma
 ## State
 (Updated by Claude Code at the end of each phase. 25 lines at most. Start with the list of phases done.)
 
-**Phases done: none.**
+**Phases done: 0 (the shell).** Next: Phase 1.
 
-**16 Nov 2026.** The repository holds the blueprint only: the docs, the design, the tokens, the content schema with sample content, and the database migration with its test (31 checks passing). Phase 0 starts from an empty app.
+**16 Nov 2026, Phase 0.** Expo SDK 58, React Native 0.88, TypeScript strict, Expo Router (versions and notes: `docs/TECH.md`).
+- Built: `app.config.ts` with the two variants, `eas.json`, the theme helpers (`auraForSlug`), the six fonts, the parts in `src/ui/` (all except the four content cards and the three state parts), `src/strings.ts`, the four tabs with the floating tab bar, Today (greeting, candlelight, one "Coming next" cover), the design gallery (preview only), the site page, `tools/` (site build, screenshots, icons), the four workflows.
+- Expo: owner `invincirick`, project ID in `app.config.ts`. Package name still the placeholder `com.yogawithmaria.app` (one constant).
+- Checks: `npm run check` green (7 tests, 31 database checks), web export builds, pictures in `docs/screens/phase-0/`.
+- Not yet proven: no Android build has run. Whether Expo creates the signing key by itself in a non-interactive build is unknown until the owner runs "Android build" once.
+- Stand-ins to replace in Phase 1: `src/ui/QuietPlace.tsx` (empty tabs) and the "Coming next" cover on Today.

@@ -1,0 +1,60 @@
+# PREVIEW UPDATE (over the air)
+# When it runs: every time app code is merged into main.
+# What it does: sends the new code to the "Yoga (preview)" app already installed on your phone.
+#   Close the app and open it twice to see the change. It never touches the public app.
+#   If the pull request said "this needs a new build", the update will not reach the old build:
+#   run "Android build" instead.
+# A red cross means: the update was not sent. Your phone keeps the previous version; nothing breaks.
+# If the EXPO_TOKEN secret is missing, it stops quietly with a message (no red cross).
+name: Preview update
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'shared/**'
+      - 'assets/**'
+      - 'app.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+concurrency:
+  group: preview-update
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      APP_VARIANT: preview
+    steps:
+      - name: Is the Expo token there?
+        id: token
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::notice::Skipped: the EXPO_TOKEN secret is not set yet (docs/OWNER-SETUP.md). Nothing was sent."
+            echo "present=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=yes" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.token.outputs.present == 'yes'
+        uses: actions/checkout@v7
+      - if: steps.token.outputs.present == 'yes'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.token.outputs.present == 'yes'
+        uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - if: steps.token.outputs.present == 'yes'
+        run: npm ci
+      - name: Send the update to the preview app
+        if: steps.token.outputs.present == 'yes'
+        run: eas update --channel preview --platform android --message "${{ github.sha }}" --non-interactive

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yoga with Maria</title>
+  <meta name="description" content="Yoga lessons from Maria. Coming soon to Google Play.">
+  <meta name="theme-color" content="#0C1311">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+  <!-- The colours are the app's tokens (src/theme/tokens.ts). -->
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: #0C1311; color: #F3ECDD;
+      font-family: 'Figtree', system-ui, sans-serif; font-size: 17px; line-height: 27px;
+      -webkit-font-smoothing: antialiased;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .light {
+      position: absolute; top: -150px; right: -140px; width: 460px; height: 460px; border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(227,180,94,0.2), rgba(227,180,94,0));
+    }
+    main { position: relative; max-width: 560px; padding: 40px 20px; }
+    .disc {
+      width: 32px; height: 32px; border-radius: 50%; background: #F3D592;
+      box-shadow: 0 0 32px 11px rgba(243,213,146,0.35); margin-bottom: 40px;
+    }
+    h1 {
+      margin: 0 0 16px; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500;
+      font-size: 44px; line-height: 46px; letter-spacing: -0.4px;
+    }
+    p { margin: 0 0 40px; color: #C3BDAE; }
+    a.button {
+      display: inline-flex; align-items: center; height: 52px; padding: 0 24px; border-radius: 20px;
+      border: 1px solid #34443C; color: #F3ECDD; font-weight: 600; font-size: 15px; text-decoration: none;
+    }
+    a.button:hover, a.button:focus-visible { border-color: #E3B45E; }
+  </style>
+</head>
+<body>
+  <div class="light" aria-hidden="true"></div>
+  <main>
+    <div class="disc" aria-hidden="true"></div>
+    <h1>Yoga with Maria</h1>
+    <p>Yoga lessons from Maria. Coming soon to Google Play.</p>
+    <a class="button" href="app/">Open the web preview</a>
+  </main>
+</body>
+</html>
