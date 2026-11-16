@@ -1,0 +1,4 @@
+# App-wide words. Format: docs/CONTENT.md.
+appName: Yoga with Maria   # working title. The final name is decided before Phase 5 (docs/PLAN.md).
+teacherFirstName: Maria
+# contactEmail: someone@example.com   # shown on the privacy page; needed before the store release
