@@ -9,7 +9,7 @@
  * Phases 4 and 10 add rows with it (delete my data, notifications).
  */
 import { ChevronRight } from 'lucide-react-native';
-import { StyleSheet, Switch, View } from 'react-native';
+import { Platform, StyleSheet, Switch, View } from 'react-native';
 
 import { layout, space } from '@/theme';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -17,6 +17,9 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { PressableScale } from './PressableScale';
 import { size } from './sizes';
 import { Text } from './Text';
+
+/** Props that only react-native-web knows (not in React Native's types): given on the web only. */
+const webOnly = (props: Record<string, string>): object => (Platform.OS === 'web' ? props : {});
 
 type Common = {
   label: string;
@@ -35,6 +38,8 @@ export function SettingsRow(props: SettingsRowProps) {
   const { scheme, color } = useTheme();
   const { label, line, accessibilityHint } = props;
   const isSwitch = props.onValueChange !== undefined;
+  // The knob: ivory in the dark, white on paper, the same whether on or off.
+  const thumb = scheme === 'dark' ? color.text.primary : color.bg.elevated;
 
   const onPress = () => {
     if (props.onValueChange) props.onValueChange(!props.value);
@@ -64,8 +69,10 @@ export function SettingsRow(props: SettingsRowProps) {
           <Switch
             value={!!props.value}
             trackColor={{ false: color.border.strong, true: color.accent.fill }}
-            thumbColor={scheme === 'dark' ? color.text.primary : color.bg.elevated}
+            thumbColor={thumb}
             ios_backgroundColor={color.border.strong}
+            // The web mirror's switch has its own colour for the knob when on (a teal): ours instead.
+            {...webOnly({ activeThumbColor: thumb })}
           />
         </View>
       ) : (
