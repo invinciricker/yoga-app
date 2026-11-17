@@ -12,6 +12,10 @@ export const storageKeys = {
   appearance: 'ywm:appearance:v1',
   /** The last calendar day the billboard was shown on Home, "2026-11-17". */
   billboardDay: 'ywm:billboard-day:v1',
+  /** true once the welcome was finished ("Begin") or skipped. Absent: show the welcome. */
+  welcome: 'ywm:welcome:v1',
+  /** The app's own "reduce motion" switch in You: true or false. The phone's setting is followed too. */
+  reduceMotion: 'ywm:reduce-motion:v1',
 } as const;
 
 /** Reads and parses a saved value. Returns undefined when there is none or it cannot be read. */
@@ -28,6 +32,16 @@ export async function readJson(key: string): Promise<unknown> {
 export async function writeJson(key: string, value: unknown): Promise<boolean> {
   try {
     await AsyncStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Forgets a saved value. Returns false if the phone refused. */
+export async function removeKey(key: string): Promise<boolean> {
+  try {
+    await AsyncStorage.removeItem(key);
     return true;
   } catch {
     return false;

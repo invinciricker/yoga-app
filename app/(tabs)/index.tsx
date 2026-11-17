@@ -78,9 +78,15 @@ export default function HomeScreen() {
   // ---- Once a day: the first opening of a calendar day shows the billboard; later ones open on Today.
   const [startOnToday] = useState(() => !showBillboard(usePrefs.getState().billboardDay, dayOf(new Date())));
   const [placed, setPlaced] = useState(!startOnToday);
+  // The billboard's day is saved as soon as it shows. It is forgotten when the welcome ends (the
+  // welcome can be opened again from About while Home stays underneath): back to the billboard.
+  const billboardDay = usePrefs((s) => s.billboardDay);
   useEffect(() => {
-    usePrefs.getState().setBillboardDay(dayOf(new Date()));
-  }, []);
+    const today = dayOf(new Date());
+    if (!showBillboard(billboardDay, today)) return;
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    usePrefs.getState().setBillboardDay(today);
+  }, [billboardDay, scrollRef]);
 
   // Back from the background on a new day (the app stayed open overnight): the billboard again.
   useEffect(() => {

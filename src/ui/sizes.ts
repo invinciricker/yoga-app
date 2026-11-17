@@ -50,5 +50,4 @@ export const size = {
   classDay: 104, // the column of days and times in "Classes with Maria"
   settingsRow: 56, // the least height of a row in You
   dot: 6, // a dot of the welcome's three
-  dotActive: 18, // the current dot is a short pill
 } as const;

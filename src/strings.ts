@@ -137,6 +137,36 @@ export const strings = {
     // When a link has nothing on this phone to open it: one calm line, then the address itself.
     notOpened: 'That did not open here.',
   },
+  // The welcome: three screens, the very first time the app opens (docs/phases/phase-3.md).
+  welcome: {
+    next: 'Next',
+    begin: 'Begin',
+    skip: 'Skip',
+    skipHint: 'Goes straight to Home',
+    place: (n: number, total: number) => `Screen ${n} of ${total}`,
+    first: {
+      overline: 'Welcome',
+      sentence: 'A quiet place to practise, a few minutes at a time.',
+    },
+    // The second screen until Breathe, Meditate and Journal are all built…
+    lessons: {
+      overline: (teacher: string) => `With ${teacher}`,
+      title: 'Short lessons, any time',
+      sentence: (teacher: string) => `Videos, tips and notes from ${teacher}, new ones as she makes them. Free.`,
+    },
+    // …and once they are.
+    everyDay: {
+      overline: 'Every day',
+      title: 'Move, breathe, sit, write',
+      sentence: (teacher: string) =>
+        `${teacher}’s lessons, a few slow breaths, a quiet sitting, a page of your own. One small practice a day.`,
+    },
+    yours: {
+      overline: 'Yours',
+      title: 'Nothing to sign up for',
+      sentence: 'Open the app and begin. What you do here stays on your phone.',
+    },
+  },
   // You: the person's own page (settings now; more in later phases).
   me: {
     title: 'You',
