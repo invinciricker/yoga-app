@@ -5,7 +5,8 @@
  *   youtube  played with YouTube's own player inside a small web view;
  *   file     not built yet (later phase): nothing is drawn.
  * It starts playing as soon as it appears (it only appears after the person pressed play),
- * keeps the screen awake while the video runs, and tells the lesson when the video cannot play.
+ * keeps the screen awake while the video runs, and tells the lesson when the video cannot play and
+ * when it reaches its end (the lesson then opens its closing screen).
  *
  * This is the phone version. The web preview uses VideoPlayer.web.tsx.
  */
@@ -21,7 +22,7 @@ import { canPlay, type VideoPlayerProps } from './video';
 
 const AWAKE_TAG = 'ywm-video'; // our own tag, so we never switch off someone else's request
 
-export function VideoPlayer({ video, seek, onError }: VideoPlayerProps) {
+export function VideoPlayer({ video, seek, onError, onEnd }: VideoPlayerProps) {
   const styles = useStyles();
   const player = useRef<YoutubeIframeRef>(null);
   const [width, setWidth] = useState(0);
@@ -56,9 +57,10 @@ export function VideoPlayer({ video, seek, onError }: VideoPlayerProps) {
       } else if (state === 'paused' || state === 'ended') {
         setRunning(false);
         setPausedAtCount(seekCount);
+        if (state === 'ended') onEnd?.();
       }
     },
-    [seekCount],
+    [seekCount, onEnd],
   );
 
   if (!canPlay(video)) return null;

@@ -16,6 +16,10 @@ export const storageKeys = {
   welcome: 'ywm:welcome:v1',
   /** The app's own "reduce motion" switch in You: true or false. The phone's setting is followed too. */
   reduceMotion: 'ywm:reduce-motion:v1',
+  /** The record of the day: every thing done, one entry each (src/day/). */
+  days: 'ywm:days:v1',
+  /** Saved lessons and the answers to "How did that feel?" (src/practice/). */
+  practice: 'ywm:practice:v1',
 } as const;
 
 /** Reads and parses a saved value. Returns undefined when there is none or it cannot be read. */

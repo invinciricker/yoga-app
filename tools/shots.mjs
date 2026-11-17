@@ -19,6 +19,8 @@
 //   :big      a small phone (360 × 640) with the text at 1.3. The web cannot grow only the text, so
 //             everything is drawn 1.3 times larger (a 277 × 492 layout): harder than the phone.
 //                                                                     → <name>-big.jpg
+//   :demo     sample progress (?demo=streak): four days of candles, a series begun, a lesson
+//             saved, an answer. In memory only.                       → <name>-demo.jpg
 // --both takes every route twice, dark and light.
 // Every picture except ":first" starts with the welcome already seen (as on a phone after the
 // first launch), so "/" shows Home.
@@ -104,12 +106,14 @@ try {
     const presses = Number(options.find((o) => /^next\d$/.test(o))?.slice(4) ?? 0);
     const first = options.includes('first');
     const big = options.includes('big');
+    const demo = options.includes('demo');
     const name =
       (route.replace(/^\/+|\/+$/g, '').replace(/\//g, '-') || 'home') +
       (today ? '-today' : '') +
       (presses ? `-${presses + 1}` : '') +
       (first ? '-first' : '') +
       (big ? '-big' : '') +
+      (demo ? '-demo' : '') +
       (offline ? '-offline' : '') +
       (scheme ? `-${scheme}` : '');
 
@@ -148,7 +152,10 @@ try {
         body: await readFile(file),
       });
     });
-    await page.goto(base + route + (scheme ? `?scheme=${scheme}` : ''), { waitUntil: 'networkidle0' });
+    const query = new URLSearchParams();
+    if (scheme) query.set('scheme', scheme);
+    if (demo) query.set('demo', 'streak');
+    await page.goto(base + route + (query.size > 0 ? `?${query}` : ''), { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
     await new Promise((r) => setTimeout(r, 1200)); // let the arriving animation finish
     for (let i = 0; i < presses; i++) {

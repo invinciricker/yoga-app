@@ -76,28 +76,35 @@ export function seriesMinutes(content: ContentFile, seriesSlug: string): number 
   return lessonsOfSeries(content, seriesSlug).reduce((total, l) => total + l.minutes, 0);
 }
 
+// How far into a series the person is: seriesProgress in src/practice/progress.ts (Phase 4).
+
 /**
- * How many lessons of a series are done. Marking lessons done arrives in Phase 4: until then
- * this always answers 0, and the screens show no progress bar.
+ * docs/V2.md, limit 3: no search and no filter on a list of fewer than 8 items. Practice counts its
+ * lessons, Notes counts its notes.
  */
-export function seriesProgress(content: ContentFile, seriesSlug: string): number {
-  return 0;
-}
+export const FILTERS_FROM = 8;
 
 /** The choices of the filter row on Practice. One at a time. */
-export type LessonFilter = 'all' | Level | 'short';
+export type LessonFilter = 'all' | 'saved' | Level | 'short';
 /** "Under 15 min". */
 export const SHORT_MINUTES = 15;
 
 /**
  * Search and filter for Practice. Every word typed must be found in the title, the summary
- * or the focus of a lesson. Capitals do not matter. Newest first.
+ * or the focus of a lesson. Capitals do not matter. Newest first. "saved" keeps the lessons whose
+ * slugs are given in `saved`.
  */
-export function searchLessons(content: ContentFile, query: string, filter: LessonFilter = 'all'): Lesson[] {
+export function searchLessons(
+  content: ContentFile,
+  query: string,
+  filter: LessonFilter = 'all',
+  saved: readonly string[] = [],
+): Lesson[] {
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
   return [...content.lessons].sort(byNewest).filter((lesson) => {
     if (filter === 'short' && lesson.minutes >= SHORT_MINUTES) return false;
-    if (filter !== 'all' && filter !== 'short' && lesson.level !== filter) return false;
+    if (filter === 'saved' && !saved.includes(lesson.slug)) return false;
+    if (filter !== 'all' && filter !== 'short' && filter !== 'saved' && lesson.level !== filter) return false;
     if (words.length === 0) return true;
     const haystack = [lesson.title, lesson.summary, ...lesson.focus, ...lesson.focus.map(focusLabel)]
       .join(' ')

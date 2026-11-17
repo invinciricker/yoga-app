@@ -2,15 +2,22 @@
  * Practice: every lesson and series. A search, a row of filters, the series, then all lessons,
  * and at the bottom the three newest of Maria's notes.
  * With a search or a filter active, the series and the notes step aside and the list shows what
- * matches. ("Saved" joins the filters in Phase 4.)
+ * matches.
+ *
+ * docs/V2.md, limit 3: the search field and the filters appear only from 8 lessons. "Saved" comes
+ * second in the filters, and only once something is saved; with fewer than 8 lessons, saved lessons
+ * are found in You → Saved. A series begun shows its progress on its card.
  */
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { notesOfKind, searchLessons, type LessonFilter } from '@/content/selectors';
+import { FILTERS_FROM, lessonsOfSeries, notesOfKind, searchLessons, type LessonFilter } from '@/content/selectors';
 import { useContent } from '@/content/store';
+import { useDays } from '@/day/store';
 import { routes } from '@/lib/nav';
+import { savedLessons, seriesProgress } from '@/practice/progress';
+import { usePractice } from '@/practice/store';
 import { strings } from '@/strings';
 import { layout, space } from '@/theme';
 import {
@@ -34,6 +41,7 @@ const NOTES_SHOWN = 3;
 
 const filters: { key: LessonFilter; label: string }[] = [
   { key: 'all', label: strings.practice.filterAll },
+  { key: 'saved', label: strings.practice.filterSaved },
   { key: 'gentle', label: strings.levels.gentle },
   { key: 'steady', label: strings.levels.steady },
   { key: 'strong', label: strings.levels.strong },
@@ -46,11 +54,19 @@ export default function PracticeScreen() {
   const status = useContent((s) => s.status);
   const refreshing = useContent((s) => s.refreshing);
   const refresh = useContent((s) => s.refresh);
+  const entries = useDays((s) => s.entries);
+  const saved = usePractice((s) => s.saved);
 
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<LessonFilter>('all');
-  const searching = query.trim() !== '' || filter !== 'all';
-  const lessons = searchLessons(content, query, filter);
+  // No search and no filter on a short list (docs/V2.md, limit 3).
+  const tools = content.lessons.length >= FILTERS_FROM;
+  const anySaved = savedLessons(content, saved).length > 0;
+  const shownFilters = filters.filter((f) => f.key !== 'saved' || anySaved || filter === 'saved');
+  const activeQuery = tools ? query : '';
+  const activeFilter = tools ? filter : 'all';
+  const searching = activeQuery.trim() !== '' || activeFilter !== 'all';
+  const lessons = searchLessons(content, activeQuery, activeFilter, saved);
   const notes = notesOfKind(content).slice(0, NOTES_SHOWN);
   const clear = () => {
     setQuery('');
@@ -66,23 +82,27 @@ export default function PracticeScreen() {
           </Text>
           {status === 'stale' ? <OfflineNote /> : null}
         </View>
-        <SearchField
-          value={query}
-          onChangeText={setQuery}
-          placeholder={strings.practice.search}
-          clearLabel={strings.practice.clearSearch}
-        />
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          style={styles.bleedRight}
-          contentContainerStyle={styles.chips}
-        >
-          {filters.map((f) => (
-            <Chip key={f.key} label={f.label} selected={filter === f.key} onPress={() => setFilter(f.key)} />
-          ))}
-        </ScrollView>
+        {tools ? (
+          <>
+            <SearchField
+              value={query}
+              onChangeText={setQuery}
+              placeholder={strings.practice.search}
+              clearLabel={strings.practice.clearSearch}
+            />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              style={styles.bleedRight}
+              contentContainerStyle={styles.chips}
+            >
+              {shownFilters.map((f) => (
+                <Chip key={f.key} label={f.label} selected={filter === f.key} onPress={() => setFilter(f.key)} />
+              ))}
+            </ScrollView>
+          </>
+        ) : null}
       </Arrive>
 
       {status === 'loading' ? (
@@ -101,6 +121,7 @@ export default function PracticeScreen() {
               key={series.slug}
               series={series}
               large={i === 0}
+              progress={seriesProgress(entries, lessonsOfSeries(content, series.slug).map((l) => l.slug))}
               onPress={() => router.push(routes.series(series.slug))}
             />
           ))}
@@ -116,6 +137,8 @@ export default function PracticeScreen() {
             ))}
           </View>
         </Arrive>
+      ) : activeFilter === 'saved' && activeQuery.trim() === '' ? (
+        <EmptyState sentence={strings.practice.savedEmpty} actionLabel={strings.common.clear} onAction={clear} aura="forest" />
       ) : searching ? (
         <EmptyState sentence={strings.practice.noMatch} actionLabel={strings.common.clear} onAction={clear} aura="forest" />
       ) : status !== 'loading' ? (

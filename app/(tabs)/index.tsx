@@ -4,14 +4,15 @@
  *   The billboard  Maria and her class, always dark, exactly as tall as the window. Shown the first
  *                  time the app is opened on a calendar day; later that day Home opens on Today.
  *   Today          in the phone's theme: a greeting that follows the clock, with the candlelight
- *                  behind it, the practice of the day, what is new, and one of Maria's sayings.
+ *                  behind it, this week's candles, the practice of the day (todayMove in
+ *                  src/day/todayMove.ts), what is new, and one of Maria's sayings.
  *
  * The scroll rests at two places only, the top and the start of Today; below that it moves freely.
- * (The week card arrives with Phase 4; the cards of Breathe, Sit and Write with their own phases.)
+ * (The cards of Breathe, Sit and Write arrive with their own phases.)
  */
 import { useNavigation, useRouter } from 'expo-router';
 import type { BottomTabNavigationProp } from 'expo-router/tabs';
-import { ArrowRight, CalendarDays, ChevronDown, Play, User } from 'lucide-react-native';
+import { ArrowRight, Bookmark, CalendarDays, ChevronDown, Play, User } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { AppState, RefreshControl, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -28,13 +29,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { lessonMeta } from '@/content/labels';
-import { dayOf, featuredLesson, latestQuote, newestLessons } from '@/content/selectors';
+import { dayOf, latestQuote, newestLessons } from '@/content/selectors';
 import { useContent } from '@/content/store';
+import { useWeek } from '@/day/hooks';
+import { useDays } from '@/day/store';
+import { todayMove } from '@/day/todayMove';
 import { longDate, nextClass, showBillboard } from '@/lib/billboard';
 import { greetingFor } from '@/lib/greeting';
+import { tick } from '@/lib/haptics';
 import { useReduceMotion } from '@/lib/motion';
 import { routes } from '@/lib/nav';
 import { usePrefs } from '@/lib/prefs';
+import { usePractice } from '@/practice/store';
 import { strings } from '@/strings';
 import { layout, space } from '@/theme';
 import { useDarkTop } from '@/theme/statusBar';
@@ -45,6 +51,7 @@ import {
   Candlelight,
   Card,
   Cover,
+  DoneTick,
   DraftChip,
   EmptyState,
   IconButton,
@@ -56,6 +63,7 @@ import {
   size,
   Skeleton,
   Text,
+  WeekCard,
 } from '@/ui';
 
 export default function HomeScreen() {
@@ -71,6 +79,9 @@ export default function HomeScreen() {
   const status = useContent((s) => s.status);
   const refreshing = useContent((s) => s.refreshing);
   const refresh = useContent((s) => s.refresh);
+  const entries = useDays((s) => s.entries);
+  const savedSlugs = usePractice((s) => s.saved);
+  const weekCard = useWeek();
 
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollY = useSharedValue(0);
@@ -140,7 +151,20 @@ export default function HomeScreen() {
   const now = new Date();
   const teacher = content.site.teacherFirstName;
   const greeting = greetingFor(now);
-  const hero = featuredLesson(content, now);
+  // The big card: a series under way, else the featured lesson, else the newest.
+  const move = todayMove(content, entries, now);
+  const hero = move?.lesson;
+  const heroSaved = hero ? savedSlugs.includes(hero.slug) : false;
+  const heroOverline = move?.series
+    ? strings.lesson.place(move.series.series.title, move.series.position, move.series.count)
+    : hero
+      ? lessonMeta(hero)
+      : '';
+  const toggleHeroSave = () => {
+    if (!hero) return;
+    tick(); // a light tick in the hand
+    usePractice.getState().toggleSave(hero.slug);
+  };
   const newest = newestLessons(content, 5, hero?.slug);
   const saying = latestQuote(content);
   const open = (slug: string) => router.push(routes.lesson(slug));
@@ -206,29 +230,59 @@ export default function HomeScreen() {
               {status === 'stale' ? <OfflineNote /> : null}
             </Arrive>
 
-            {/* The practice of the day: tap anywhere on it, or "Begin". */}
-            {hero ? (
-              <Arrive index={1} style={styles.heroBlock}>
+            {/* This week: seven candles, and the streak. */}
+            <Arrive index={1}>
+              <WeekCard days={weekCard.days} streak={weekCard.streak} ever={weekCard.ever} />
+            </Arrive>
+
+            {/* The practice of the day: tap anywhere on it, or "Begin". Once done today: a tick. */}
+            {hero && move ? (
+              <Arrive index={2} style={styles.heroBlock}>
                 <Overline tone="muted">{greeting.practice}</Overline>
-                <PressableScale onPress={() => open(hero.slug)} accessibilityLabel={`${hero.title}, ${lessonMeta(hero)}`}>
+                <PressableScale
+                  onPress={() => open(hero.slug)}
+                  accessibilityLabel={[hero.title, heroOverline, move.doneToday ? strings.today.doneToday : '']
+                    .filter(Boolean)
+                    .join(', ')}
+                >
                   <Cover aura={hero.aura} image={hero.cover} height={size.hero.height} radius="xl" scrim>
                     <DraftChip item={hero} onCover style={styles.heroDraft} />
+                    <IconButton
+                      icon={Bookmark}
+                      kind="glass"
+                      active={heroSaved}
+                      accessibilityLabel={heroSaved ? strings.lesson.unsave : strings.lesson.save}
+                      onPress={toggleHeroSave}
+                      style={styles.heroSave}
+                    />
                     <View style={styles.heroText}>
-                      <Overline tone="cover">{lessonMeta(hero)}</Overline>
+                      <Overline tone="cover">{heroOverline}</Overline>
                       <Text variant="h1" color="onCover.primary">
                         {hero.title}
                       </Text>
                       <Text variant="body" color="onCover.secondary">
                         {hero.summary}
                       </Text>
-                      <Button
-                        label={strings.today.begin}
-                        icon={Play}
-                        iconFilled
-                        shape="pill"
-                        onPress={() => open(hero.slug)}
-                        style={styles.begin}
-                      />
+                      {move.doneToday ? (
+                        <View style={styles.heroDone}>
+                          {/* Over a cover, the sage of the dark palette (covers are night pictures). */}
+                          <ThemeScope scheme="dark">
+                            <DoneTick />
+                          </ThemeScope>
+                          <Text variant="label" color="onCover.primary">
+                            {strings.today.doneToday}
+                          </Text>
+                        </View>
+                      ) : (
+                        <Button
+                          label={strings.today.begin}
+                          icon={Play}
+                          iconFilled
+                          shape="pill"
+                          onPress={() => open(hero.slug)}
+                          style={styles.begin}
+                        />
+                      )}
                     </View>
                   </Cover>
                 </PressableScale>
@@ -240,7 +294,7 @@ export default function HomeScreen() {
             )}
 
             {newest.length > 0 ? (
-              <Arrive index={2} style={styles.block2}>
+              <Arrive index={3} style={styles.block2}>
                 <SectionHeader
                   title={strings.today.newFrom(teacher)}
                   actionLabel={strings.common.seeAll}
@@ -261,7 +315,7 @@ export default function HomeScreen() {
             ) : null}
 
             {saying?.quote ? (
-              <Arrive index={3}>
+              <Arrive index={4}>
                 <Card padding="xl" style={styles.saying}>
                   <Overline>{strings.today.noteFrom(teacher)}</Overline>
                   <Text variant="quote">{saying.quote}</Text>
@@ -301,7 +355,9 @@ const useStyles = makeStyles((color) =>
     heroBlock: { gap: space.sm },
     heroText: { position: 'absolute', left: space.xl, right: space.xl, bottom: space.xl, gap: space.xs },
     heroDraft: { position: 'absolute', top: space.md, left: space.md },
+    heroSave: { position: 'absolute', top: space.md, right: space.md },
     begin: { alignSelf: 'flex-start', marginTop: space.xs },
+    heroDone: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: space.sm, minHeight: size.button.pill },
     block2: { gap: space.md },
     bleedRight: { marginRight: -layout.gutter },
     cards: { gap: layout.cardGap, paddingRight: layout.gutter },

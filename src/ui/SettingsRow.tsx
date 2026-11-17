@@ -6,7 +6,8 @@
  *   <SettingsRow label="Reduce motion" line="Fewer moving parts…" value={on} onValueChange={setOn} />
  *   <SettingsRow label="About" onPress={() => router.push(routes.about)} />
  *
- * Phases 4 and 10 add rows with it (delete my data, notifications).
+ * A row may show a short `detail` before its chevron (the number of saved lessons), and a
+ * destructive row (Delete my data) is `danger`: its label in support.danger.
  */
 import { ChevronRight } from 'lucide-react-native';
 import { Platform, StyleSheet, Switch, View } from 'react-native';
@@ -26,6 +27,10 @@ type Common = {
   /** A short line under the label. */
   line?: string;
   accessibilityHint?: string;
+  /** A short word or number before the chevron. */
+  detail?: string;
+  /** A destructive row: the label in support.danger. */
+  danger?: boolean;
 };
 
 export type SettingsRowProps = Common &
@@ -36,7 +41,7 @@ export type SettingsRowProps = Common &
 
 export function SettingsRow(props: SettingsRowProps) {
   const { scheme, color } = useTheme();
-  const { label, line, accessibilityHint } = props;
+  const { label, line, accessibilityHint, detail, danger } = props;
   const isSwitch = props.onValueChange !== undefined;
   // The knob: ivory in the dark, white on paper, the same whether on or off.
   const thumb = scheme === 'dark' ? color.text.primary : color.bg.elevated;
@@ -49,14 +54,16 @@ export function SettingsRow(props: SettingsRowProps) {
   return (
     <PressableScale
       onPress={onPress}
-      accessibilityLabel={line ? `${label}. ${line}` : label}
+      accessibilityLabel={[label, detail, line].filter(Boolean).join('. ')}
       accessibilityHint={accessibilityHint}
       accessibilityRole={isSwitch ? 'switch' : 'button'}
       accessibilityState={isSwitch ? { checked: !!props.value } : undefined}
       style={styles.row}
     >
       <View style={styles.words}>
-        <Text variant="title">{label}</Text>
+        <Text variant="title" color={danger ? 'support.danger' : 'text.primary'}>
+          {label}
+        </Text>
         {line ? (
           <Text variant="meta" color="text.secondary">
             {line}
@@ -76,7 +83,14 @@ export function SettingsRow(props: SettingsRowProps) {
           />
         </View>
       ) : (
-        <ChevronRight size={size.icon.md} strokeWidth={size.stroke.regular} color={color.text.muted} />
+        <>
+          {detail ? (
+            <Text variant="meta" color="text.muted" tabular>
+              {detail}
+            </Text>
+          ) : null}
+          <ChevronRight size={size.icon.md} strokeWidth={size.stroke.regular} color={color.text.muted} />
+        </>
       )}
     </PressableScale>
   );

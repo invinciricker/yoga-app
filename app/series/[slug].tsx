@@ -1,7 +1,9 @@
 /**
  * A series: its cover with its name, a few lines about it, then its lessons in order, numbered.
  * The words on the cover use the onCover colours (covers are pictures, the same in both themes).
- * (From Phase 4: a tick on the lessons done, and a "Continue" button.)
+ * Once begun: a thin progress line and "2 of 7 done" on the cover, a sage tick on the lessons done
+ * (LessonRow), and a ghost "Continue" under the description that opens the first lesson not yet
+ * done. A finished series says "All 7 done." and offers no button.
  */
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
@@ -11,10 +13,27 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { slugsForStaticPages } from '@/content/load';
 import { findSeries, lessonsOfSeries, seriesMinutes } from '@/content/selectors';
 import { useContent } from '@/content/store';
+import { useDays } from '@/day/store';
 import { routes, useBack } from '@/lib/nav';
+import { seriesProgress } from '@/practice/progress';
 import { strings } from '@/strings';
 import { layout, space } from '@/theme';
-import { Arrive, Cover, DraftChip, IconButton, LessonRow, LoadingPage, NotHere, Overline, RichText, Screen, size, Text } from '@/ui';
+import {
+  Arrive,
+  Button,
+  Cover,
+  DraftChip,
+  IconButton,
+  LessonRow,
+  LoadingPage,
+  NotHere,
+  Overline,
+  ProgressLine,
+  RichText,
+  Screen,
+  size,
+  Text,
+} from '@/ui';
 
 /** Web preview only: the series pages to prepare when the website is built. */
 export function generateStaticParams() {
@@ -28,6 +47,7 @@ export default function SeriesScreen() {
   const back = useBack(routes.practice);
   const content = useContent((s) => s.content);
   const status = useContent((s) => s.status);
+  const entries = useDays((s) => s.entries);
 
   const series = findSeries(content, slug);
   if (!series) {
@@ -41,6 +61,8 @@ export default function SeriesScreen() {
     );
   }
   const lessons = lessonsOfSeries(content, series.slug);
+  const progress = seriesProgress(entries, lessons.map((l) => l.slug));
+  const next = progress.done > 0 ? progress.next : undefined;
 
   return (
     <Screen bleed darkTop={size.cover.series}>
@@ -56,11 +78,12 @@ export default function SeriesScreen() {
           <Text variant="h1" color="onCover.primary" accessibilityRole="header">
             {series.title}
           </Text>
+          <ProgressLine done={progress.done} total={progress.total} />
         </View>
       </Cover>
 
       <View style={styles.sections}>
-        <Arrive index={0}>
+        <Arrive index={0} style={styles.intro}>
           {series.body.length > 0 ? (
             <RichText blocks={series.body} ink="text.secondary" />
           ) : (
@@ -68,6 +91,7 @@ export default function SeriesScreen() {
               {series.summary}
             </Text>
           )}
+          {next ? <Button kind="ghost" label={strings.series.continue} onPress={() => router.push(routes.lesson(next))} /> : null}
         </Arrive>
         <Arrive index={1}>
           {lessons.map((lesson, i) => (
@@ -89,4 +113,5 @@ const styles = StyleSheet.create({
   coverWords: { position: 'absolute', left: layout.gutter, right: layout.gutter, bottom: space.xl, gap: space.xs },
   labels: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: space.sm },
   sections: { paddingHorizontal: layout.gutter, paddingTop: space.xl, gap: space.xl },
+  intro: { gap: space.xl },
 });

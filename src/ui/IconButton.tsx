@@ -2,6 +2,8 @@
  * IconButton: a round button holding one icon. Always give it a label for screen readers.
  *   raised  on a screen
  *   glass   on top of a cover (its icon in onCover.primary, the same in both themes)
+ * With `active` the icon is filled with gold (a saved lesson's bookmark): accent.gold on a screen,
+ * onCover.accent on a cover (the bronze of the light theme cannot be read on a night picture).
  */
 import type { LucideIcon } from 'lucide-react-native';
 import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
@@ -19,12 +21,24 @@ export type IconButtonProps = {
   kind?: 'raised' | 'glass';
   onPress?: () => void;
   disabled?: boolean;
+  /** The icon filled with gold. */
+  active?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
-export function IconButton({ icon: Icon, accessibilityLabel, kind = 'raised', onPress, disabled, style }: IconButtonProps) {
+export function IconButton({
+  icon: Icon,
+  accessibilityLabel,
+  kind = 'raised',
+  onPress,
+  disabled,
+  active = false,
+  style,
+}: IconButtonProps) {
   const { color, onCover } = useTheme();
   const styles = useStyles();
+  const gold = kind === 'glass' ? onCover.accent : color.accent.gold;
+  const ink = active ? gold : kind === 'glass' ? onCover.primary : color.text.primary;
   return (
     <PressableScale
       onPress={onPress}
@@ -33,11 +47,7 @@ export function IconButton({ icon: Icon, accessibilityLabel, kind = 'raised', on
       containerStyle={style}
       style={[shape.base, styles[kind]]}
     >
-      <Icon
-        size={size.icon.lg}
-        strokeWidth={size.stroke.regular}
-        color={kind === 'glass' ? onCover.primary : color.text.primary}
-      />
+      <Icon size={size.icon.lg} strokeWidth={size.stroke.regular} color={ink} fill={active ? ink : 'none'} />
     </PressableScale>
   );
 }

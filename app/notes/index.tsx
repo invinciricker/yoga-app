@@ -1,13 +1,14 @@
 /**
  * Notes from Maria: her tips (short advice) and notes (longer thoughts), newest first.
  * Opened from the bottom of Practice ("See all"). It was the "Journal" tab before version 2.
+ * The chips (All, Tips, Notes) appear only from 8 notes (docs/V2.md, limit 3).
  */
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { notesOfKind } from '@/content/selectors';
+import { FILTERS_FROM, notesOfKind } from '@/content/selectors';
 import { useContent } from '@/content/store';
 import { routes, useBack } from '@/lib/nav';
 import { strings } from '@/strings';
@@ -30,7 +31,9 @@ export default function NotesScreen() {
   const refresh = useContent((s) => s.refresh);
 
   const [kind, setKind] = useState<Kind>('all');
-  const notes = notesOfKind(content, kind);
+  // No filter on a short list.
+  const chips = content.journal.length >= FILTERS_FROM;
+  const notes = notesOfKind(content, chips ? kind : 'all');
 
   return (
     <Screen contentStyle={styles.sections} refreshing={refreshing} onRefresh={refresh}>
@@ -42,11 +45,13 @@ export default function NotesScreen() {
           </Text>
           {status === 'stale' ? <OfflineNote /> : null}
         </View>
-        <View style={styles.chips}>
-          {filters.map((f) => (
-            <Chip key={f.key} label={f.label} selected={kind === f.key} onPress={() => setKind(f.key)} />
-          ))}
-        </View>
+        {chips ? (
+          <View style={styles.chips}>
+            {filters.map((f) => (
+              <Chip key={f.key} label={f.label} selected={kind === f.key} onPress={() => setKind(f.key)} />
+            ))}
+          </View>
+        ) : null}
       </Arrive>
 
       {status === 'loading' ? (
@@ -60,7 +65,7 @@ export default function NotesScreen() {
             <NoteCard key={entry.slug} entry={entry} onPress={() => router.push(routes.note(entry.slug))} />
           ))}
         </Arrive>
-      ) : kind !== 'all' && content.journal.length > 0 ? (
+      ) : chips && kind !== 'all' && content.journal.length > 0 ? (
         <EmptyState sentence={strings.notes.noMatch} actionLabel={strings.common.clear} onAction={() => setKind('all')} />
       ) : (
         <EmptyState sentence={strings.notes.empty} />

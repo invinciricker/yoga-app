@@ -78,18 +78,15 @@ A phase has a brief only once the architect has written it, one or two phases ah
 ## State
 (Updated by Claude Code at the end of each phase. 25 lines at most. Start with the list of phases done.)
 
-**Phases done: 0 (the shell), 1 (content and reading), 2 (the new look and the new map), 3 (Maria and the welcome).** Next: Phase 4 (`docs/phases/phase-4.md`), in its own session.
+**Phases done: 0 (the shell), 1 (content and reading), 2 (the new look and the new map), 3 (Maria and the welcome), 4 (my practice).** Next: Phase 5 (Journal, part one), once its brief is written.
 
-**Phases 0 to 2 (16 and 17 Nov).** Expo SDK 58, React Native 0.88, TypeScript strict, Expo Router (`docs/TECH.md`). Two variants (`app.config.ts`), `eas.json`, the four workflows, the content build (`tools/content/`), `src/content/`, the lesson, series and note pages, `VideoPlayer` (YouTube, web twin).
-- Expo owner `invincirick`; package name still the placeholder `com.yogawithmaria.app` (one constant). Content at `https://invinciricker.github.io/yoga-app/content/v1/`, published by `pages.yml` on every merge into `main`. Still sample content (7 files `sample: true`).
-- Theme: `palette.dark`/`light`, `ThemeProvider`, `ThemeScope`, `useTheme`, `makeStyles`; nothing outside `src/theme/` imports a colour (a test checks). Five tabs; `areas` in `src/config.ts` all `false`. Home = the billboard (once a day) then Today.
+**Phases 0 to 2 (16 and 17 Nov).** Expo SDK 58, React Native 0.88, TypeScript strict, Expo Router (`docs/TECH.md`). Two variants (`app.config.ts`), `eas.json`, four workflows, the content build (`tools/content/`), `src/content/`, lesson, series and note pages, `VideoPlayer` (YouTube, web twin). Expo owner `invincirick`; package name still the placeholder `com.yogawithmaria.app` (one constant). Content at `https://invinciricker.github.io/yoga-app/content/v1/`, published by `pages.yml` on every merge into `main`; still sample content (7 files `sample: true`). Theme: `palette.dark`/`light`, `ThemeProvider`, `ThemeScope`, `useTheme`, `makeStyles` (a test forbids colour imports). Five tabs; `areas` in `src/config.ts` all `false`. Home = the billboard (once a day) then Today.
 
-**17 Nov 2026, Phase 3.**
-- Expo patches (`expo` 58.0.26, `expo-router` 58.0.32); `expo-doctor` 20/20. `eslint-config-expo` moved to devDependencies.
-- `/maria`: portrait, introduction, why yoga, classes by day with "Next", place, price, contact; every block hides when empty. Logic in `src/lib/studio.ts` (tested). A link that will not open shows "That did not open here." and the address.
-- `/welcome`: three screens on the first launch (`ywm:welcome:v1`, written on Begin/Skip), reached through a `Redirect` in `app/(tabs)/_layout.tsx`. `welcomeSlides()` never names a room not built.
-- You (`/me`): Appearance, Reduce motion (`ywm:reduce-motion:v1`; `useReduceMotion()` = phone OR app), About (care notice, version line, show the welcome again), Privacy, Licences. New parts `SettingsRow`, `ListCard`.
-- `src/legal/` (`npm run legal`): the privacy policy as blocks and the licences list; tests fail when stale. `privacy.html` made by `build:site`; the site serves its own fonts.
-- `publisher` added to `site` (protected commit); `content:build -- --release` refuses without `contactEmail` and `publisher`.
-- Production: `updates.enabled: false`. **Needs a new Android build.** Pictures in `docs/screens/phase-3/`. `npm run check` green (173 tests).
-- Not yet proven on a real phone: everything since Phase 1 (video, refresh, status bar, theme, welcome, links). Maria's real details still to come as content.
+**17 Nov 2026, Phase 3.** Expo patches (`expo` 58.0.26). `/maria` (logic in `src/lib/studio.ts`), `/welcome` (`ywm:welcome:v1`), You (`/me`: Appearance, Reduce motion, About, Privacy, Licences), `src/legal/` (`npm run legal`), `publisher` in `site`. Production: `updates.enabled: false`. Needed a new Android build.
+
+**17 Nov 2026, Phase 4.** No new library, no change to `app.config.ts` or to the scripts: same fingerprint as Phase 3 (checked), so it arrives over the air. Expo already current within SDK 58.
+- `src/day/`: the record of the day (`ywm:days:v1`, `DayEntry`), `streak`, `longestStreak`, `week`, `totals`, `nextStep`, `todayMove` (Today's big card). `src/practice/`: saved lessons and answers (`ywm:practice:v1`), `isDone`, `lastDone`, `seriesProgress`, `historyDays`. Both read before the splash goes; a refused save keeps the session going.
+- The lesson's bar (Begin practice / Mark as done / Done again, "Done today"), the bookmark; the closing screen `/lesson-done/<slug>` (written once per opening, answers, feelings); the video's end opens it on the phone.
+- `WeekCard` on Today and in You; Today's big card follows `todayMove`; ticks and bookmarks in rows; series progress and Continue; You's numbers, Saved, History, Delete my data. Search and filters only from 8 lessons (notes: 8 notes).
+- Sample progress: `?demo=streak` or the gallery's switch (memory only). Pictures in `docs/screens/phase-4/`. `npm run check` green (256 tests).
+- Not yet proven on a real phone: everything since Phase 1 (video, refresh, status bar, theme, welcome, links), and the over-the-air update itself. Maria's real details still to come as content.

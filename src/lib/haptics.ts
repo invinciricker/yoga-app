@@ -12,3 +12,11 @@ export function tick(): void {
     // No haptics on this device: nothing to do.
   });
 }
+
+/** A success in the hand: a lesson is done (its closing screen opens). */
+export function success(): void {
+  if (Platform.OS === 'web') return;
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {
+    // No haptics on this device: nothing to do.
+  });
+}

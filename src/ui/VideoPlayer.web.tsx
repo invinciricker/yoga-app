@@ -1,6 +1,7 @@
 /**
  * VideoPlayer, web version: a plain YouTube frame, so the web preview can show a lesson's video.
- * It uses YouTube's privacy-enhanced address (youtube-nocookie.com).
+ * It uses YouTube's privacy-enhanced address (youtube-nocookie.com). A plain frame cannot tell
+ * when the video ends, so the web preview never opens the closing screen by itself (onEnd).
  * The phone version is VideoPlayer.tsx.
  */
 import { StyleSheet, View } from 'react-native';
