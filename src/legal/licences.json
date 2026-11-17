@@ -1,0 +1,134 @@
+{
+  "libraries": [
+    {
+      "name": "@expo-google-fonts/cormorant-garamond",
+      "licence": "MIT License and SIL Open Font License 1.1"
+    },
+    {
+      "name": "@expo-google-fonts/figtree",
+      "licence": "MIT License and SIL Open Font License 1.1"
+    },
+    {
+      "name": "@react-native-async-storage/async-storage",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo-constants",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo-font",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo-haptics",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo-image",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo-keep-awake",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo-linking",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo-router",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo-splash-screen",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo-status-bar",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo-system-ui",
+      "licence": "MIT License"
+    },
+    {
+      "name": "expo-updates",
+      "licence": "MIT License"
+    },
+    {
+      "name": "lucide-react-native",
+      "licence": "ISC License"
+    },
+    {
+      "name": "react",
+      "licence": "MIT License"
+    },
+    {
+      "name": "react-dom",
+      "licence": "MIT License"
+    },
+    {
+      "name": "react-native",
+      "licence": "MIT License"
+    },
+    {
+      "name": "react-native-gesture-handler",
+      "licence": "MIT License"
+    },
+    {
+      "name": "react-native-reanimated",
+      "licence": "MIT License"
+    },
+    {
+      "name": "react-native-safe-area-context",
+      "licence": "MIT License"
+    },
+    {
+      "name": "react-native-screens",
+      "licence": "MIT License"
+    },
+    {
+      "name": "react-native-svg",
+      "licence": "MIT License"
+    },
+    {
+      "name": "react-native-web",
+      "licence": "MIT License"
+    },
+    {
+      "name": "react-native-webview",
+      "licence": "MIT License"
+    },
+    {
+      "name": "react-native-worklets",
+      "licence": "MIT License"
+    },
+    {
+      "name": "react-native-youtube-iframe",
+      "licence": "MIT License"
+    },
+    {
+      "name": "zod",
+      "licence": "MIT License"
+    },
+    {
+      "name": "zustand",
+      "licence": "MIT License"
+    }
+  ],
+  "fonts": [
+    {
+      "name": "Cormorant Garamond",
+      "licence": "SIL Open Font License 1.1"
+    },
+    {
+      "name": "Figtree",
+      "licence": "SIL Open Font License 1.1"
+    }
+  ]
+}

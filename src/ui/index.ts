@@ -29,6 +29,7 @@ export { Screen } from './Screen';
 export { SearchField } from './SearchField';
 export { SectionHeader } from './SectionHeader';
 export { SeriesCard } from './SeriesCard';
+export { SettingsRow } from './SettingsRow';
 export { size } from './sizes';
 export { Skeleton } from './Skeleton';
 export { TabBar, type TabItem } from './TabBar';

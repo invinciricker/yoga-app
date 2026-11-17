@@ -24,6 +24,7 @@ import {
   IconButton,
   LessonCard,
   LessonRow,
+  ListCard,
   NoteCard,
   OfflineNote,
   Overline,
@@ -33,6 +34,7 @@ import {
   SearchField,
   SectionHeader,
   SeriesCard,
+  SettingsRow,
   size,
   Skeleton,
   TabBar,
@@ -100,6 +102,7 @@ function GalleryPage({ choice, onChoose }: { choice: Choice; onChoose: (c: Choic
   const { color, onCover, scheme } = useTheme();
   const local = useStyles();
   const [chipOn, setChipOn] = useState(true);
+  const [switchOn, setSwitchOn] = useState(true);
   const [query, setQuery] = useState('');
   const content = useContent((state) => state.content);
   const lesson = content.lessons[0];
@@ -220,6 +223,13 @@ function GalleryPage({ choice, onChoose }: { choice: Choice; onChoose: (c: Choic
         <Card padding="xl">
           <Text variant="quote">{g.italicSample}</Text>
         </Card>
+      </Block>
+
+      <Block label={g.settingsRows}>
+        <ListCard>
+          <SettingsRow label={g.switchRow} line={g.switchLine} value={switchOn} onValueChange={setSwitchOn} />
+          <SettingsRow label={g.linkRow} onPress={noop} />
+        </ListCard>
       </Block>
 
       <Block label={g.areaCards}>

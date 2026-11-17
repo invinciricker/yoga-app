@@ -174,7 +174,38 @@ export const strings = {
     system: 'System',
     light: 'Light',
     dark: 'Dark',
+    reduceMotion: 'Reduce motion',
+    reduceMotionLine: 'Fewer moving parts. Your phone’s own setting is always followed too.',
+    about: 'About',
+    privacy: 'Privacy',
     galleryLink: 'Design gallery',
+  },
+  // You → About.
+  about: {
+    sentence: (teacher: string) => `Made for ${teacher}’s students, and for anyone who wants to begin.`,
+    careTitle: 'Look after yourself',
+    care:
+      'Everything here is general guidance, not medical advice. If you are pregnant, injured, unwell, or unsure whether a practice is right for you, ask a doctor first. Stop if something hurts or makes you feel worse.',
+    // Which copy of the app this is (src/lib/version.ts).
+    version: (version: string) => `Version ${version}`,
+    update: (day: string, time: string) => `Update of ${day}, ${time}`,
+    embedded: 'The code that came with this build',
+    fingerprint: (short: string) => `Fingerprint ${short}`,
+    web: 'Web preview',
+    welcomeAgain: 'Show the welcome again',
+    licences: 'Open-source licences',
+  },
+  // You → Privacy. The text itself is docs/legal/privacy-policy.md (src/legal/privacy.json).
+  privacy: {
+    // A placeholder of the policy whose value is not in content/site.yaml yet.
+    notSet: '(not set yet)',
+  },
+  // You → About → Open-source licences.
+  licences: {
+    title: 'Open-source licences',
+    sentence: 'The app is built with these free libraries and typefaces. Thank you to the people who make them.',
+    libraries: 'Libraries',
+    fonts: 'Typefaces',
   },
   // The design gallery is a checking tool for the owner, shown in the preview app only.
   gallery: {
@@ -199,6 +230,10 @@ export const strings = {
     cardTitle: 'A note from Maria',
     cardBody: 'Cards sit one step above the page, with a hairline around them.',
     sectionHeader: 'Section header',
+    settingsRows: 'Settings rows (a ListCard)',
+    switchRow: 'Reduce motion',
+    switchLine: 'A row with a switch: the whole row is the touch target.',
+    linkRow: 'About',
     sectionTitle: 'New from Maria',
     aurasHero: 'Auras, hero size',
     aurasThumb: 'Auras, thumbnail size',
