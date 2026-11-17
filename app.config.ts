@@ -10,7 +10,7 @@
  */
 import type { ExpoConfig } from 'expo/config';
 
-// The Android package name. A placeholder that the owner confirms before Phase 5.
+// The Android package name. A placeholder that the owner confirms before Phase 10 (notifications).
 // Keep it in this ONE constant; the preview app adds ".preview" to it.
 const PACKAGE_NAME = 'com.yogawithmaria.app';
 
@@ -18,8 +18,9 @@ const PACKAGE_NAME = 'com.yogawithmaria.app';
 const EXPO_OWNER = 'invincirick';
 const EXPO_PROJECT_ID = '78246bde-20b9-46bb-b161-a356f8298483';
 
-// A config file cannot import the design tokens, so the two colours are written here.
-const BG_BASE = '#0C1311'; // color.bg.base in src/theme/tokens.ts
+// A config file cannot import the design tokens, so the colour is written here. The splash and the
+// icon stay dark in both themes: the app opens on the billboard, which is always dark.
+const BG_BASE = '#0C1311'; // palette.dark.bg.base in src/theme/tokens.ts
 
 const variant: 'production' | 'preview' =
   process.env.APP_VARIANT === 'production' ? 'production' : 'preview';
@@ -32,9 +33,10 @@ const config: ExpoConfig = {
   scheme: 'yogawithmaria',
   version: '0.1.0',
   orientation: 'portrait',
-  userInterfaceStyle: 'dark',
+  // The theme follows the phone (light or dark) unless the person chooses in You → Appearance.
+  userInterfaceStyle: 'automatic',
   backgroundColor: BG_BASE,
-  // Temporary icon: the small gold light. The real icon comes in Phase 6.
+  // Temporary icon: the small gold light. The real icon comes in Phase 11 (the Play Store).
   icon: './assets/images/icon.png',
   android: {
     // Android draws edge to edge (under the status and navigation bars) by default in this SDK.

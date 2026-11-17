@@ -8,6 +8,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const storageKeys = {
   /** The last content file that was downloaded and accepted. */
   content: 'ywm:content:v1',
+  /** The theme chosen in You → Appearance: "system", "light" or "dark". */
+  appearance: 'ywm:appearance:v1',
+  /** The last calendar day the billboard was shown on Home, "2026-11-17". */
+  billboardDay: 'ywm:billboard-day:v1',
 } as const;
 
 /** Reads and parses a saved value. Returns undefined when there is none or it cannot be read. */

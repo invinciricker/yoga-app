@@ -5,45 +5,111 @@
  * screen. Never change or remove a value. If a token is truly missing, add it here in a separate
  * commit starting with "protected:" and list it in the pull request.
  *
- * The look is "deep and moody": a forest-at-night ground, warm ivory text, candlelight gold.
+ * The look is black and gold, in a dark and a light version, with one colour per area (docs/V2.md).
  * Every text colour below passes WCAG 4.5:1 on every surface below (checked 16 Nov 2026).
  * Visual reference: docs/design/mockups.html and docs/design/mockups.png.
  */
 
-export const color = {
-  // Surfaces, from the page up. Depth is shown by a lighter surface plus a hairline, never by a shadow.
+/**
+ * Colours, version 2 (17 Nov 2026): two palettes with the same keys.
+ * Parts and screens read them through useTheme() (src/theme); they never import them.
+ * Every colour of text (except onAccent), accent.gold, support and area passes WCAG 4.5:1 on every
+ * bg of its own palette (checked 17 Nov 2026 and kept true by src/theme/contrast.test.ts).
+ * Depth is a lighter surface plus a hairline, never a shadow, in both palettes.
+ */
+const dark = {
   bg: {
     sunken: '#080D0B', // wells: inputs when focused, the video letterbox
     base: '#0C1311', // every screen background
     raised: '#131D19', // cards, list rows, chips
     elevated: '#1A2721', // tab bar, sheets, menus
   },
-  border: {
-    subtle: '#22302A', // hairline around raised surfaces
-    strong: '#34443C', // hairline around elevated surfaces, unselected controls
-  },
+  border: { subtle: '#22302A', strong: '#34443C' },
   text: {
     primary: '#F3ECDD', // warm ivory. Never pure white.
-    secondary: '#C3BDAE', // body copy on cards, summaries
-    muted: '#969A8D', // meta lines, placeholders, inactive tabs
-    onAccent: '#1B1507', // text and icons on gold
+    secondary: '#C3BDAE',
+    muted: '#969A8D',
+    onAccent: '#1B1507', // words and icons on a gold fill
   },
   accent: {
-    gold: '#E3B45E', // THE accent: one primary action per screen, active tab, overlines
-    goldBright: '#F3D592', // highlights, pressed glow, the lit candle
-    goldDeep: '#A67A2B', // gold hairlines, progress track fill on light auras
+    gold: '#E3B45E', // gold as a WORD or an ICON: overlines, links, the Home tab
+    goldBright: '#F3D592', // highlights, the lit candle
+    goldDeep: '#A67A2B', // gold hairlines
+    fill: '#E3B45E', // gold as a FILL: the one primary button, a selected chip, the play button
+    fillBorder: '#E3B45E', // hairline around a gold fill
   },
-  support: {
-    ember: '#DE8A63', // warmth: "strong" level, secondary highlights
-    sage: '#93B8A0', // success and "done"
-    danger: '#E5786D', // errors, destructive actions
-  },
-  // Dark veil over photos so text stays readable. Use as a gradient from transparent to this.
+  support: { ember: '#DE8A63', sage: '#93B8A0', danger: '#E5786D' },
+  // One colour per area: the active tab, overlines and small icons inside the area.
+  area: { home: '#E3B45E', move: '#E8946A', breathe: '#6CC5BE', sit: '#ACA3F2', write: '#EC9BB0' },
+  // The ground of an area's card on Today.
+  areaSoft: { home: '#303223', move: '#312E24', breathe: '#1F3530', sit: '#283037', write: '#312F2E' },
+  glow: 0.26, // strength of the candlelight behind a greeting
   scrim: 'rgba(8, 13, 11, 0.82)',
-  // Translucent fills for round buttons that sit on top of a cover.
   glass: 'rgba(12, 19, 17, 0.55)',
   glassBorder: 'rgba(243, 236, 221, 0.18)',
 } as const;
+
+const light = {
+  bg: {
+    sunken: '#EAE2D2',
+    base: '#F5EFE3', // warm paper. Never pure white as a page.
+    raised: '#FCF8F0',
+    elevated: '#FFFFFF',
+  },
+  border: { subtle: '#E2D9C7', strong: '#B9AD95' },
+  text: {
+    primary: '#1C1A15', // warm ink. Never pure black.
+    secondary: '#4A453B',
+    muted: '#69634F',
+    onAccent: '#1B1507',
+  },
+  accent: {
+    gold: '#84560B', // a bronze: bright gold cannot be read on paper
+    goldBright: '#B07A1E',
+    goldDeep: '#A67A2B',
+    fill: '#E3B45E', // the same gold as in the dark palette…
+    fillBorder: '#A67A2B', // …held by a darker hairline, so the button has an edge on paper
+  },
+  support: { ember: '#A8481F', sage: '#2F6B4B', danger: '#A93A2B' },
+  area: { home: '#84560B', move: '#A8481F', breathe: '#166E69', sit: '#5546B8', write: '#A83A60' },
+  areaSoft: { home: '#F8ECD6', move: '#F8E6D8', breathe: '#E2EFE7', sit: '#EEE9F0', write: '#F9E7E4' },
+  glow: 0.16,
+  // Covers are dark pictures in both themes, so what sits on them does not change.
+  scrim: 'rgba(8, 13, 11, 0.82)',
+  glass: 'rgba(12, 19, 17, 0.55)',
+  glassBorder: 'rgba(243, 236, 221, 0.18)',
+} as const;
+
+export const palette = { dark, light } as const;
+export type Scheme = keyof typeof palette;
+
+/** Only so that old imports keep compiling during the conversion. Nothing outside src/theme may use it. */
+export const color = palette.dark;
+
+/** Words and icons on top of a cover or an aura, in both themes. Never text.* there. */
+export const onCover = {
+  primary: '#F3ECDD',
+  secondary: '#D5CFC0',
+  accent: '#F3D592',
+} as const;
+
+/**
+ * The shape both palettes share: the same keys, every value a colour (text), except "glow" (a number).
+ * useTheme() gives a Palette, so a palette that loses or changes a key stops the build.
+ */
+export type Palette = {
+  bg: { sunken: string; base: string; raised: string; elevated: string };
+  border: { subtle: string; strong: string };
+  text: { primary: string; secondary: string; muted: string; onAccent: string };
+  accent: { gold: string; goldBright: string; goldDeep: string; fill: string; fillBorder: string };
+  support: { ember: string; sage: string; danger: string };
+  area: { home: string; move: string; breathe: string; sit: string; write: string };
+  areaSoft: { home: string; move: string; breathe: string; sit: string; write: string };
+  glow: number;
+  scrim: string;
+  glass: string;
+  glassBorder: string;
+};
 
 /**
  * Auras: the generated cover art used whenever a lesson, series or journal entry has no photo.
@@ -93,10 +159,53 @@ export const aura = {
     ],
     disc: { color: '#F3ECDD', cx: 0.3, cy: 0.22, r: 0.04 },
   },
+  // Version 2 (17 Nov 2026): five more, brighter. tide = Breathe, iris = Meditate, rose = Journal,
+  // saffron = Home and Maria, dawn = free to use. Never picked automatically (see autoAuraNames).
+  dawn: {
+    ground: ['#2A1B2E', '#4A2A3A', '#7A3F3F'],
+    glows: [
+      { color: '#F0A070', cx: 0.8, cy: 1.05, r: 0.85, opacity: 0.9 },
+      { color: '#C2607A', cx: 0.1, cy: 0.9, r: 0.7, opacity: 0.8 },
+    ],
+    disc: { color: '#FBE9D2', cx: 0.3, cy: 0.26, r: 0.05 },
+  },
+  tide: {
+    ground: ['#071A20', '#0D2E36', '#124449'],
+    glows: [
+      { color: '#5CC8C0', cx: 0.5, cy: 1.1, r: 0.8, opacity: 0.75 },
+      { color: '#1D4F7A', cx: 0.1, cy: 0.05, r: 0.7, opacity: 0.9 },
+    ],
+    disc: { color: '#DFF5EE', cx: 0.72, cy: 0.22, r: 0.045 },
+  },
+  iris: {
+    ground: ['#131129', '#211B47', '#332766'],
+    glows: [
+      { color: '#8E7BEA', cx: 0.85, cy: 1.0, r: 0.8, opacity: 0.8 },
+      { color: '#B25C9E', cx: 0.1, cy: 1.05, r: 0.6, opacity: 0.7 },
+    ],
+    disc: { color: '#F3ECDD', cx: 0.5, cy: 0.24, r: 0.045 },
+  },
+  rose: {
+    ground: ['#2B1420', '#4A1E33', '#6B2A44'],
+    glows: [
+      { color: '#EC8FA8', cx: 0.2, cy: 1.05, r: 0.8, opacity: 0.8 },
+      { color: '#E3B45E', cx: 0.9, cy: 0.0, r: 0.6, opacity: 0.45 },
+    ],
+    disc: { color: '#FBE3D0', cx: 0.7, cy: 0.28, r: 0.05 },
+  },
+  saffron: {
+    ground: ['#2A1A08', '#4A2C0C', '#70430F'],
+    glows: [
+      { color: '#F0B24A', cx: 0.5, cy: 1.1, r: 0.9, opacity: 0.85 },
+      { color: '#DE8A63', cx: 0.05, cy: 0.3, r: 0.6, opacity: 0.5 },
+    ],
+    disc: { color: '#FFF1C9', cx: 0.5, cy: 0.3, r: 0.055 },
+  },
 } as const;
 
 export type AuraName = keyof typeof aura;
 export const auraNames = Object.keys(aura) as AuraName[];
+export const autoAuraNames = ['dusk', 'forest', 'candle', 'ember', 'moss'] as const;
 
 /** Font family names exactly as registered with expo-font. */
 export const font = {
@@ -171,5 +280,5 @@ export const motion = {
 
 export const opacity = { disabled: 0.4, pressed: 0.85 } as const;
 
-export const tokens = { color, aura, font, type, space, layout, radius, motion, opacity } as const;
+export const tokens = { color, palette, onCover, aura, font, type, space, layout, radius, motion, opacity } as const;
 export type Tokens = typeof tokens;

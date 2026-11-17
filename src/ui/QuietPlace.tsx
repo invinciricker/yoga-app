@@ -1,6 +1,6 @@
 /**
  * QuietPlace: what a tab shows while it has not been built yet: its title and one calm sentence.
- * Only Studio still uses it (its real page arrives in Phase 2).
+ * Only Maria's page (/maria) still uses it: her real page arrives in Phase 3.
  */
 import { StyleSheet } from 'react-native';
 

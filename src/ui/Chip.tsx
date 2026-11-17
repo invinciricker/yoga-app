@@ -1,11 +1,12 @@
 /**
  * Chip: a small pill.
- *   With onPress: a filter that is selected (gold) or not (outline).
+ *   With onPress: a filter that is selected (a gold fill with a hairline) or not (outline).
  *   Without onPress: a small static label, as in "You'll need".
  */
 import { StyleSheet, View } from 'react-native';
 
-import { color, layout, radius, space } from '@/theme';
+import { layout, radius, space } from '@/theme';
+import { makeStyles } from '@/theme/ThemeProvider';
 
 import { PressableScale } from './PressableScale';
 import { size } from './sizes';
@@ -19,9 +20,10 @@ export type ChipProps = {
 };
 
 export function Chip({ label, selected = false, onPress, disabled }: ChipProps) {
+  const styles = useStyles();
   if (!onPress) {
     return (
-      <View style={[styles.base, styles.static]}>
+      <View style={[shape.base, styles.static]}>
         <Text variant="meta" color="text.secondary">
           {label}
         </Text>
@@ -37,7 +39,7 @@ export function Chip({ label, selected = false, onPress, disabled }: ChipProps) 
       hitSlop={{ top: slop, bottom: slop }}
       accessibilityLabel={label}
       accessibilityState={{ selected, disabled: !!disabled }}
-      style={[styles.base, styles.select, selected ? styles.selected : styles.unselected]}
+      style={[shape.base, shape.select, selected ? styles.selected : styles.unselected]}
     >
       <Text variant="meta" color={selected ? 'text.onAccent' : 'text.secondary'}>
         {label}
@@ -46,7 +48,7 @@ export function Chip({ label, selected = false, onPress, disabled }: ChipProps) 
   );
 }
 
-const styles = StyleSheet.create({
+const shape = StyleSheet.create({
   base: {
     borderRadius: radius.pill,
     borderWidth: size.stroke.hairline,
@@ -55,12 +57,17 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   select: { minHeight: size.chip.select, minWidth: layout.touchMin, paddingHorizontal: space.md },
-  selected: { backgroundColor: color.accent.gold, borderColor: color.accent.gold },
-  unselected: { borderColor: color.border.strong },
-  static: {
-    minHeight: size.chip.static,
-    paddingHorizontal: space.md,
-    backgroundColor: color.bg.raised,
-    borderColor: color.border.subtle,
-  },
 });
+
+const useStyles = makeStyles((color) =>
+  StyleSheet.create({
+    selected: { backgroundColor: color.accent.fill, borderColor: color.accent.fillBorder },
+    unselected: { borderColor: color.border.strong },
+    static: {
+      minHeight: size.chip.static,
+      paddingHorizontal: space.md,
+      backgroundColor: color.bg.raised,
+      borderColor: color.border.subtle,
+    },
+  }),
+);

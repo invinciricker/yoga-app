@@ -5,7 +5,8 @@
 import { Search, X } from 'lucide-react-native';
 import { Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-import { color, font, layout, radius, space, type } from '@/theme';
+import { font, layout, radius, space, type } from '@/theme';
+import { makeStyles, useTheme } from '@/theme/ThemeProvider';
 
 import { size } from './sizes';
 
@@ -19,6 +20,8 @@ export type SearchFieldProps = {
 };
 
 export function SearchField({ value, onChangeText, placeholder, clearLabel }: SearchFieldProps) {
+  const { color } = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.box}>
       <Search size={size.icon.md} strokeWidth={size.stroke.regular} color={color.text.muted} />
@@ -45,30 +48,32 @@ export function SearchField({ value, onChangeText, placeholder, clearLabel }: Se
   );
 }
 
-const styles = StyleSheet.create({
-  box: {
-    minHeight: size.search,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.sm,
-    paddingLeft: space.md,
-    borderRadius: radius.md,
-    borderWidth: size.stroke.hairline,
-    borderColor: color.border.subtle,
-    backgroundColor: color.bg.raised,
-  },
-  // The size of "title", in the regular weight: what is typed is not a heading.
-  input: {
-    ...type.title,
-    fontFamily: font.body,
-    color: color.text.primary,
-    flex: 1,
-    minWidth: 0,
-    minHeight: layout.touchMin,
-    paddingVertical: 0,
-    paddingRight: space.md,
-    // The web draws its own outline around a focused field; the box is enough.
-    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : null),
-  },
-  clear: { width: layout.touchMin, height: layout.touchMin, alignItems: 'center', justifyContent: 'center' },
-});
+const useStyles = makeStyles((color) =>
+  StyleSheet.create({
+    box: {
+      minHeight: size.search,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space.sm,
+      paddingLeft: space.md,
+      borderRadius: radius.md,
+      borderWidth: size.stroke.hairline,
+      borderColor: color.border.subtle,
+      backgroundColor: color.bg.raised,
+    },
+    // The size of "title", in the regular weight: what is typed is not a heading.
+    input: {
+      ...type.title,
+      fontFamily: font.body,
+      color: color.text.primary,
+      flex: 1,
+      minWidth: 0,
+      minHeight: layout.touchMin,
+      paddingVertical: 0,
+      paddingRight: space.md,
+      // The web draws its own outline around a focused field; the box is enough.
+      ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : null),
+    },
+    clear: { width: layout.touchMin, height: layout.touchMin, alignItems: 'center', justifyContent: 'center' },
+  }),
+);

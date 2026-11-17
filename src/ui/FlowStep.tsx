@@ -4,7 +4,8 @@
  */
 import { StyleSheet, View } from 'react-native';
 
-import { color, space, type } from '@/theme';
+import { space, type } from '@/theme';
+import { makeStyles } from '@/theme/ThemeProvider';
 
 import { PressableScale } from './PressableScale';
 import { size } from './sizes';
@@ -24,8 +25,9 @@ export type FlowStepProps = {
 };
 
 export function FlowStep({ name, note, at, timeColumn = false, last = false, onPress, accessibilityHint }: FlowStepProps) {
+  const lines = useLines();
   const row = (
-    <View style={[styles.row, !last && styles.line]}>
+    <View style={[styles.row, !last && lines.line]}>
       {timeColumn ? (
         <Text variant="meta" color="accent.gold" tabular style={styles.time}>
           {at ?? ''}
@@ -55,8 +57,13 @@ export function FlowStep({ name, note, at, timeColumn = false, last = false, onP
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: space.md, paddingVertical: size.flowPad },
-  line: { borderBottomWidth: size.stroke.hairline, borderBottomColor: color.border.subtle },
   // The time sits on the same line as the name (22 high), a little smaller.
   time: { width: size.flowTime, lineHeight: type.title.lineHeight },
   words: { flex: 1, gap: space.xxs / 2 },
 });
+
+const useLines = makeStyles((color) =>
+  StyleSheet.create({
+    line: { borderBottomWidth: size.stroke.hairline, borderBottomColor: color.border.subtle },
+  }),
+);

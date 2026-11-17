@@ -1,78 +1,19 @@
 /**
- * Journal: Maria's tips (short advice) and notes (longer thoughts), newest first.
+ * Journal: the person's own private writing (free pages and three guided journals). Built in
+ * Phases 5 and 6. Nothing written here ever leaves the phone.
+ * Until then: a placeholder in the preview app; the public app hides this tab (src/config.ts).
+ *
+ * (Maria's tips and notes, which this tab used to show, are now at /notes.)
  */
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Redirect } from 'expo-router';
 
-import { journalEntries } from '@/content/selectors';
-import { useContent } from '@/content/store';
+import { areas } from '@/config';
 import { routes } from '@/lib/nav';
+import { isPreview } from '@/lib/variant';
 import { strings } from '@/strings';
-import { space } from '@/theme';
-import { Arrive, Chip, EmptyState, JournalCard, OfflineNote, Screen, size, Skeleton, Text } from '@/ui';
-
-type Kind = 'all' | 'tip' | 'note';
-const filters: { key: Kind; label: string }[] = [
-  { key: 'all', label: strings.journal.filterAll },
-  { key: 'tip', label: strings.journal.filterTips },
-  { key: 'note', label: strings.journal.filterNotes },
-];
+import { RoomPlaceholder } from '@/ui';
 
 export default function JournalScreen() {
-  const router = useRouter();
-  const content = useContent((s) => s.content);
-  const status = useContent((s) => s.status);
-  const refreshing = useContent((s) => s.refreshing);
-  const refresh = useContent((s) => s.refresh);
-
-  const [kind, setKind] = useState<Kind>('all');
-  const entries = journalEntries(content, kind);
-
-  return (
-    <Screen tabBar contentStyle={styles.sections} refreshing={refreshing} onRefresh={refresh}>
-      <Arrive index={0} style={styles.header}>
-        <View style={styles.title}>
-          <Text variant="display" accessibilityRole="header">
-            {strings.journal.title}
-          </Text>
-          {status === 'stale' ? <OfflineNote /> : null}
-        </View>
-        <View style={styles.chips}>
-          {filters.map((f) => (
-            <Chip key={f.key} label={f.label} selected={kind === f.key} onPress={() => setKind(f.key)} />
-          ))}
-        </View>
-      </Arrive>
-
-      {status === 'loading' ? (
-        <View style={styles.entries}>
-          <Skeleton height={size.cover.note} />
-          <Skeleton height={size.thumb * 2} />
-        </View>
-      ) : entries.length > 0 ? (
-        <Arrive index={1} style={styles.entries}>
-          {entries.map((entry) => (
-            <JournalCard key={entry.slug} entry={entry} onPress={() => router.push(routes.entry(entry.slug))} />
-          ))}
-        </Arrive>
-      ) : kind !== 'all' && content.journal.length > 0 ? (
-        <EmptyState
-          sentence={strings.journal.noMatch}
-          actionLabel={strings.common.clear}
-          onAction={() => setKind('all')}
-        />
-      ) : (
-        <EmptyState sentence={strings.journal.empty} />
-      )}
-    </Screen>
-  );
+  if (!areas.journal && !isPreview) return <Redirect href={routes.home} />;
+  return <RoomPlaceholder title={strings.tabs.journal} aura="rose" />;
 }
-
-const styles = StyleSheet.create({
-  sections: { gap: space.xxl },
-  header: { gap: space.lg },
-  title: { gap: space.xs },
-  chips: { flexDirection: 'row', gap: space.xs, paddingVertical: space.xxs },
-  entries: { gap: space.xxl },
-});

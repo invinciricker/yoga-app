@@ -24,7 +24,12 @@ export function findLesson(content: ContentFile, slug: string | undefined): Less
 export function findSeries(content: ContentFile, slug: string | undefined): Series | undefined {
   return content.series.find((s) => s.slug === slug);
 }
-export function findEntry(content: ContentFile, slug: string | undefined): JournalEntry | undefined {
+/**
+ * Maria's tips and notes. In the content they are still called "journal" (content/journal/ and the
+ * key `journal` in content.json): those data names are permanent (docs/V2.md). Everywhere else they
+ * are "notes"; "journal" now means the person's own journal.
+ */
+export function findNote(content: ContentFile, slug: string | undefined): JournalEntry | undefined {
   return content.journal.find((j) => j.slug === slug);
 }
 
@@ -72,7 +77,7 @@ export function seriesMinutes(content: ContentFile, seriesSlug: string): number 
 }
 
 /**
- * How many lessons of a series are done. Marking lessons done arrives in Phase 3: until then
+ * How many lessons of a series are done. Marking lessons done arrives in Phase 4: until then
  * this always answers 0, and the screens show no progress bar.
  */
 export function seriesProgress(content: ContentFile, seriesSlug: string): number {
@@ -101,12 +106,12 @@ export function searchLessons(content: ContentFile, query: string, filter: Lesso
   });
 }
 
-/** The newest journal entry that has a saying of Maria's, for "From the journal" on Today. */
+/** The newest of Maria's notes that has a saying of hers, for "A note from Maria" on Today. */
 export function latestQuote(content: ContentFile): JournalEntry | undefined {
   return [...content.journal].sort(byNewest).find((entry) => !!entry.quote);
 }
 
-/** The journal, newest first, all of it or one kind. */
-export function journalEntries(content: ContentFile, kind: 'all' | JournalEntry['kind'] = 'all'): JournalEntry[] {
+/** Maria's tips and notes, newest first, all of them or one kind. */
+export function notesOfKind(content: ContentFile, kind: 'all' | JournalEntry['kind'] = 'all'): JournalEntry[] {
   return [...content.journal].sort(byNewest).filter((entry) => kind === 'all' || entry.kind === kind);
 }

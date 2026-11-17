@@ -5,11 +5,22 @@
  * It can also pull to refresh, and hold a bar fixed at the bottom (a lesson's "Begin practice").
  */
 import { useId, useState, type ComponentRef, type ReactNode, type RefObject } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
-import { color, layout, space } from '@/theme';
+import { layout, space } from '@/theme';
+import { useDarkTop } from '@/theme/statusBar';
+import { makeStyles, useTheme } from '@/theme/ThemeProvider';
 
 import { size } from './sizes';
 
@@ -17,7 +28,7 @@ export type ScreenProps = {
   children: ReactNode;
   /** Scrolls when the content is taller than the screen. On by default. */
   scroll?: boolean;
-  /** True on the four tabs: leaves room so nothing hides behind the floating tab bar. */
+  /** True on the tabs: leaves room so nothing hides behind the floating tab bar. */
   tabBar?: boolean;
   /** Drawn behind the content, in the same column (for example the candlelight). */
   backdrop?: ReactNode;
@@ -28,6 +39,11 @@ export type ScreenProps = {
    * screen (under the status bar) and has no gutter. The page pads its own text.
    */
   bleed?: boolean;
+  /**
+   * How tall the dark part at the top of the page is (a cover). While it is under the status bar,
+   * the status bar's icons are light, whatever the theme.
+   */
+  darkTop?: number;
   /** A bar fixed at the bottom, fading in from the background. */
   footer?: ReactNode;
   /** Pull to refresh: give both. */
@@ -44,14 +60,28 @@ export function Screen({
   backdrop,
   contentStyle,
   bleed = false,
+  darkTop,
   footer,
   refreshing = false,
   onRefresh,
   scrollRef,
 }: ScreenProps) {
   const insets = useSafeAreaInsets();
+  const { color } = useTheme();
+  const styles = useStyles();
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
   const [footerHeight, setFooterHeight] = useState(0);
+  // True once the dark top has scrolled away from under the status bar.
+  const [pastDarkTop, setPastDarkTop] = useState(false);
+  useDarkTop(darkTop !== undefined && darkTop > 0 && !pastDarkTop);
+
+  const onScroll =
+    darkTop === undefined
+      ? undefined
+      : (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+          const past = e.nativeEvent.contentOffset.y > darkTop - insets.top;
+          if (past !== pastDarkTop) setPastDarkTop(past);
+        };
 
   const padding = {
     // Every screen starts 16 below the top inset.
@@ -76,6 +106,8 @@ export function Screen({
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          onScroll={onScroll}
+          scrollEventThrottle={onScroll ? size.scrollThrottle : undefined}
           refreshControl={
             onRefresh ? (
               <RefreshControl
@@ -115,24 +147,26 @@ export function Screen({
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.bg.base },
-  scroll: { flexGrow: 1 },
-  column: {
-    flexGrow: 1,
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
-    alignSelf: 'center',
-    overflow: 'hidden', // keeps the backdrop from spilling sideways
-  },
-  content: { flexGrow: 1 },
-  gutter: { paddingHorizontal: layout.gutter },
-  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, alignItems: 'center' },
-  footerContent: {
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
-    paddingTop: space.xxxl,
-    paddingHorizontal: layout.gutter,
-    gap: space.xxs,
-  },
-});
+const useStyles = makeStyles((color) =>
+  StyleSheet.create({
+    root: { flex: 1, backgroundColor: color.bg.base },
+    scroll: { flexGrow: 1 },
+    column: {
+      flexGrow: 1,
+      width: '100%',
+      maxWidth: layout.maxContentWidth,
+      alignSelf: 'center',
+      overflow: 'hidden', // keeps the backdrop from spilling sideways
+    },
+    content: { flexGrow: 1 },
+    gutter: { paddingHorizontal: layout.gutter },
+    footer: { position: 'absolute', left: 0, right: 0, bottom: 0, alignItems: 'center' },
+    footerContent: {
+      width: '100%',
+      maxWidth: layout.maxContentWidth,
+      paddingTop: space.xxxl,
+      paddingHorizontal: layout.gutter,
+      gap: space.xxs,
+    },
+  }),
+);

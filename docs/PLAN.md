@@ -57,6 +57,7 @@ paste the YouTube link]. It is [a new lesson / a tip / a note / a change to her 
 **Spending little.** The briefs are written so the builder does not have to think about *what* to build, which is the expensive part. Keep it that way: one phase per session; do not ask the builder to "improve the design" in general (ask for one named thing); for content use the cheapest model; if the builder fails the same check three times, stop it and ask for a plain explanation before it burns more.
 
 ## The phases
+**Replaced on 17 Nov 2026: the current phases are in `docs/V2.md`.** The table below is the plan of 16 Nov, kept for the record.
 
 | # | Name | At the end you can… | You do first | New build? |
 |---|---|---|---|---|
@@ -85,6 +86,7 @@ After version 1: `docs/phases/later.md`.
 - **16 Nov 2026** · The work is split as in the table above. All briefs for version 1 are written in advance so the builder can run on a cheaper model without the architect.
 - **16 Nov 2026** · Working title "Yoga with Maria", placeholder package `com.yogawithmaria.app`.
 - **16 Nov 2026** · Small backend: Supabase (reactions, notification tokens, Maria's sign-in). Chosen over Firebase because one free account also gives the server functions and storage that Phase 8 needs. Firebase is still needed in Phase 5, only as Android's notification pipe.
+- **17 Nov 2026** · Version 2 of the plan: see "Decisions" in `docs/V2.md`.
 
 ## Decisions waiting for the owner
 

@@ -1,7 +1,8 @@
 /**
- * SeriesCard: a series as a wide cover with its name on it.
+ * SeriesCard: a series as a wide cover with its name on it (in the onCover colours: covers are
+ * pictures, the same in both themes).
  * The first one on Practice is large; the others are lower.
- * (The progress line "2 of 7 done" arrives in Phase 3, with marking lessons done.)
+ * (The progress line "2 of 7 done" arrives in Phase 4, with marking lessons done.)
  */
 import { StyleSheet, View } from 'react-native';
 
@@ -30,10 +31,10 @@ export function SeriesCard({ series, onPress, large = false }: SeriesCardProps) 
         radius={large ? 'xl' : 'lg'}
         scrim
       >
-        <DraftChip item={series} style={styles.draft} />
+        <DraftChip item={series} onCover style={styles.draft} />
         <View style={styles.words}>
-          <Overline>{count}</Overline>
-          <Text variant={large ? 'h2' : 'h3'} numberOfLines={2}>
+          <Overline tone="cover">{count}</Overline>
+          <Text variant={large ? 'h2' : 'h3'} color="onCover.primary" numberOfLines={2}>
             {series.title}
           </Text>
         </View>

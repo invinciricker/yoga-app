@@ -1,4 +1,5 @@
 /** The parts every screen is built from. Import from "@/ui". */
+export { AreaCard } from './AreaCard';
 export { Arrive } from './Arrive';
 export { Aura } from './Aura';
 export { Button } from './Button';
@@ -11,16 +12,17 @@ export { EmptyState } from './EmptyState';
 export { Fact } from './Fact';
 export { FlowStep } from './FlowStep';
 export { IconButton } from './IconButton';
-export { JournalCard } from './JournalCard';
 export { LessonCard } from './LessonCard';
 export { LessonRow } from './LessonRow';
 export { LoadingPage, NotHere } from './NotHere';
+export { NoteCard } from './NoteCard';
 export { OfflineNote } from './OfflineNote';
 export { Overline } from './Overline';
 export { PlayButton } from './PlayButton';
 export { PressableScale } from './PressableScale';
 export { QuietPlace } from './QuietPlace';
 export { RichText } from './RichText';
+export { RoomPlaceholder } from './RoomPlaceholder';
 export { Screen } from './Screen';
 export { SearchField } from './SearchField';
 export { SectionHeader } from './SectionHeader';

@@ -5,12 +5,13 @@
  */
 import { StyleSheet, View } from 'react-native';
 
-import { color } from '@/theme';
+import { makeStyles } from '@/theme/ThemeProvider';
 
 import { size } from './sizes';
 import { canPlay, type VideoPlayerProps } from './video';
 
 export function VideoPlayer({ video, seek }: VideoPlayerProps) {
+  const styles = useStyles();
   if (!canPlay(video)) return null;
   const start = seek ? `&start=${seek.seconds}` : '';
   const src = `https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&playsinline=1&rel=0${start}`;
@@ -28,6 +29,8 @@ export function VideoPlayer({ video, seek }: VideoPlayerProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  box: { width: '100%', aspectRatio: size.videoAspect, backgroundColor: color.bg.sunken },
-});
+const useStyles = makeStyles((color) =>
+  StyleSheet.create({
+    box: { width: '100%', aspectRatio: size.videoAspect, backgroundColor: color.bg.sunken },
+  }),
+);

@@ -16,7 +16,8 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import type { Image as ContentImage } from '../../shared/content-schema';
 
 import { pickVariant, pictureUrl } from '@/content/pictures';
-import { color, motion, radius as radii, splitAlpha, type AuraName } from '@/theme';
+import { motion, radius as radii, splitAlpha, type AuraName } from '@/theme';
+import { makeStyles, useTheme } from '@/theme/ThemeProvider';
 
 import { Aura } from './Aura';
 import { size } from './sizes';
@@ -35,21 +36,36 @@ export type CoverProps = {
   scrim?: boolean;
   /** The lower part melts into the screen's background (the top of a lesson). */
   fade?: boolean;
-  /** Text and buttons drawn on top. */
+  /** Which part of the photo stays in view when it is cropped: the top for a portrait. */
+  imagePosition?: 'center' | 'top';
+  /** Text and buttons drawn on top. Words over a cover use the onCover.* colours. */
   children?: ReactNode;
   style?: StyleProp<ViewStyle>;
 };
 
-const veil = splitAlpha(color.scrim);
-
-export function Cover({ aura, image, height, aspect, width, radius = 'lg', scrim = false, fade = false, children, style }: CoverProps) {
+export function Cover({
+  aura,
+  image,
+  height,
+  aspect,
+  width,
+  radius = 'lg',
+  scrim = false,
+  fade = false,
+  imagePosition = 'center',
+  children,
+  style,
+}: CoverProps) {
+  const { color } = useTheme();
+  const styles = useStyles();
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
   // The width on screen, known after the first layout. Until then only the blurred preview shows.
   const [shownWidth, setShownWidth] = useState(0);
   const variant = image && shownWidth > 0 ? pickVariant(image, shownWidth * PixelRatio.get()) : undefined;
 
   // The veil: a gradient from nothing to the scrim colour, or to the screen colour for "fade".
-  const to = fade ? { color: color.bg.base, opacity: 1 } : veil;
+  // The scrim is the same in both themes (covers are pictures); the fade melts into the screen.
+  const to = fade ? { color: color.bg.base, opacity: 1 } : splitAlpha(color.scrim);
   const veilHeight = fade ? size.fadeHeight : size.scrimHeight;
 
   return (
@@ -63,6 +79,7 @@ export function Cover({ aura, image, height, aspect, width, radius = 'lg', scrim
           placeholder={{ blurhash: image.blurhash }}
           placeholderContentFit="cover"
           contentFit="cover"
+          contentPosition={imagePosition}
           cachePolicy="disk"
           transition={motion.duration.base}
           style={StyleSheet.absoluteFill}
@@ -91,7 +108,9 @@ export function Cover({ aura, image, height, aspect, width, radius = 'lg', scrim
   );
 }
 
-const styles = StyleSheet.create({
-  box: { overflow: 'hidden', backgroundColor: color.bg.raised },
-  veil: { position: 'absolute', left: 0, right: 0, bottom: 0 },
-});
+const useStyles = makeStyles((color) =>
+  StyleSheet.create({
+    box: { overflow: 'hidden', backgroundColor: color.bg.raised },
+    veil: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+  }),
+);

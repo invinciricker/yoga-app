@@ -1,16 +1,19 @@
 /**
  * Design gallery: every part of src/ui on one page, to check the look.
- * Reached from the bottom of Today in the preview app only.
+ * Reached from You in the preview app only. The control at the top draws the whole page in the
+ * app's theme (System) or forces Light or Dark, without changing the app's setting.
  */
 import { useRouter } from 'expo-router';
-import { ArrowRight, Bookmark, BookOpen, ChevronLeft, MapPin, Play, Sun } from 'lucide-react-native';
+import { ArrowRight, Bookmark, ChevronDown, ChevronLeft, Feather, House, MapPin, Moon, Play, Wind } from 'lucide-react-native';
 import { useState, type ReactNode } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { useContent } from '@/content/store';
 import { strings } from '@/strings';
-import { auraNames, color, layout, radius, space, type } from '@/theme';
+import { areas, auraNames, layout, radius, space, type, type Area, type Palette, type Scheme } from '@/theme';
+import { makeStyles, ThemeScope, useTheme } from '@/theme/ThemeProvider';
 import {
+  AreaCard,
   Arrive,
   Button,
   Card,
@@ -19,9 +22,9 @@ import {
   DraftChip,
   EmptyState,
   IconButton,
-  JournalCard,
   LessonCard,
   LessonRow,
+  NoteCard,
   OfflineNote,
   Overline,
   PlayButton,
@@ -42,23 +45,38 @@ const g = strings.gallery;
 type Variant = keyof typeof type;
 const variants = Object.keys(type) as Variant[];
 
-// Every colour token, flattened to "group.name" → value.
-const swatches: { name: string; value: string }[] = [
-  ...Object.entries(color.bg).map(([k, v]) => ({ name: `bg.${k}`, value: v })),
-  ...Object.entries(color.border).map(([k, v]) => ({ name: `border.${k}`, value: v })),
-  ...Object.entries(color.text).map(([k, v]) => ({ name: `text.${k}`, value: v })),
-  ...Object.entries(color.accent).map(([k, v]) => ({ name: `accent.${k}`, value: v })),
-  ...Object.entries(color.support).map(([k, v]) => ({ name: `support.${k}`, value: v })),
-  { name: 'scrim', value: color.scrim },
-  { name: 'glass', value: color.glass },
-  { name: 'glassBorder', value: color.glassBorder },
-];
+/** Every colour of a palette (and the cover colours), flattened to "group.name" → value. */
+function swatchesOf(color: Palette, onCover: Record<string, string>): { name: string; value: string }[] {
+  const groups = ['bg', 'border', 'text', 'accent', 'support', 'area', 'areaSoft'] as const;
+  return [
+    ...groups.flatMap((group) => Object.entries(color[group]).map(([k, v]) => ({ name: `${group}.${k}`, value: v }))),
+    ...Object.entries(onCover).map(([k, v]) => ({ name: `onCover.${k}`, value: v })),
+    { name: 'scrim', value: color.scrim },
+    { name: 'glass', value: color.glass },
+    { name: 'glassBorder', value: color.glassBorder },
+  ];
+}
 
 const tabItems: TabItem[] = [
-  { key: 'today', label: strings.tabs.today, icon: Sun },
-  { key: 'practice', label: strings.tabs.practice, icon: Play },
-  { key: 'journal', label: strings.tabs.journal, icon: BookOpen },
-  { key: 'studio', label: strings.tabs.studio, icon: MapPin },
+  { key: 'home', label: strings.tabs.home, icon: House, area: 'home' },
+  { key: 'practice', label: strings.tabs.practice, icon: Play, area: 'move' },
+  { key: 'breathe', label: strings.tabs.breathe, icon: Wind, area: 'breathe' },
+  { key: 'meditate', label: strings.tabs.meditate, icon: Moon, area: 'sit' },
+  { key: 'journal', label: strings.tabs.journal, icon: Feather, area: 'write' },
+];
+
+const areaCards: { area: Exclude<Area, 'home'>; icon: typeof Play }[] = [
+  { area: 'move', icon: Play },
+  { area: 'breathe', icon: Wind },
+  { area: 'sit', icon: Moon },
+  { area: 'write', icon: Feather },
+];
+
+type Choice = 'system' | Scheme;
+const choices: { key: Choice; label: string }[] = [
+  { key: 'system', label: strings.me.system },
+  { key: 'light', label: strings.me.light },
+  { key: 'dark', label: strings.me.dark },
 ];
 
 /** One labelled block of the gallery. */
@@ -72,7 +90,15 @@ function Block({ label, children }: { label: string; children: ReactNode }) {
 }
 
 export default function GalleryScreen() {
+  const [choice, setChoice] = useState<Choice>('system');
+  const page = <GalleryPage choice={choice} onChoose={setChoice} />;
+  return choice === 'system' ? page : <ThemeScope scheme={choice}>{page}</ThemeScope>;
+}
+
+function GalleryPage({ choice, onChoose }: { choice: Choice; onChoose: (c: Choice) => void }) {
   const router = useRouter();
+  const { color, onCover, scheme } = useTheme();
+  const local = useStyles();
   const [chipOn, setChipOn] = useState(true);
   const [query, setQuery] = useState('');
   const content = useContent((state) => state.content);
@@ -80,7 +106,7 @@ export default function GalleryScreen() {
   const series = content.series[0];
   const tip = content.journal.find((entry) => entry.kind === 'tip');
   const note = content.journal.find((entry) => entry.kind === 'note');
-  const [tab, setTab] = useState('today');
+  const [tab, setTab] = useState('home');
   const noop = () => {};
 
   return (
@@ -91,6 +117,14 @@ export default function GalleryScreen() {
           {g.title}
         </Text>
       </Arrive>
+
+      <Block label={`${g.theme} · ${scheme}`}>
+        <View style={styles.row}>
+          {choices.map((c) => (
+            <Chip key={c.key} label={c.label} selected={choice === c.key} onPress={() => onChoose(c.key)} />
+          ))}
+        </View>
+      </Block>
 
       <Block label={g.type}>
         {variants.map((v) => (
@@ -113,16 +147,26 @@ export default function GalleryScreen() {
 
       <Block label={g.colours}>
         <View style={styles.swatches}>
-          {swatches.map((s) => (
+          {swatchesOf(color, onCover).map((s) => (
             <View key={s.name} style={styles.swatchRow}>
-              <View style={[styles.swatch, { backgroundColor: s.value }]} />
-              <View>
+              <View style={[local.swatch, { backgroundColor: s.value }]} />
+              <View style={styles.swatchWords}>
                 <Text variant="meta">{s.name}</Text>
                 <Text variant="meta" color="text.muted">
                   {s.value}
                 </Text>
               </View>
             </View>
+          ))}
+        </View>
+      </Block>
+
+      <Block label={g.areaColours}>
+        <View style={styles.row}>
+          {areas.map((area) => (
+            <Overline key={area} tone="area" area={area}>
+              {area}
+            </Overline>
           ))}
         </View>
       </Block>
@@ -139,6 +183,12 @@ export default function GalleryScreen() {
           <PlayButton accessibilityLabel={strings.lesson.play} onPress={noop} />
           <Button kind="link" label={strings.today.readNote} icon={ArrowRight} onPress={noop} />
         </View>
+        <Cover aura="saffron" height={size.hero.width / 2} radius="lg" style={styles.glassDemo}>
+          <View style={styles.row}>
+            <Button kind="glass" label={strings.home.meet(content.site.teacherFirstName)} icon={ArrowRight} onPress={noop} />
+            <Button kind="glass" small label={strings.home.today} icon={ChevronDown} onPress={noop} />
+          </View>
+        </Cover>
       </Block>
 
       <Block label={g.iconButtons}>
@@ -170,6 +220,12 @@ export default function GalleryScreen() {
         <Card padding="xl">
           <Text variant="quote">{g.italicSample}</Text>
         </Card>
+      </Block>
+
+      <Block label={g.areaCards}>
+        {areaCards.map(({ area, icon }) => (
+          <AreaCard key={area} area={area} icon={icon} {...g.areaSamples[area]} onPress={noop} />
+        ))}
       </Block>
 
       <Block label={g.sectionHeader}>
@@ -205,9 +261,11 @@ export default function GalleryScreen() {
       <Block label={g.cover}>
         <Cover aura="forest" height={size.hero.height} radius="xl" scrim>
           <View style={styles.coverText}>
-            <Overline>{g.coverOverline}</Overline>
-            <Text variant="h1">{g.coverTitle}</Text>
-            <Text variant="body" color="text.secondary">
+            <Overline tone="cover">{g.coverOverline}</Overline>
+            <Text variant="h1" color="onCover.primary">
+              {g.coverTitle}
+            </Text>
+            <Text variant="body" color="onCover.secondary">
               {g.coverBody}
             </Text>
           </View>
@@ -229,9 +287,9 @@ export default function GalleryScreen() {
         </Block>
       ) : null}
       {tip || note ? (
-        <Block label={g.journalParts}>
-          {note ? <JournalCard entry={note} onPress={noop} /> : null}
-          {tip ? <JournalCard entry={tip} onPress={noop} /> : null}
+        <Block label={g.notesParts}>
+          {note ? <NoteCard entry={note} onPress={noop} /> : null}
+          {tip ? <NoteCard entry={tip} onPress={noop} /> : null}
         </Block>
       ) : null}
       {note ? (
@@ -258,6 +316,18 @@ export default function GalleryScreen() {
   );
 }
 
+const useStyles = makeStyles((color) =>
+  StyleSheet.create({
+    swatch: {
+      width: size.swatch,
+      height: size.swatch,
+      borderRadius: radius.sm,
+      borderWidth: size.stroke.hairline,
+      borderColor: color.border.strong,
+    },
+  }),
+);
+
 const styles = StyleSheet.create({
   sections: { gap: layout.sectionGap },
   header: { gap: space.lg },
@@ -266,13 +336,7 @@ const styles = StyleSheet.create({
   cardGap: { gap: space.xs },
   swatches: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space.sm },
   swatchRow: { width: '50%', flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  swatch: {
-    width: size.swatch,
-    height: size.swatch,
-    borderRadius: radius.sm,
-    borderWidth: size.stroke.hairline,
-    borderColor: color.border.strong,
-  },
+  swatchWords: { flexShrink: 1 },
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.sm },
   glassDemo: { alignItems: 'center', justifyContent: 'center' },
   // The row of big auras runs to the screen edges, past the gutter.

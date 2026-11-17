@@ -24,3 +24,11 @@ export const CONTENT_URL = CONTENT_BASE + CONTENT_FILE;
 
 /** How long the app waits for the download before it keeps working from its saved copy. */
 export const CONTENT_TIMEOUT_MS = 6000;
+
+/**
+ * Which areas are built. A tab whose area is false is hidden in the public app; the preview app
+ * shows a quiet placeholder instead ("This room is being built."). Each later phase turns its area
+ * to true: Breathe in Phase 7, Meditate in Phase 8, Journal in Phase 5.
+ */
+export type BuildingArea = 'breathe' | 'meditate' | 'journal';
+export const areas: Record<BuildingArea, boolean> = { breathe: false, meditate: false, journal: false };

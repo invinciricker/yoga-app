@@ -1,10 +1,12 @@
 /**
  * Text: the only way to put words on screen.
  * Pick a style by name (variant) and a colour by its token path. Never set a font size elsewhere.
+ * The colour follows the theme; over a cover or an aura, use the onCover.* names.
  */
 import { Text as RNText, type TextProps as RNTextProps, type TextStyle } from 'react-native';
 
 import { font, inkColors, type InkColor, type } from '@/theme';
+import { useTheme } from '@/theme/ThemeProvider';
 
 import { size } from './sizes';
 
@@ -29,8 +31,9 @@ export function Text({
   style,
   ...rest
 }: TextProps) {
+  const theme = useTheme();
   const extra: TextStyle = {
-    color: inkColors[color],
+    color: inkColors(theme.color)[color],
     ...(variant === 'overline' ? { textTransform: 'uppercase' } : null),
     ...(italic ? { fontFamily: font.displayItalic } : null),
     ...(tabular ? { fontVariant: ['tabular-nums'] } : null),
