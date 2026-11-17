@@ -1,15 +1,13 @@
 /**
- * QuietPlace: what a tab shows while it has nothing yet: its title, a small disc of light
- * and one calm sentence. Used by Practice, Journal and Studio in Phase 0.
- * (Phase 1 brings the real EmptyState part and the real screens.)
+ * QuietPlace: what a tab shows while it has not been built yet: its title and one calm sentence.
+ * Only Studio still uses it (its real page arrives in Phase 2).
  */
 import { StyleSheet } from 'react-native';
 
-import { space, type AuraName } from '@/theme';
+import type { AuraName } from '@/theme';
 
 import { Arrive } from './Arrive';
-import { Cover } from './Cover';
-import { size } from './sizes';
+import { EmptyState } from './EmptyState';
 import { Text } from './Text';
 
 export type QuietPlaceProps = { title: string; sentence: string; aura: AuraName };
@@ -23,16 +21,12 @@ export function QuietPlace({ title, sentence, aura }: QuietPlaceProps) {
         </Text>
       </Arrive>
       <Arrive index={1} style={styles.block}>
-        <Cover aura={aura} width={size.thumb} height={size.thumb} radius="pill" />
-        <Text variant="bodyLarge" color="text.secondary" center style={styles.sentence}>
-          {sentence}
-        </Text>
+        <EmptyState sentence={sentence} aura={aura} fill />
       </Arrive>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  block: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.xl, paddingVertical: space.huge },
-  sentence: { maxWidth: size.readWidth },
+  block: { flex: 1 },
 });

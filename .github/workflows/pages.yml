@@ -1,10 +1,14 @@
 # PAGES (the public website and the web preview)
 # When it runs: every time something is merged into main. It can also be run by hand.
-# What it does: builds the small website and the web version of the app, and publishes them at
-#   https://invinciricker.github.io/yoga-app/        (the website)
-#   https://invinciricker.github.io/yoga-app/app/    (the web preview of the app)
-# A red cross means: the website was NOT updated (the old one stays online, nothing is broken).
-#   Most often: GitHub Pages is not set to "GitHub Actions" (Settings → Pages → Source).
+# What it does: builds Maria's content, the small website and the web version of the app, and
+#   publishes them at
+#   https://invinciricker.github.io/yoga-app/               (the website)
+#   https://invinciricker.github.io/yoga-app/app/           (the web preview of the app)
+#   https://invinciricker.github.io/yoga-app/content/v1/    (what the app downloads: lessons, photos)
+#   So a change in content/ is live for everyone a few minutes after it is merged.
+# A red cross means: nothing was published (the old site and the old content stay online, nothing
+#   is broken). Most often: a mistake in a file of content/ (open the run: each problem is one
+#   sentence naming the file), or GitHub Pages is not set to "GitHub Actions" (Settings → Pages → Source).
 name: Pages
 
 on:
@@ -31,6 +35,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Build the content (and the copy bundled inside the app)
+        # Writes dist-site/content/v1/ and assets/content-fallback.json. Must come first:
+        # the web preview below bundles that copy, and the website step keeps the content.
+        run: npm run content:fallback
       - name: Build the web preview of the app
         run: npm run build:web
         env:

@@ -3,10 +3,11 @@
  * Reached from the bottom of Today in the preview app only.
  */
 import { useRouter } from 'expo-router';
-import { Bookmark, BookOpen, ChevronLeft, MapPin, Play, Sun } from 'lucide-react-native';
+import { ArrowRight, Bookmark, BookOpen, ChevronLeft, MapPin, Play, Sun } from 'lucide-react-native';
 import { useState, type ReactNode } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
+import { useContent } from '@/content/store';
 import { strings } from '@/strings';
 import { auraNames, color, layout, radius, space, type } from '@/theme';
 import {
@@ -15,11 +16,22 @@ import {
   Card,
   Chip,
   Cover,
+  DraftChip,
+  EmptyState,
   IconButton,
+  JournalCard,
+  LessonCard,
+  LessonRow,
+  OfflineNote,
   Overline,
+  PlayButton,
+  RichText,
   Screen,
+  SearchField,
   SectionHeader,
+  SeriesCard,
   size,
+  Skeleton,
   TabBar,
   Text,
   type TabItem,
@@ -62,6 +74,12 @@ function Block({ label, children }: { label: string; children: ReactNode }) {
 export default function GalleryScreen() {
   const router = useRouter();
   const [chipOn, setChipOn] = useState(true);
+  const [query, setQuery] = useState('');
+  const content = useContent((state) => state.content);
+  const lesson = content.lessons[0];
+  const series = content.series[0];
+  const tip = content.journal.find((entry) => entry.kind === 'tip');
+  const note = content.journal.find((entry) => entry.kind === 'note');
   const [tab, setTab] = useState('today');
   const noop = () => {};
 
@@ -116,6 +134,11 @@ export default function GalleryScreen() {
         <Button kind="ghost" label={g.disabled} disabled onPress={noop} />
         <Button kind="quiet" label={g.quiet} onPress={noop} />
         <Button kind="quiet" label={g.disabled} disabled onPress={noop} />
+        <View style={styles.row}>
+          <Button label={strings.today.begin} icon={Play} iconFilled shape="pill" onPress={noop} />
+          <PlayButton accessibilityLabel={strings.lesson.play} onPress={noop} />
+          <Button kind="link" label={strings.today.readNote} icon={ArrowRight} onPress={noop} />
+        </View>
       </Block>
 
       <Block label={g.iconButtons}>
@@ -189,6 +212,43 @@ export default function GalleryScreen() {
             </Text>
           </View>
         </Cover>
+      </Block>
+
+      {/* The parts that show content, drawn with the first items of the real content. */}
+      {lesson ? (
+        <Block label={g.lessonParts}>
+          <LessonCard lesson={lesson} onPress={noop} />
+          <LessonRow lesson={lesson} onPress={noop} />
+          <LessonRow lesson={lesson} number={1} onPress={noop} />
+        </Block>
+      ) : null}
+      {series ? (
+        <Block label={g.seriesParts}>
+          <SeriesCard series={series} large onPress={noop} />
+          <SeriesCard series={series} onPress={noop} />
+        </Block>
+      ) : null}
+      {tip || note ? (
+        <Block label={g.journalParts}>
+          {note ? <JournalCard entry={note} onPress={noop} /> : null}
+          {tip ? <JournalCard entry={tip} onPress={noop} /> : null}
+        </Block>
+      ) : null}
+      {note ? (
+        <Block label={g.richText}>
+          <RichText blocks={note.body} />
+        </Block>
+      ) : null}
+
+      <Block label={g.search}>
+        <SearchField value={query} onChangeText={setQuery} placeholder={strings.practice.search} clearLabel={strings.practice.clearSearch} />
+      </Block>
+
+      <Block label={g.states}>
+        <OfflineNote />
+        <DraftChip item={{ draft: true }} />
+        <Skeleton height={size.thumb} radius="md" />
+        <EmptyState sentence={strings.practice.noMatch} actionLabel={strings.common.clear} onAction={noop} />
       </Block>
 
       <Block label={g.tabBar}>

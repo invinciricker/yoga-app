@@ -11,9 +11,11 @@ export type SectionHeaderProps = {
   title: string;
   actionLabel?: string;
   onAction?: () => void;
+  /** A small quiet count on the right instead of an action ("14 lessons"). */
+  note?: string;
 };
 
-export function SectionHeader({ title, actionLabel, onAction }: SectionHeaderProps) {
+export function SectionHeader({ title, actionLabel, onAction, note }: SectionHeaderProps) {
   return (
     <View style={styles.row}>
       <Text variant="h3" accessibilityRole="header" style={styles.title}>
@@ -25,6 +27,10 @@ export function SectionHeader({ title, actionLabel, onAction }: SectionHeaderPro
             {actionLabel}
           </Text>
         </Pressable>
+      ) : note ? (
+        <Text variant="meta" color="text.muted" tabular>
+          {note}
+        </Text>
       ) : null}
     </View>
   );
