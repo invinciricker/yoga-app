@@ -2,18 +2,18 @@
 
 Kept by Claude Code, updated each phase. Short on purpose. The decisions and their reasons are in `docs/ARCHITECTURE.md`.
 
-## Versions (Phase 0, 16 Nov 2026; libraries of Phase 1 added 17 Nov 2026)
+## Versions (Phase 0, 16 Nov 2026; libraries of Phase 1 added 17 Nov 2026; Expo patches of Phase 3, 17 Nov 2026)
 
 | What | Version |
 |---|---|
-| Expo SDK | 58 (`expo` ~58.0.25) |
+| Expo SDK | 58 (`expo` ~58.0.26) |
 | React Native | 0.88.1 |
 | React | 19.3.0 |
-| Expo Router | ~58.0.31 |
+| Expo Router | ~58.0.32 |
 | Reanimated | 4.7.1 (with `react-native-worklets` 0.13.0) |
 | TypeScript | ~6.0.3, strict |
 | Node | 22 (22.23 here; the workflows use 22) |
-| Jest | 30, preset `jest-expo` |
+| Jest | 30, preset `jest-expo` ~58.0.15 |
 | Video (Phase 1) | `react-native-youtube-iframe` ^2.4.1 on `react-native-webview` 14.0.1, `expo-keep-awake` ~58.0.4 |
 | Content build (Phase 1, dev only) | `tsx`, `gray-matter`, `js-yaml` 5, `unified` 11 + `remark-parse` 11, `sharp`, `blurhash`, `zod` 4 |
 
