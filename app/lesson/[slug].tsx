@@ -5,24 +5,33 @@
  * Pressing play (on the cover, or "Begin practice" at the bottom) puts the video in place of the
  * cover. Tapping a step of the flow that has a time moves the video there.
  * The video plays on a stage that is always dark, whatever the theme ("the room dims", docs/V2.md).
- * (The save button and "Mark as done" arrive in Phase 4.)
+ *
+ * The bar at the bottom: "Begin practice" (gold) with "Mark as done" (quiet) under it; without a
+ * video (or while it plays), "Mark as done" alone, as a ghost button. A lesson done before shows a
+ * quiet line above the bar ("Done yesterday") and its button reads "Done again". "Mark as done",
+ * and the video reaching its end, open the closing screen (app/lesson-done/[slug].tsx), which records it.
+ * The bookmark at the top right saves the lesson (You → Saved).
  */
 import * as Linking from 'expo-linking';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChartNoAxesColumnIncreasing, ChevronLeft, Clock, Play, Target } from 'lucide-react-native';
-import { useRef, useState, type ComponentRef } from 'react';
+import { Bookmark, ChartNoAxesColumnIncreasing, Check, ChevronLeft, Clock, Play, Target } from 'lucide-react-native';
+import { useCallback, useRef, useState, type ComponentRef } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { focusLine, levelLabel, secondsOf } from '@/content/labels';
 import { slugsForStaticPages } from '@/content/load';
-import { findLesson, placeInSeries } from '@/content/selectors';
+import { dayOf, findLesson, placeInSeries } from '@/content/selectors';
 import { useContent } from '@/content/store';
+import { useDays } from '@/day/store';
+import { tick } from '@/lib/haptics';
 import { useReduceMotion } from '@/lib/motion';
 import { routes, useBack } from '@/lib/nav';
+import { doneLine, lastDone } from '@/practice/progress';
+import { usePractice } from '@/practice/store';
 import { strings } from '@/strings';
 import { layout, space } from '@/theme';
-import { makeStyles, ThemeScope } from '@/theme/ThemeProvider';
+import { makeStyles, ThemeScope, useTheme } from '@/theme/ThemeProvider';
 import {
   Arrive,
   Button,
@@ -64,10 +73,18 @@ export default function LessonScreen() {
   const stageStyles = useStageStyles();
   const [stageHeight, setStageHeight] = useState(0);
   const reduce = useReduceMotion();
+  const { color } = useTheme();
+  const entries = useDays((s) => s.entries);
+  const saved = usePractice((s) => (slug ? s.saved.includes(slug) : false));
 
   const [playing, setPlaying] = useState(false); // the video has taken the place of the cover
   const [failed, setFailed] = useState(false); // the video would not play
   const [seek, setSeek] = useState<SeekRequest>(); // "go to this moment", from a step of the flow
+
+  // "Mark as done", or the video reaching its end: the closing screen opens over the lesson.
+  const finish = useCallback(() => {
+    if (slug) router.push(routes.lessonDone(slug));
+  }, [router, slug]);
 
   const lesson = findLesson(content, slug);
   if (!lesson) {
@@ -100,6 +117,35 @@ export default function LessonScreen() {
     setPlaying(false);
     setFailed(true);
   };
+  const toggleSave = () => {
+    tick(); // a light tick in the hand
+    usePractice.getState().toggleSave(lesson.slug);
+  };
+  const saveLabel = saved ? strings.lesson.unsave : strings.lesson.save;
+
+  // Done before: a quiet line above the bar, and "Done again".
+  const last = lastDone(entries, lesson.slug);
+  const markLabel = last ? strings.lesson.doneAgain : strings.lesson.markDone;
+  const footer = (
+    <>
+      {last ? (
+        <View style={styles.doneLine}>
+          <Check size={size.icon.xs} strokeWidth={size.tickStroke} color={color.support.sage} />
+          <Text variant="meta" color="text.muted">
+            {doneLine(last, dayOf(new Date()))}
+          </Text>
+        </View>
+      ) : null}
+      {playable && !playing ? (
+        <>
+          <Button label={strings.lesson.begin} icon={Play} iconFilled onPress={play} />
+          <Button kind="quiet" label={markLabel} onPress={finish} />
+        </>
+      ) : (
+        <Button kind="ghost" label={markLabel} onPress={finish} />
+      )}
+    </>
+  );
 
   return (
     <Screen
@@ -107,11 +153,7 @@ export default function LessonScreen() {
       scrollRef={scroll}
       // The top of the page is dark: the cover (down to where it melts away), or the video's stage.
       darkTop={playable && playing ? stageHeight : size.cover.lesson * (1 - size.fadeHeight / 2)}
-      footer={
-        playable && !playing ? (
-          <Button label={strings.lesson.begin} icon={Play} iconFilled onPress={play} />
-        ) : undefined
-      }
+      footer={footer}
     >
       {playable && playing ? (
         // The video, 16:9, on the darkest ground, with the back button above it.
@@ -120,14 +162,18 @@ export default function LessonScreen() {
             style={[stageStyles.stage, { paddingTop: insets.top + space.sm }]}
             onLayout={(e) => setStageHeight(e.nativeEvent.layout.height)}
           >
-            <IconButton icon={ChevronLeft} accessibilityLabel={strings.common.back} onPress={back} style={styles.stageBack} />
-            <VideoPlayer video={video} seek={seek} onError={onVideoError} />
+            <View style={styles.stageTop}>
+              <IconButton icon={ChevronLeft} accessibilityLabel={strings.common.back} onPress={back} />
+              <IconButton icon={Bookmark} active={saved} accessibilityLabel={saveLabel} onPress={toggleSave} />
+            </View>
+            <VideoPlayer video={video} seek={seek} onError={onVideoError} onEnd={finish} />
           </View>
         </ThemeScope>
       ) : (
         <Cover aura={lesson.aura} image={lesson.cover} height={size.cover.lesson} radius="none" fade>
           <View style={[styles.coverTop, { top: insets.top + space.md }]}>
             <IconButton icon={ChevronLeft} kind="glass" accessibilityLabel={strings.common.back} onPress={back} />
+            <IconButton icon={Bookmark} kind="glass" active={saved} accessibilityLabel={saveLabel} onPress={toggleSave} />
           </View>
           {playable ? (
             <View style={styles.coverCentre} pointerEvents="box-none">
@@ -239,8 +285,23 @@ const useStageStyles = makeStyles((color) =>
 );
 
 const styles = StyleSheet.create({
-  stageBack: { marginLeft: layout.gutter, alignSelf: 'flex-start' },
-  coverTop: { position: 'absolute', left: layout.gutter, right: layout.gutter, flexDirection: 'row' },
+  stageTop: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: layout.gutter },
+  coverTop: {
+    position: 'absolute',
+    left: layout.gutter,
+    right: layout.gutter,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  // Lower than the top of the bar's fade, so the words behind it never show through the line.
+  doneLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.xxs,
+    marginTop: space.md,
+    marginBottom: space.xs,
+  },
   coverCentre: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
   sections: { paddingHorizontal: layout.gutter, gap: space.xxl },
   // The title climbs onto the lower, faded part of the cover.

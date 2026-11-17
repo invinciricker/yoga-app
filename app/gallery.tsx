@@ -2,6 +2,8 @@
  * Design gallery: every part of src/ui on one page, to check the look.
  * Reached from You in the preview app only. The control at the top draws the whole page in the
  * app's theme (System) or forces Light or Dark, without changing the app's setting.
+ * "Show sample progress" fills the person's candles, a series, a saved lesson and an answer in
+ * memory only (src/practice/demo.ts), to look at Today, Practice and You with progress in them.
  */
 import { useRouter } from 'expo-router';
 import { ArrowRight, Bookmark, ChevronDown, ChevronLeft, Feather, House, MapPin, Moon, Play, Wind } from 'lucide-react-native';
@@ -9,16 +11,22 @@ import { useState, type ReactNode } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { useContent } from '@/content/store';
+import { useWeek } from '@/day/hooks';
+import { addDays, week } from '@/day/record';
+import { useDays } from '@/day/store';
+import { setSampleProgress } from '@/practice/demo';
 import { strings } from '@/strings';
 import { areas, auraNames, layout, radius, space, type, type Area, type Palette, type Scheme } from '@/theme';
 import { makeStyles, ThemeScope, useTheme } from '@/theme/ThemeProvider';
 import {
+  AnswerChoice,
   AreaCard,
   Arrive,
   Button,
   Card,
   Chip,
   Cover,
+  DoneTick,
   DraftChip,
   EmptyState,
   IconButton,
@@ -39,6 +47,7 @@ import {
   Skeleton,
   TabBar,
   Text,
+  WeekCard,
   type TabItem,
 } from '@/ui';
 
@@ -111,6 +120,13 @@ function GalleryPage({ choice, onChoose }: { choice: Choice; onChoose: (c: Choic
   const note = content.journal.find((entry) => entry.kind === 'note');
   const [tab, setTab] = useState('home');
   const noop = () => {};
+  const sample = useDays((s) => s.sample);
+  const weekCard = useWeek();
+  const [answer, setAnswer] = useState<'gentle' | 'right' | 'much'>('right');
+  const [feeling, setFeeling] = useState<string | undefined>('calmer');
+  // A week with nothing done yet, for the card's other states (today is Wednesday 18 Nov 2026).
+  const emptyWeek = week([], '2026-11-18');
+  const goneOut = week([{ day: addDays('2026-11-18', -3), kind: 'move', ref: 'x', minutes: 1, at: '' }], '2026-11-18');
 
   return (
     <Screen contentStyle={styles.sections}>
@@ -127,6 +143,12 @@ function GalleryPage({ choice, onChoose }: { choice: Choice; onChoose: (c: Choic
             <Chip key={c.key} label={c.label} selected={choice === c.key} onPress={() => onChoose(c.key)} />
           ))}
         </View>
+      </Block>
+
+      <Block label={g.sample}>
+        <ListCard>
+          <SettingsRow label={g.sampleSwitch} line={g.sampleLine} value={sample} onValueChange={setSampleProgress} />
+        </ListCard>
       </Block>
 
       <Block label={g.type}>
@@ -238,6 +260,46 @@ function GalleryPage({ choice, onChoose }: { choice: Choice; onChoose: (c: Choic
         ))}
       </Block>
 
+      <Block label={g.weekCard}>
+        <WeekCard days={weekCard.days} streak={weekCard.streak} ever={weekCard.ever} />
+        <WeekCard days={goneOut} streak={0} ever />
+        <WeekCard days={emptyWeek} streak={0} ever={false} />
+      </Block>
+
+      <Block label={g.choices}>
+        {(['gentle', 'right', 'much'] as const).map((d) => (
+          <AnswerChoice
+            key={d}
+            title={strings.done.difficulty[d].title}
+            line={strings.done.difficulty[d].line}
+            selected={answer === d}
+            onPress={() => setAnswer(d)}
+          />
+        ))}
+        <View style={styles.row}>
+          {(['calmer', 'energised', 'stronger', 'tired'] as const).map((f) => (
+            <Chip
+              key={f}
+              look="soft"
+              label={strings.done.feelings[f]}
+              selected={feeling === f}
+              onPress={() => setFeeling(feeling === f ? undefined : f)}
+            />
+          ))}
+        </View>
+        <Button kind="danger" label={strings.deleteData.delete} onPress={noop} />
+      </Block>
+
+      <Block label={g.marks}>
+        <View style={styles.row}>
+          <DoneTick />
+          <IconButton icon={Bookmark} accessibilityLabel={strings.lesson.unsave} active onPress={noop} />
+          <Cover aura="dusk" width={size.thumb * 2} height={size.thumb} radius="md" style={styles.glassDemo}>
+            <IconButton kind="glass" icon={Bookmark} accessibilityLabel={strings.lesson.unsave} active onPress={noop} />
+          </Cover>
+        </View>
+      </Block>
+
       <Block label={g.sectionHeader}>
         <SectionHeader title={g.sectionTitle} actionLabel={strings.common.seeAll} onAction={noop} />
       </Block>
@@ -294,6 +356,12 @@ function GalleryPage({ choice, onChoose }: { choice: Choice; onChoose: (c: Choic
         <Block label={g.seriesParts}>
           <SeriesCard series={series} large onPress={noop} />
           <SeriesCard series={series} onPress={noop} />
+        </Block>
+      ) : null}
+      {series ? (
+        <Block label={g.progress}>
+          <SeriesCard series={series} large progress={{ done: 2, total: 7 }} onPress={noop} />
+          <SeriesCard series={series} progress={{ done: 7, total: 7 }} onPress={noop} />
         </Block>
       ) : null}
       {tip || note ? (
