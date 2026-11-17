@@ -1,0 +1,33 @@
+/*
+ * The website's fonts: the same files the app bundles (Cormorant Garamond and Figtree, SIL Open
+ * Font License 1.1), copied into fonts/ by "npm run build:site". Served from this site, so reading
+ * the website asks no other site for anything (no Google Fonts).
+ */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/CormorantGaramond_500Medium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/CormorantGaramond_500Medium_Italic.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/Figtree_400Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/Figtree_600SemiBold.ttf') format('truetype');
+}

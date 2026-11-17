@@ -16,6 +16,7 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import type { Image as ContentImage } from '../../shared/content-schema';
 
 import { pickVariant, pictureUrl } from '@/content/pictures';
+import { useReduceMotion } from '@/lib/motion';
 import { motion, radius as radii, splitAlpha, type AuraName } from '@/theme';
 import { makeStyles, useTheme } from '@/theme/ThemeProvider';
 
@@ -58,6 +59,7 @@ export function Cover({
 }: CoverProps) {
   const { color } = useTheme();
   const styles = useStyles();
+  const reduce = useReduceMotion();
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
   // The width on screen, known after the first layout. Until then only the blurred preview shows.
   const [shownWidth, setShownWidth] = useState(0);
@@ -81,7 +83,8 @@ export function Cover({
           contentFit="cover"
           contentPosition={imagePosition}
           cachePolicy="disk"
-          transition={motion.duration.base}
+          // The photo fades in over its blurred preview; shorter with "reduce motion".
+          transition={reduce ? motion.duration.quick : motion.duration.base}
           style={StyleSheet.absoluteFill}
           accessible={image.alt !== ''}
           accessibilityLabel={image.alt}

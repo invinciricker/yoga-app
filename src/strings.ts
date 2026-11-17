@@ -117,9 +117,55 @@ export const strings = {
     noMatch: 'Nothing of that kind yet.',
     empty: 'Maria’s tips and notes will be kept here, a few lines at a time.',
   },
-  // Maria's page, behind the billboard. Its real content arrives in Phase 3.
+  // Maria's page, behind the billboard (docs/phases/phase-3.md). Every block hides when its content is missing.
   maria: {
-    empty: 'Soon, a little about Maria and where to practise with her in person.',
+    yourTeacher: 'Your teacher',
+    whyYoga: 'Why yoga',
+    classesWith: (teacher: string) => `Classes with ${teacher}`,
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    next: 'Next',
+    // "18:30 – 19:45" and "All levels · 75 min".
+    timeRange: (start: string, end: string) => `${start} – ${end}`,
+    joined: (parts: string[]) => parts.join(' · '),
+    openInMaps: 'Open in Maps',
+    message: (teacher: string) => `Message ${teacher}`,
+    call: 'Call',
+    instagram: 'Instagram',
+    email: 'Email',
+    website: 'Website',
+    // When a link has nothing on this phone to open it: one calm line, then the address itself.
+    notOpened: 'That did not open here.',
+  },
+  // The welcome: three screens, the very first time the app opens (docs/phases/phase-3.md).
+  welcome: {
+    next: 'Next',
+    begin: 'Begin',
+    skip: 'Skip',
+    skipHint: 'Goes straight to Home',
+    place: (n: number, total: number) => `Screen ${n} of ${total}`,
+    first: {
+      overline: 'Welcome',
+      sentence: 'A quiet place to practise, a few minutes at a time.',
+    },
+    // The second screen until Breathe, Meditate and Journal are all built…
+    lessons: {
+      overline: (teacher: string) => `With ${teacher}`,
+      title: 'Short lessons, any time',
+      sentence: (teacher: string) => `Videos, tips and notes from ${teacher}, new ones as she makes them. Free.`,
+    },
+    // …and once they are.
+    everyDay: {
+      overline: 'Every day',
+      title: 'Move, breathe, sit, write',
+      sentence: (teacher: string) =>
+        `${teacher}’s lessons, a few slow breaths, a quiet sitting, a page of your own. One small practice a day.`,
+    },
+    yours: {
+      overline: 'Yours',
+      title: 'Nothing to sign up for',
+      sentence: 'Open the app and begin. What you do here stays on your phone.',
+    },
   },
   // You: the person's own page (settings now; more in later phases).
   me: {
@@ -128,7 +174,38 @@ export const strings = {
     system: 'System',
     light: 'Light',
     dark: 'Dark',
+    reduceMotion: 'Reduce motion',
+    reduceMotionLine: 'Fewer moving parts. Your phone’s own setting is always followed too.',
+    about: 'About',
+    privacy: 'Privacy',
     galleryLink: 'Design gallery',
+  },
+  // You → About.
+  about: {
+    sentence: (teacher: string) => `Made for ${teacher}’s students, and for anyone who wants to begin.`,
+    careTitle: 'Look after yourself',
+    care:
+      'Everything here is general guidance, not medical advice. If you are pregnant, injured, unwell, or unsure whether a practice is right for you, ask a doctor first. Stop if something hurts or makes you feel worse.',
+    // Which copy of the app this is (src/lib/version.ts).
+    version: (version: string) => `Version ${version}`,
+    update: (day: string, time: string) => `Update of ${day}, ${time}`,
+    embedded: 'The code that came with this build',
+    fingerprint: (short: string) => `Fingerprint ${short}`,
+    web: 'Web preview',
+    welcomeAgain: 'Show the welcome again',
+    licences: 'Open-source licences',
+  },
+  // You → Privacy. The text itself is docs/legal/privacy-policy.md (src/legal/privacy.json).
+  privacy: {
+    // A placeholder of the policy whose value is not in content/site.yaml yet.
+    notSet: '(not set yet)',
+  },
+  // You → About → Open-source licences.
+  licences: {
+    title: 'Open-source licences',
+    sentence: 'The app is built with these free libraries and typefaces. Thank you to the people who make them.',
+    libraries: 'Libraries',
+    fonts: 'Typefaces',
   },
   // The design gallery is a checking tool for the owner, shown in the preview app only.
   gallery: {
@@ -153,6 +230,10 @@ export const strings = {
     cardTitle: 'A note from Maria',
     cardBody: 'Cards sit one step above the page, with a hairline around them.',
     sectionHeader: 'Section header',
+    settingsRows: 'Settings rows (a ListCard)',
+    switchRow: 'Reduce motion',
+    switchLine: 'A row with a switch: the whole row is the touch target.',
+    linkRow: 'About',
     sectionTitle: 'New from Maria',
     aurasHero: 'Auras, hero size',
     aurasThumb: 'Auras, thumbnail size',

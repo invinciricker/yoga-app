@@ -6,7 +6,7 @@ Written by Claude chat, 16 Nov 2026. This page is the reference. To add somethin
 
 ```
 content/
-  site.yaml                       the app's name, Maria's first name, the contact email
+  site.yaml                       the app's name, Maria's first name, the contact email, the publisher
   studio/studio.md                Maria's page: who she is, why yoga, class times, place, contact
   series/<slug>/series.md         a series (a set of lessons in order)
   lessons/<slug>/lesson.md        a lesson
@@ -122,6 +122,18 @@ contact:                            # each button appears only if its line is fi
 
 Maria's introduction, in her own words.
 ```
+
+## The app's own words: `content/site.yaml`
+
+```yaml
+appName: Yoga with Maria        # 30 characters at most
+teacherFirstName: Maria         # 20 at most: "New from Maria", "Message Maria"…
+# --- optional, but both are needed before the store release (the release build refuses without them) ---
+contactEmail: someone@example.com   # on the privacy page: where people write about their data
+publisher: Maria Surname        # 60 at most: the name Google Play shows as the developer, also on the privacy page
+```
+
+The privacy page (in the app and at `privacy.html` on the website) fills `{contactEmail}` and `{publisher}` from here; a line that is not there yet shows as "(not set yet)".
 
 ## Markdown that works in the text
 

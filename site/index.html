@@ -6,9 +6,8 @@
   <title>Yoga with Maria</title>
   <meta name="description" content="Yoga lessons from Maria. Coming soon to Google Play.">
   <meta name="theme-color" content="#0C1311">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+  <!-- The fonts are served from this site (fonts.css), never from Google: see privacy.html. -->
+  <link rel="stylesheet" href="fonts.css">
   <!-- The colours are the app's tokens (src/theme/tokens.ts). -->
   <style>
     html, body { height: 100%; margin: 0; }
@@ -38,6 +37,8 @@
       border: 1px solid #34443C; color: #F3ECDD; font-weight: 600; font-size: 15px; text-decoration: none;
     }
     a.button:hover, a.button:focus-visible { border-color: #E3B45E; }
+    nav.small { margin-top: 24px; font-size: 15px; }
+    nav.small a { display: inline-flex; align-items: center; min-height: 48px; color: #C3BDAE; }
   </style>
 </head>
 <body>
@@ -47,6 +48,9 @@
     <h1>Yoga with Maria</h1>
     <p>Yoga lessons from Maria. Coming soon to Google Play.</p>
     <a class="button" href="app/">Open the web preview</a>
+    <nav class="small" aria-label="More">
+      <a href="privacy.html">Privacy</a>
+    </nav>
   </main>
 </body>
 </html>

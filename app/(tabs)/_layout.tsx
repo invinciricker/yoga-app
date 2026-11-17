@@ -4,13 +4,20 @@
  *
  * Breathe, Meditate and Journal are opened by their own phases (`areas` in src/config.ts). Until
  * then the public app hides their tabs and the preview app shows a placeholder in them.
+ *
+ * The very first time the app opens (the welcome not yet seen), the tabs give their place to the
+ * welcome before anything is drawn. The answer is read once, when the tabs first appear: "Show the
+ * welcome again" in About opens the welcome on top instead.
  */
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
+import { useState } from 'react';
 import type { BottomTabBarProps } from 'expo-router/tabs';
 import { Feather, House, Moon, Play, Wind, type LucideIcon } from 'lucide-react-native';
 
 import { areas, type BuildingArea } from '@/config';
 import { tick } from '@/lib/haptics';
+import { routes } from '@/lib/nav';
+import { usePrefs } from '@/lib/prefs';
 import { isPreview } from '@/lib/variant';
 import { strings } from '@/strings';
 import type { Area } from '@/theme';
@@ -59,6 +66,8 @@ function FloatingTabBar({ state, descriptors, emitter, navigateToTab }: BottomTa
 
 export default function TabsLayout() {
   const { color } = useTheme();
+  const [needsWelcome] = useState(() => !usePrefs.getState().welcomeSeen);
+  if (needsWelcome) return <Redirect href={routes.welcome} />;
   return (
     <Tabs
       tabBar={(props) => <FloatingTabBar {...props} />}

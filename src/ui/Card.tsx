@@ -11,14 +11,14 @@ import { size } from './sizes';
 
 export type CardProps = {
   children: ReactNode;
-  /** Inner padding: 20 (default) or 24. */
-  padding?: 'lg' | 'xl';
+  /** Inner padding: 20 (default) or 24; "none" for a card of rows that pad themselves. */
+  padding?: 'none' | 'lg' | 'xl';
   style?: StyleProp<ViewStyle>;
 };
 
 export function Card({ children, padding = 'lg', style }: CardProps) {
   const styles = useStyles();
-  return <View style={[styles.card, { padding: space[padding] }, style]}>{children}</View>;
+  return <View style={[styles.card, padding !== 'none' && { padding: space[padding] }, style]}>{children}</View>;
 }
 
 const useStyles = makeStyles((color) =>

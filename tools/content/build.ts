@@ -4,7 +4,8 @@
  *   npm run content:build              → dist-site/content/v1/content.json   (published items)
  *                                        dist-site/content/v1/preview.json   (drafts included)
  *                                        dist-site/content/v1/media/*.webp   (the pictures)
- *   npm run content:build -- --release   also refuses to finish while a "sample: true" remains
+ *   npm run content:build -- --release   also refuses to finish while a "sample: true" remains, or while
+ *                                        site.yaml lacks contactEmail or publisher (the privacy page names them)
  *
  * It follows docs/CONTENT.md, "What the app receives", step by step (the numbers below).
  * The same input always gives byte-identical output, except the "generatedAt" time.
@@ -199,16 +200,27 @@ export async function buildContent(options: BuildOptions): Promise<BuildResult> 
   await writeFile(path.join(outDir, 'content.json'), contentText);
   await writeFile(path.join(outDir, 'preview.json'), JSON.stringify(preview) + '\n');
 
-  // Step 7: what the summary lists.
+  // Step 7: what the summary lists. A store release also needs what the privacy page names.
   const { drafts, samples } = listDraftsAndSamples(loaded);
-  if (release && samples.length > 0) {
-    return {
-      ok: false,
-      problems: samples.map((file) => ({
-        file,
-        message: 'This is still sample text ("sample: true"): replace it with the real words and remove that line, or delete it, before the store release.',
-      })),
-    };
+  if (release) {
+    const problems: Problem[] = samples.map((file) => ({
+      file,
+      message: 'This is still sample text ("sample: true"): replace it with the real words and remove that line, or delete it, before the store release.',
+    }));
+    const siteShown = `${shownRoot}/site.yaml`;
+    if (!loaded.site.contactEmail) {
+      problems.push({
+        file: siteShown,
+        message: '"contactEmail" is missing: the privacy page needs the address where people can write about their data. Add a line like "contactEmail: someone@example.com".',
+      });
+    }
+    if (!loaded.site.publisher) {
+      problems.push({
+        file: siteShown,
+        message: '"publisher" is missing: the privacy page needs the name Google Play shows as the developer. Add a line like "publisher: Maria Surname".',
+      });
+    }
+    if (problems.length > 0) return { ok: false, problems };
   }
 
   // Step 8: time to ask the architect about splitting the file.

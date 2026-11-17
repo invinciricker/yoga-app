@@ -2,18 +2,18 @@
 
 Kept by Claude Code, updated each phase. Short on purpose. The decisions and their reasons are in `docs/ARCHITECTURE.md`.
 
-## Versions (Phase 0, 16 Nov 2026; libraries of Phase 1 added 17 Nov 2026)
+## Versions (Phase 0, 16 Nov 2026; libraries of Phase 1 added 17 Nov 2026; Expo patches of Phase 3, 17 Nov 2026)
 
 | What | Version |
 |---|---|
-| Expo SDK | 58 (`expo` ~58.0.25) |
+| Expo SDK | 58 (`expo` ~58.0.26) |
 | React Native | 0.88.1 |
 | React | 19.3.0 |
-| Expo Router | ~58.0.31 |
+| Expo Router | ~58.0.32 |
 | Reanimated | 4.7.1 (with `react-native-worklets` 0.13.0) |
 | TypeScript | ~6.0.3, strict |
 | Node | 22 (22.23 here; the workflows use 22) |
-| Jest | 30, preset `jest-expo` |
+| Jest | 30, preset `jest-expo` ~58.0.15 |
 | Video (Phase 1) | `react-native-youtube-iframe` ^2.4.1 on `react-native-webview` 14.0.1, `expo-keep-awake` ~58.0.4 |
 | Content build (Phase 1, dev only) | `tsx`, `gray-matter`, `js-yaml` 5, `unified` 11 + `remark-parse` 11, `sharp`, `blurhash`, `zod` 4 |
 
@@ -25,28 +25,30 @@ Exact versions of everything: `package.json` and `package-lock.json`. Install ne
 |---|---|
 | `npm run check` | types + lint + tests + content check + database rules. Must be green before a pull request. |
 | `npm run content:check` | reads and checks everything in `content/` (fast, writes nothing). One sentence per problem: file, line if known, what to do. |
-| `npm run content:build` | `dist-site/content/v1/`: `content.json`, `preview.json`, `media/*.webp`. Add `-- --release` to fail while a `sample: true` remains. |
+| `npm run content:build` | `dist-site/content/v1/`: `content.json`, `preview.json`, `media/*.webp`. Add `-- --release` to fail while a `sample: true` remains, or while `site.yaml` lacks `contactEmail` or `publisher` (the privacy page names them). |
 | `npm run content:fallback` | the content build, then a copy of `content.json` to `assets/content-fallback.json` (ignored by git, bundled in the app). Run it before `build:web` if you want content in the pictures. |
 | `npm run content:image -- <file>` | shrinks a photo in place: 2400 on the long side, JPEG quality 85, metadata removed |
 | `npm run build:web` | the web export, into `dist/` |
-| `npm run build:site` | `dist-site/`: `site/` at the root, the web export under `app/`, `.nojekyll`. Keeps `dist-site/content/` and refuses to run without it. |
-| `npm run shots -- 2 --both / /:today /practice /gallery:full` | pictures of screens into `docs/screens/phase-2/` (needs `build:web` first and `CHROME_PATH`). `/` is saved as `home.jpg`. `--both` takes each route in dark and light (`-dark.jpg`, `-light.jpg`, through `?scheme=`); `:light`/`:dark` do one; `:full` captures the whole scrolling page; `:today` captures the whole of Today under Home's billboard; `:offline` cuts the content download. Each picture opens in a fresh browser profile. The content address is answered from `dist-site/content/v1/` on this machine. |
+| `npm run build:site` | `dist-site/` (`tools/site/build.ts`): `site/` at the root, `privacy.html` made from `src/legal/privacy.json` with the names of the built `content.json`, the app's own font files in `fonts/`, the web export under `app/`, `.nojekyll`. Keeps `dist-site/content/` and refuses to run without it. |
+| `npm run legal` | remakes `src/legal/privacy.json` (from `docs/legal/privacy-policy.md`) and `src/legal/licences.json` (from `dependencies` and the installed packages). Run it after changing either; the tests fail until you do. |
+| `npm run shots -- 2 --both / /:today /practice /gallery:full` | pictures of screens into `docs/screens/phase-2/` (needs `build:web` first and `CHROME_PATH`). `/` is saved as `home.jpg`. `--both` takes each route in dark and light (`-dark.jpg`, `-light.jpg`, through `?scheme=`); `:light`/`:dark` do one; `:full` captures the whole scrolling page; `:today` captures the whole of Today under Home's billboard; `:offline` cuts the content download; `:next1`/`:next2` press "Next" first (the welcome's screens 2 and 3); `:first` is a first launch (otherwise the welcome counts as seen, so `/` is Home); `:big` is 360 × 640 with everything 1.3 times larger (the web cannot grow only the text). Each picture opens in a fresh browser profile. The content address is answered from `dist-site/content/v1/` on this machine: build it with `-- --content <folder>` to picture other content without touching `content/`. |
 | `node tools/assets/make-icons.mjs` | remakes the temporary icon and splash (gold disc) in `assets/images/` |
 | `npx expo-doctor` | Expo's own health check of the project |
 
 ## Where things are
 
-- `app.config.ts`: the two variants (`APP_VARIANT`), the package name (one constant), the Expo owner and project ID, splash, icon, updates. **Any change here needs a new build.**
+- `app.config.ts`: the two variants (`APP_VARIANT`), the package name (one constant), the Expo owner and project ID, splash, icon, updates (on in the preview app only). **Any change here needs a new build.**
 - `app/`: screens. `app/_layout.tsx` loads the six fonts and holds the splash until they are ready.
 - `src/theme/`: `tokens.ts` (protected: `palette.dark`, `palette.light`, `onCover`, ten auras), `index.ts` (re-exports, `areas`, `inkColors(palette)`, `splitAlpha`, `withAlpha`; no React Native), `scheme.ts` (which scheme to draw, pure), `ThemeProvider.tsx` (`ThemeProvider`, `ThemeScope`, `useTheme`, `makeStyles`, the `?scheme=` override), `statusBar.tsx` (`ThemedStatusBar`, `useDarkTop`), `auraForSlug.ts` (FNV-1a hash over the first five auras; no React Native import, so `tools/` can use it), `fonts.ts`. Tests: `contrast.test.ts`, `noColorImport.test.ts`, `scheme.test.ts`, `auraForSlug.test.ts`.
-- `app/`: `(tabs)/` holds Home (`index`), `practice`, `breathe`, `meditate`, `journal` (the last three are placeholders until their phases). Pages: `lesson/[slug]`, `series/[slug]`, `notes/index`, `notes/[slug]` (Maria's tips and notes; the content key stays `journal`), `maria`, `me/index` (You), `gallery`. The `[slug]` pages export `generateStaticParams`, used only by the web export.
-- `src/ui/`: the parts. `sizes.ts` holds the fixed measures of the parts themselves (button heights, icon sizes), so no part and no screen carries a loose number. Phase 1 added the four content cards (`LessonCard`, `LessonRow`, `SeriesCard`, `JournalCard`), the states (`EmptyState`, `OfflineNote`, `Skeleton`, `NotHere`, `LoadingPage`, `DraftChip`), `RichText`, `SearchField`, `PlayButton`, `Fact`, `FlowStep`, and `VideoPlayer` (phone) with its twin `VideoPlayer.web.tsx`. `QuietPlace` now only serves the Studio tab, until Phase 2.
+- `app/`: `(tabs)/` holds Home (`index`), `practice`, `breathe`, `meditate`, `journal` (the last three are placeholders until their phases). Pages: `lesson/[slug]`, `series/[slug]`, `notes/index`, `notes/[slug]` (Maria's tips and notes; the content key stays `journal`), `maria`, `welcome`, `me/index` (You), `me/about`, `me/privacy`, `me/licences`, `gallery`. The `[slug]` pages export `generateStaticParams`, used only by the web export.
+- `src/ui/`: the parts. `sizes.ts` holds the fixed measures of the parts themselves (button heights, icon sizes), so no part and no screen carries a loose number. Phase 1 added the four content cards (`LessonCard`, `LessonRow`, `SeriesCard`, `JournalCard`), the states (`EmptyState`, `OfflineNote`, `Skeleton`, `NotHere`, `LoadingPage`, `DraftChip`), `RichText`, `SearchField`, `PlayButton`, `Fact`, `FlowStep`, and `VideoPlayer` (phone) with its twin `VideoPlayer.web.tsx`. Phase 3 added `ListCard` (rows in one card, hairlines between them), `SettingsRow` (switch or chevron; Phases 4 and 10 add rows with it) and `icons.ts` (`Instagram`, drawn with Lucide's own `createLucideIcon`: Lucide 1.x ships no brand logos). `Button` quiet and link take `onCover`.
 - `src/config.ts`: the content address (`CONTENT_BASE`, permanent once in the store), the file by variant, the 6-second limit, and `areas` (which of Breathe, Meditate, Journal are built; a `false` tab is hidden in production and a placeholder in preview).
 - `src/content/`: `fallback.ts` (the bundled copy), `load.ts` (saved copy, download, check), `store.ts` (zustand: `status`, `content`, `refresh`), `selectors.ts`, `labels.ts`, `pictures.ts`. All pure except the store; tests next to them.
-- `src/lib/`: `billboard.ts` (`nextClass`, `longDate`, `showBillboard`; pure, tested), `prefs.ts` (zustand: the appearance setting and the billboard's day, read before the splash goes), `greeting.ts` (pure, tested), `variant.ts`, `haptics.ts`, `motion.ts` (the single place that answers "reduce motion?"), `storage.ts` (the one wrapper around AsyncStorage; keys start with `ywm:`), `nav.ts` (the addresses of the pages, and a back that always leads somewhere).
+- `src/lib/`: `billboard.ts` (`nextClass`, `longDate`, `showBillboard`; pure, tested), `studio.ts` (Maria's page: `classDays`, `classTime`, `classDetails`, `classLength`, `contactActions`, `mapsLink`; pure, tested), `welcome.ts` (`welcomeSlides`: the words of the welcome, never naming a room that is not built; tested), `version.ts` (`versionLines` for About; tested) with `buildInfo.ts` and its web twin, `links.ts` (`openLink`: false when nothing can open the link; web twin), `prefs.ts` (zustand: appearance, reduce motion, welcome seen, the billboard's day, all read before the splash goes), `greeting.ts` (pure, tested), `variant.ts`, `haptics.ts`, `motion.ts` (the single place that answers "reduce motion?"), `storage.ts` (the one wrapper around AsyncStorage; keys start with `ywm:`), `nav.ts` (the addresses of the pages, and a back that always leads somewhere).
 - `src/strings.ts`: every word on screen.
+- `src/legal/`: `privacy.json` and `licences.json` (made by `npm run legal`, kept in git, never edited by hand), `fill.ts` (`placeholderValues`, `fillPlaceholders`: `{appName}`, `{teacher}`, `{contactEmail}`, `{publisher}` from the content, "(not set yet)" when missing; tested), `index.ts`.
 - `tools/content/`: `read.ts` (steps 1 and 2 of the specification: read, check, Markdown to blocks), `markdown.ts`, `pictures.ts`, `problems.ts` (zod issues turned into plain sentences), `build.ts`, `check.ts`, `fallback.ts`, `image.ts`. Fixtures in `__fixtures__/valid/` (remake its two pictures with `node tools/content/__fixtures__/make-pictures.mjs`).
-- `tools/`: `site/build.mjs`, `shots.mjs`, `assets/make-icons.mjs`.
+- `tools/`: `legal/build.ts` (with its freshness tests), `site/build.ts` (with tests: privacy.html is filled; no page of the site loads anything from another site), `shots.mjs`, `assets/make-icons.mjs`.
 - `.github/workflows/`: `checks`, `pages`, `preview-update`, `android-build`. Each starts with a plain-words comment.
 
 ## Things worth knowing
@@ -87,3 +89,15 @@ Exact versions of everything: `package.json` and `package-lock.json`. Install ne
 - **Tab press**: the custom tab bar emits `tabPress`; a screen listens with `navigation.addListener('tabPress')` and checks `navigation.isFocused()` (the event also arrives when coming from another tab).
 - **The shots tool and window-sized parts**: for `:full` and `:today` it stops react-native-web from hearing `resize`, so the billboard keeps its phone height while the window grows.
 - **`expo-doctor`, 17 Nov 2026 evening**: 19/20, only because Expo published patch releases since Phase 1 (`expo` 58.0.26, `expo-router` 58.0.32, `jest-expo` 58.0.15). Not upgraded in Phase 2 (no library changes); `npx expo install --fix` does it, and changes the build's fingerprint.
+
+## Things worth knowing (Phase 3)
+
+- **The welcome** is reached through `app/(tabs)/_layout.tsx`: when `welcomeSeen` is false at the moment the tabs first appear, it renders `<Redirect href="/welcome">` (a `replace`), so Home never draws first and the welcome is alone in the stack (back leaves the app). The answer is read once (`useState`), so "Show the welcome again" in About pushes the welcome on top instead, without unmounting the tabs. "Begin"/"Skip" write `ywm:welcome:v1`, forget the billboard's day in memory (Home listens and goes back to its top), then `replace('/')` on a first launch or `dismissAll()` + `navigate('/')` from About. A deep link (`/maria` in the web preview) does not go through the tabs, so it opens directly.
+- **The welcome's pager** is a horizontal `ScrollView` with `pagingEnabled`; the current screen comes from `onScroll` (react-native-web has no `onMomentumScrollEnd`). With reduce motion there is no pager: one screen at a time, a 120 ms fade, and a swipe read from `onTouchStart`/`onTouchEnd` (a `PanResponder` built during render trips the React Compiler lint).
+- **Reduce motion** = the phone's setting OR `ywm:reduce-motion:v1` (`useReduceMotion()`, `src/lib/motion.ts`). Everything that moves asks it: `Arrive`, `PressableScale`, `Candlelight`, the billboard's parallax and fade, Home's and the lesson's scrolls, the welcome, the photo fade-in of `Cover` (120 ms), and the stack's screen transitions (`animation: 'fade'`).
+- **Updates**: `updates.enabled` is `false` in the production variant (Expo's app config: the build then only runs its bundled code). About reads `expo-updates` (`isEmbeddedLaunch`, `createdAt`, `runtimeVersion`) on the phone; `buildInfo.web.ts` never imports it.
+- **Links that cannot open**: `Linking.openURL` rejects on Android when no app takes the link (`tel:` on a tablet). On the web, a `https:` link opens a new tab and anything else counts as "did not open". Maria's page then shows "That did not open here." and the address, selectable. `canOpenURL` is not used: on Android 11 and later it needs every scheme declared in the manifest.
+- **`npm run build:site` is TypeScript now** (`tsx`), so it reuses `src/legal/fill.ts`. `tsx` follows the `@/` paths of `tsconfig.json`.
+- **The site's fonts**: `site/fonts.css` points at `fonts/*.ttf`, which `build:site` copies from `@expo-google-fonts/*` (the app's own files).
+- **`eslint-config-expo`** moved to `devDependencies` (it never shipped in the app); `licences.json` is made from `dependencies` only, direct libraries (not the libraries they use in turn).
+- **Scripts changed** (`legal`, `build:site`): with `app.config.ts`, this phase changes the build's fingerprint. `expo-doctor`: 20/20 after `npx expo install --fix` (17 Nov 2026).

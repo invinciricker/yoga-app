@@ -18,6 +18,7 @@ import { focusLine, levelLabel, secondsOf } from '@/content/labels';
 import { slugsForStaticPages } from '@/content/load';
 import { findLesson, placeInSeries } from '@/content/selectors';
 import { useContent } from '@/content/store';
+import { useReduceMotion } from '@/lib/motion';
 import { routes, useBack } from '@/lib/nav';
 import { strings } from '@/strings';
 import { layout, space } from '@/theme';
@@ -62,6 +63,7 @@ export default function LessonScreen() {
   const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
   const stageStyles = useStageStyles();
   const [stageHeight, setStageHeight] = useState(0);
+  const reduce = useReduceMotion();
 
   const [playing, setPlaying] = useState(false); // the video has taken the place of the cover
   const [failed, setFailed] = useState(false); // the video would not play
@@ -88,7 +90,7 @@ export default function LessonScreen() {
   const play = () => {
     setFailed(false);
     setPlaying(true);
-    scroll.current?.scrollTo({ y: 0, animated: true });
+    scroll.current?.scrollTo({ y: 0, animated: !reduce });
   };
   const jumpTo = (seconds: number) => {
     setSeek((last) => ({ seconds, count: (last?.count ?? 0) + 1 }));

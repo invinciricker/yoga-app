@@ -186,6 +186,8 @@ export const siteSource = z.object({
   teacherFirstName: z.string().min(1).max(20),
   /** Shown on the privacy page: where people write to ask about their data. */
   contactEmail: z.string().email().optional(),
+  /** Added 17 Nov 2026 (Phase 3). Shown on the privacy page: the name Google Play shows as the developer. */
+  publisher: z.string().min(1).max(60).optional(),
 }).strict();
 
 // ------------------------------------------------------------------ what the app downloads (content.json)
@@ -285,7 +287,13 @@ export const studio = z.object({
 export const contentFile = z.object({
   schemaVersion: z.literal(SCHEMA_VERSION),
   generatedAt: z.string(),
-  site: z.object({ appName: z.string(), teacherFirstName: z.string(), contactEmail: z.string().optional() }),
+  site: z.object({
+    appName: z.string(),
+    teacherFirstName: z.string(),
+    contactEmail: z.string().optional(),
+    /** Added 17 Nov 2026 (Phase 3): optional, so files built before it still pass. */
+    publisher: z.string().optional(),
+  }),
   studio,
   series: z.array(series),
   lessons: z.array(lesson),

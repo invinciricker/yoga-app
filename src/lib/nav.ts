@@ -13,8 +13,13 @@ export const routes = {
   note: (slug: string): Href => ({ pathname: '/notes/[slug]', params: { slug } }),
   /** Maria's page, behind the billboard. */
   maria: '/maria' as Href,
-  /** You: the person's own page (Appearance). */
+  /** You: the person's own page (settings), and its pages. */
   me: '/me' as Href,
+  about: '/me/about' as Href,
+  privacy: '/me/privacy' as Href,
+  licences: '/me/licences' as Href,
+  /** The three screens of the first launch. */
+  welcome: '/welcome' as Href,
   gallery: '/gallery' as Href,
   lesson: (slug: string): Href => ({ pathname: '/lesson/[slug]', params: { slug } }),
   series: (slug: string): Href => ({ pathname: '/series/[slug]', params: { slug } }),

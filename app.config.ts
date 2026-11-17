@@ -71,7 +71,11 @@ const config: ExpoConfig = {
   },
   // Over-the-air updates. "fingerprint" means an update only reaches a build whose native side
   // is identical, so an update can never break an installed app.
+  // Only the preview app asks for them. The public app NEVER asks Expo for updates: it changes only
+  // through a store release (docs/ARCHITECTURE.md, decision 9), and its privacy page names no Expo.
+  // With enabled: false a build runs only the code and assets bundled in it (Expo's app config docs).
   updates: {
+    enabled: !isProduction,
     url: `https://u.expo.dev/${EXPO_PROJECT_ID}`,
   },
   runtimeVersion: { policy: 'fingerprint' },

@@ -9,6 +9,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo, type ReactNode } from 'react';
 
 import { useContent } from '@/content/store';
+import { useReduceMotion } from '@/lib/motion';
 import { usePrefs } from '@/lib/prefs';
 import { fontFiles } from '@/theme/fonts';
 import { ThemedStatusBar } from '@/theme/statusBar';
@@ -25,6 +26,8 @@ SplashScreen.preventAutoHideAsync().catch(() => {
  */
 function Screens(): ReactNode {
   const { scheme, color } = useTheme();
+  // With "reduce motion" (the phone's or the app's own), screens fade in place of the platform's slide.
+  const reduce = useReduceMotion();
   const navigationTheme = useMemo(() => {
     const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
     return {
@@ -42,7 +45,16 @@ function Screens(): ReactNode {
   }, [scheme, color]);
   return (
     <NavigationTheme value={navigationTheme}>
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg.base } }} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: color.bg.base },
+          animation: reduce ? 'fade' : 'default',
+        }}
+      >
+        {/* The welcome fades in, whether it replaces the tabs on a first launch or opens from About. */}
+        <Stack.Screen name="welcome" options={{ animation: 'fade' }} />
+      </Stack>
     </NavigationTheme>
   );
 }
@@ -51,7 +63,7 @@ export default function RootLayout() {
   const [fontsReady, fontsError] = useFonts(fontFiles);
   // True once the copy of the content saved on the phone has been read (a few milliseconds).
   const contentStarted = useContent((s) => s.started);
-  // True once the theme setting and the billboard's day have been read (a few milliseconds).
+  // True once the preferences (theme, reduce motion, welcome seen, billboard's day) have been read.
   const prefsStarted = usePrefs((s) => s.started);
   const ready = fontsReady && contentStarted && prefsStarted;
 

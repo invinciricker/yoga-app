@@ -63,7 +63,12 @@ describe('a valid tree', () => {
     const content = contentFile.parse(JSON.parse(await readFile(path.join(out, 'content.json'), 'utf8')));
     const preview = contentFile.parse(JSON.parse(await readFile(path.join(out, 'preview.json'), 'utf8')));
     expect(content.generatedAt).toBe(NOW.toISOString());
-    expect(content.site).toEqual({ appName: 'Yoga with Test', teacherFirstName: 'Tess', contactEmail: 'tess@example.com' });
+    expect(content.site).toEqual({
+      appName: 'Yoga with Test',
+      teacherFirstName: 'Tess',
+      contactEmail: 'tess@example.com',
+      publisher: 'Tess Example',
+    });
     expect(content.studio.name).toBe('Tess Teacher');
 
     // A draft is in preview.json only, marked as such, and nothing in content.json points to it.
@@ -129,6 +134,35 @@ describe('a valid tree', () => {
     expect(result.problems.map(formatProblem)).toEqual([
       expect.stringMatching(/^content\/lessons\/second-rest\/lesson\.md: This is still sample text/),
     ]);
+  });
+
+  it('refuses a release while the contact email or the publisher is missing, saying which', async () => {
+    const dir = await copyOfValid();
+    await edit(dir, 'lessons/second-rest/lesson.md', 'sample: true\n', '');
+    await edit(dir, 'site.yaml', /contactEmail: .*\n/, '');
+    await edit(dir, 'site.yaml', /publisher: .*\n/, '');
+    const result = await buildContent({ contentDir: dir, outDir: freshDir(), now: NOW, release: true });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.problems.map(formatProblem)).toEqual([
+      expect.stringMatching(/^content\/site\.yaml: "contactEmail" is missing/),
+      expect.stringMatching(/^content\/site\.yaml: "publisher" is missing/),
+    ]);
+  });
+
+  it('builds a release once there is no sample and both are filled in', async () => {
+    const dir = await copyOfValid();
+    await edit(dir, 'lessons/second-rest/lesson.md', 'sample: true\n', '');
+    const result = await buildContent({ contentDir: dir, outDir: freshDir(), now: NOW, release: true });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.content.site.publisher).toBe('Tess Example');
+  });
+
+  it('builds without them when it is not a release', async () => {
+    const dir = await copyOfValid();
+    await edit(dir, 'site.yaml', /publisher: .*\n/, '');
+    const result = await buildContent({ contentDir: dir, outDir: freshDir(), now: NOW });
+    expect(result.ok).toBe(true);
   });
 });
 

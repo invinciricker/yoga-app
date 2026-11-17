@@ -7,6 +7,8 @@
  *   link     gold words, with the icon after them ("Read the note →").
  *   glass    a translucent pill for the top of a cover or the billboard ("Meet Maria →").
  *            48 high; with small, 40 high (the touch area stays 48).
+ * On a cover or an aura, give quiet and link buttons `onCover`: their words take the onCover.*
+ * colours, which are the same in both themes ("Skip" on the welcome).
  */
 import type { LucideIcon } from 'lucide-react-native';
 import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
@@ -30,6 +32,8 @@ export type ButtonProps = {
   shape?: 'block' | 'pill';
   /** Glass only: the smaller pill, 40 high. */
   small?: boolean;
+  /** Quiet and link only: drawn on a cover, so the words use the onCover.* colours. */
+  onCover?: boolean;
   onPress?: () => void;
   disabled?: boolean;
   /** Layout of the button on the screen (for example alignSelf). */
@@ -45,6 +49,9 @@ const look: Record<ButtonKind, { text: TextVariant; ink: InkColor; iconInk: InkC
   glass: { text: 'label', ink: 'onCover.primary', iconInk: 'onCover.primary', iconAfter: true },
 };
 
+/** The words of a quiet or link button drawn on a cover. */
+const onCoverInk: Partial<Record<ButtonKind, InkColor>> = { quiet: 'onCover.secondary', link: 'onCover.accent' };
+
 export function Button({
   label,
   kind = 'primary',
@@ -52,6 +59,7 @@ export function Button({
   iconFilled = false,
   shape = 'block',
   small = false,
+  onCover = false,
   onPress,
   disabled,
   style,
@@ -59,7 +67,8 @@ export function Button({
 }: ButtonProps) {
   const { color } = useTheme();
   const styles = useStyles();
-  const l = look[kind];
+  const coverInk = onCover ? onCoverInk[kind] : undefined;
+  const l = coverInk ? { ...look[kind], ink: coverInk, iconInk: coverInk } : look[kind];
   const compact = kind === 'glass' && small;
   const icon = Icon ? (
     <Icon

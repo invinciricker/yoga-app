@@ -43,4 +43,11 @@ export const size = {
   billboardFade: 0.4, // the billboard's words are gone after this part of its height has scrolled
   scrollThrottle: 16, // how often a scrolling page reports where it is, in ms
   tabLabelMinScale: 0.9, // a tab's label may shrink this far rather than be cut
+  // --- Phase 3: Maria, the welcome, You (docs/phases/phase-3.md)
+  portrait: 500, // Maria's portrait at the top of her page
+  benefitCard: 210, // a card of "Why yoga"
+  disc: { size: 40, alpha: 0.16 }, // the round disc behind a small icon, in the area's colour
+  classDay: 104, // the column of days and times in "Classes with Maria"
+  settingsRow: 56, // the least height of a row in You
+  dot: 6, // a dot of the welcome's three
 } as const;
