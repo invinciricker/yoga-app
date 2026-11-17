@@ -50,4 +50,18 @@ export const size = {
   classDay: 104, // the column of days and times in "Classes with Maria"
   settingsRow: 56, // the least height of a row in You
   dot: 6, // a dot of the welcome's three
+  // --- Phase 4: my practice (docs/phases/phase-4.md)
+  candle: 26, // a candle of the week card
+  candleRing: 4, // the gap between today's candle and the ring around it
+  candleGlow: 44, // the soft glow around a lit candle (a square this wide)
+  candleGlowAlpha: 0.35, // its strength at the candle's edge
+  choice: 64, // an answer on a closing screen ("Just right")
+  softFill: 0.12, // the gold wash under a chosen answer or feeling
+  tick: 28, // the round sage tick of a lesson done
+  tickIcon: 16,
+  tickStroke: 2,
+  progress: 4, // the thin progress line of a series
+  progressTrack: 0.22, // the strength of the line's empty part, over a cover
+  candlelightWide: 560, // the light above "Well done.", centred at the top
+  numberColumn: 88, // the least width of each of You's three numbers
 } as const;

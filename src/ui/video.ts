@@ -30,4 +30,6 @@ export type VideoPlayerProps = {
   seek?: SeekRequest;
   /** The video cannot be shown: removed, embedding switched off, or no network. */
   onError: () => void;
+  /** The video reached its end (the phone only: the web preview's plain frame cannot tell). */
+  onEnd?: () => void;
 };

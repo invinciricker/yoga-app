@@ -1,5 +1,5 @@
 /**
- * Button: five kinds.
+ * Button: six kinds.
  *   primary  the gold one. ONE per screen. With shape="pill" it is the smaller rounded one
  *            that sits on a cover ("Begin"). Gold as a fill, with a hairline around it.
  *   ghost    a hairline outline, for second choices.
@@ -7,6 +7,8 @@
  *   link     gold words, with the icon after them ("Read the note →").
  *   glass    a translucent pill for the top of a cover or the billboard ("Meet Maria →").
  *            48 high; with small, 40 high (the touch area stays 48).
+ *   danger   a hairline outline and words in support.danger, for a destructive action only
+ *            ("Delete" on You → Delete my data).
  * On a cover or an aura, give quiet and link buttons `onCover`: their words take the onCover.*
  * colours, which are the same in both themes ("Skip" on the welcome).
  */
@@ -20,7 +22,7 @@ import { PressableScale } from './PressableScale';
 import { size } from './sizes';
 import { Text, type TextVariant } from './Text';
 
-export type ButtonKind = 'primary' | 'ghost' | 'quiet' | 'link' | 'glass';
+export type ButtonKind = 'primary' | 'ghost' | 'quiet' | 'link' | 'glass' | 'danger';
 
 export type ButtonProps = {
   label: string;
@@ -47,6 +49,7 @@ const look: Record<ButtonKind, { text: TextVariant; ink: InkColor; iconInk: InkC
   quiet: { text: 'label', ink: 'text.secondary', iconInk: 'text.secondary', iconAfter: false },
   link: { text: 'label', ink: 'accent.gold', iconInk: 'accent.gold', iconAfter: true },
   glass: { text: 'label', ink: 'onCover.primary', iconInk: 'onCover.primary', iconAfter: true },
+  danger: { text: 'label', ink: 'support.danger', iconInk: 'support.danger', iconAfter: false },
 };
 
 /** The words of a quiet or link button drawn on a cover. */
@@ -126,6 +129,11 @@ const useStyles = makeStyles((color) =>
       minHeight: size.button.ghost,
       borderWidth: size.stroke.hairline,
       borderColor: color.border.strong,
+    },
+    danger: {
+      minHeight: size.button.ghost,
+      borderWidth: size.stroke.hairline,
+      borderColor: color.support.danger,
     },
     quiet: { minHeight: size.button.quiet, paddingHorizontal: space.md },
     link: { minHeight: size.button.quiet, paddingHorizontal: 0, justifyContent: 'flex-start' },

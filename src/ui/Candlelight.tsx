@@ -1,7 +1,8 @@
 /**
  * Candlelight: the soft circle of gold light behind a greeting. It breathes slowly
  * (the only looping animation in the app) and stays still when "reduce motion" is on.
- * Place it inside a box with position relative; it sits at the top right, partly off screen.
+ * Place it inside a box with position relative; it sits at the top right, partly off screen, or,
+ * with place="top", larger and centred above a closing screen ("Well done.").
  * Its strength is `glow` from the palette: softer on paper than in the dark.
  */
 import { useEffect, useId } from 'react';
@@ -18,8 +19,10 @@ import { size } from './sizes';
 // Where the circle sits, as fractions of its own size (matches the Today mockup).
 const OFFSET_TOP = -0.33;
 const OFFSET_RIGHT = -0.3;
+// Centred at the top: how far it rises above the screen (matches the After practice mockup).
+const OFFSET_TOP_CENTRED = -0.375;
 
-export function Candlelight() {
+export function Candlelight({ place = 'right' }: { place?: 'right' | 'top' }) {
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
   const reduce = useReduceMotion();
   const { color } = useTheme();
@@ -40,14 +43,18 @@ export function Candlelight() {
   }, [reduce, breath]);
 
   const animated = useAnimatedStyle(() => ({ transform: [{ scale: breath.get() }] }));
-  const d = size.candlelight;
+  const d = place === 'top' ? size.candlelightWide : size.candlelight;
+  const where =
+    place === 'top'
+      ? { top: d * OFFSET_TOP_CENTRED, left: '50%' as const, marginLeft: -d / 2 }
+      : { top: d * OFFSET_TOP, right: d * OFFSET_RIGHT };
 
   return (
     <Animated.View
       pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={[styles.circle, { width: d, height: d, top: d * OFFSET_TOP, right: d * OFFSET_RIGHT }, animated]}
+      style={[styles.circle, { width: d, height: d }, where, animated]}
     >
       <Svg width={d} height={d}>
         <Defs>
