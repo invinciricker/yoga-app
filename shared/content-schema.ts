@@ -31,7 +31,7 @@ export const levels = ['gentle', 'steady', 'strong'] as const;
 export const level = z.enum(levels);
 
 /** Must match the keys of `aura` in src/theme/tokens.ts. */
-export const auraNames = ['dusk', 'forest', 'candle', 'ember', 'moss'] as const;
+export const auraNames = ['dusk', 'forest', 'candle', 'ember', 'moss', 'dawn', 'tide', 'iris', 'rose', 'saffron'] as const;
 export const auraName = z.enum(auraNames);
 
 /** What a lesson works on. A fixed list so filters stay tidy. The labels shown in the app are in docs/CONTENT.md. */

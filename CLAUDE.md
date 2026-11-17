@@ -3,11 +3,12 @@
 ## What it is
 An Android app (working title "Yoga with Maria") where Maria, a yoga teacher, shares lessons, videos, tips and things she has learned, and where anyone can follow them for free. It also presents Maria and her in-person classes, so it works as her shop window. After a lesson, people tell her in one tap how it felt. It goes on the Google Play Store first; an iPhone version may follow, so nothing may be Android-only without a reason.
 
-Four tabs in a floating bar at the bottom:
-1. **Today**: a greeting, the week's candles (streak), tonight's practice, what's new, one of Maria's sayings.
-2. **Practice**: every lesson and series, with search and filters.
-3. **Journal**: Maria's tips and notes.
-4. **Studio**: Maria, why yoga, her class times and place, how to contact her.
+Five tabs in a floating bar at the bottom. The reasons and the rules are in `docs/V2.md`: read it after this file; it wins over older pages.
+1. **Home**: a billboard for Maria and her class, then Today: a greeting and one suggestion for each area.
+2. **Practice**: every lesson and series, with search and filters, and Maria's notes.
+3. **Breathe**: breathing exercises with a pacer.
+4. **Meditate**: a timer and guided sittings.
+5. **Journal**: the person's own private writing: free pages and three guided journals (gratitude, habit, health).
 
 I'm a beginner and this is my first Android app. Explain things in plain English, keep it short, and tell me exactly what to click.
 
@@ -24,17 +25,17 @@ I'm a beginner and this is my first Android app. Explain things in plain English
 - How the work flows and every decision so far: `docs/PLAN.md`.
 
 ## Which phase
-My message names the phase. If it does not, build the first phase that "State" does not list as done. Read that phase's brief whole (`docs/phases/phase-N.md`) and the documents it names. Do not read the other briefs: they cost tokens and they will tempt you to build ahead.
+My message names the phase. If it does not, build the first phase that "State" does not list as done. Read that phase's brief whole (`docs/phases/phase-N.md`) and the documents it names. Do not read the other briefs: they cost tokens and they will tempt you to build ahead. The briefs in `docs/phases/old/` are never built.
 
 ## Rules for the whole app
 - **Stack**: Expo (React Native) with TypeScript in strict mode and Expo Router. The reasons and the folder layout are in `docs/ARCHITECTURE.md`. Use the newest stable Expo SDK when the project is created and write the versions in `docs/TECH.md`. Expo changes fast: when unsure of an API, read the current docs (https://docs.expo.dev/llms.txt lists them) instead of guessing from memory.
 - **No new library** unless the brief names it. If one is really needed, prefer a package from the Expo SDK, install it with `npx expo install`, and say why under "Choices made".
-- **Look**: every colour, size, radius and timing comes from `src/theme/tokens.ts`. No hex colour and no magic number in a screen. Build screens from the parts in `src/ui/`. The target is `docs/design/mockups.html` (picture: `docs/design/mockups.jpg`); the rules are in `docs/DESIGN.md`.
+- **Look**: every colour, size, radius and timing comes from `src/theme/tokens.ts`. No hex colour and no magic number in a screen. Build screens from the parts in `src/ui/`. The target is `docs/design/mockups.html` (picture: `docs/design/mockups.jpg`); the rules are in `docs/DESIGN.md`. Where `docs/V2.md` differs from the mockups (themes, colour by area, the tabs, Home), `docs/V2.md` wins.
 - **Words**: everything the user reads is in English and lives in `src/strings.ts`, never inside a component. Short, warm, calm. No exclamation marks.
 - **Content is data**: lessons, tips, photos and Maria's page come from `content.json`, built from `content/` and downloaded by the app (`docs/CONTENT.md`). Adding content never needs a code change or a new version in the store.
 - **Old versions keep working**: once the app is in the store, people keep old versions for months. The app ignores fields it does not know and survives optional ones being absent. Never make the app need something new in `content.json` or in the database without keeping the old path working.
 - **It works without the network** after the first launch: reading comes from the saved copy. Only video needs a connection (until Phase 7).
-- **Privacy**: no accounts, no analytics, no ads, no trackers. The only things that leave the phone are the one-tap reaction and the notification token, both without a name. The repository is public: never commit a key, a password, a `.env` file or a personal detail. The Supabase address and publishable key are public by design and may be committed.
+- **Privacy**: no accounts, no analytics, no ads, no trackers. The only things that leave the phone are the one-tap reaction and the notification token, both without a name. The repository is public: never commit a key, a password, a `.env` file or a personal detail. The Supabase address and publishable key are public by design and may be committed. The person's journal never leaves the phone.
 - **Android first, web as a mirror**: the web export exists so that you and I can look at screens in a browser. It must build and open. A part that only exists on phones gets a `.web.tsx` twin that shows a quiet placeholder. Never hold up Android work for a web-only detail.
 - **Accessible**: touch targets of 48 or more, a label on every icon button, text that survives the phone's "larger text" setting, and "reduce motion" respected.
 - **Main is the rehearsal room, the store is the stage**: merging into `main` updates the preview app on my phone and the web preview, never the public app. A store release is a separate, deliberate step (`docs/PLAY-STORE.md`). One exception to keep in mind: `content/` on `main` IS live for everyone.
@@ -48,15 +49,20 @@ My message names the phase. If it does not, build the first phase that "State" d
 5. Then wait for my go before the next phase.
 
 ## Phases
-0. The shell: the project, the look, four empty tabs, the preview on my phone.
-1. Content and reading: the content build, Today, Practice, lessons with video, Journal.
-2. Studio and welcome: Maria's page, class times, the first-launch welcome, settings.
-3. My practice: marking a lesson done, the "how did that feel" screen, streaks, saved lessons.
-4. Feedback reaches Maria: the reactions go online, Maria's sign-in and her totals.
-5. Notifications: a nudge when Maria posts, and an optional daily reminder.
-6. The Play Store: icon, listing, the production build, the closed test, the release. May start any time after Phase 3.
+0. The shell. Done.
+1. Content and reading. Done.
+2. The new look and the new map: light and dark, colour by area, five tabs, the billboard and Today.
+3. Maria and the welcome: Maria's page, the first-launch welcome, You (settings, about, privacy).
+4. My practice: marking a lesson done, "how did that feel", candles, saved lessons.
+5. Journal, part one: free pages, the guided engine, the Gratitude journal.
+6. Journal, part two: the Habit and Health journals; Today offers a page.
+7. Breathe: exercises and the pacer.
+8. Meditate: the timer and guided sittings.
+9. Feedback reaches Maria: the reactions go online, Maria's sign-in and her totals.
+10. Notifications: one daily nudge, and a nudge when Maria posts.
+11. The Play Store. May start any time after Phase 4.
 
-Later (`docs/phases/later.md`): our own video hosting with offline downloads, Maria posting from her phone, iPhone.
+Only the next phase has a brief; the architect writes each one when the owner asks. Later (`docs/phases/later.md`): our own video and audio hosting with offline downloads, Maria posting from her phone, iPhone.
 
 ## State
 (Updated by Claude Code at the end of each phase. 25 lines at most. Start with the list of phases done.)
