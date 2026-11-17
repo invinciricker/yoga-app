@@ -2,6 +2,8 @@
 
 Written by Claude chat for Ricky, 16 Nov 2026. Read this once, slowly. It explains what everything is, why it is there, and what happens when. You do not need to remember it: come back when a word confuses you (there is a glossary at the end).
 
+> **Updated 17 Nov 2026 (evening).** The app grew in version 2 (`docs/V2.md`): five tabs, a light theme, and breathing, meditation and a private journal next to Maria's lessons. The phases were renumbered: the current list is the table in `docs/V2.md`. Maria's page and the welcome are now Phase 3, "My practice" is Phase 4, Supabase is Phase 9, notifications Phase 10, the Play Store Phase 11. Everything else on this page still holds where it does not name a phase.
+
 ## The 60-second version
 
 - You are making a real Android app. It is written once in a toolkit called **Expo**, which can also produce an iPhone app later from the same code.

@@ -14,22 +14,33 @@ I'm a beginner and this is my first Android app. Explain things in plain English
 
 ## Who does what
 - **Claude chat** (my claude.ai Project "yoga app with Maria") is the architect. It took the decisions and wrote the briefs, the design, the tokens, the content formats and the database. I may not be able to reach it for every question, so the briefs are meant to be complete.
-- **Claude Code** is the builder: you. You build exactly what the brief of the phase says and you own all the app code (`app/`, `src/`, `tools/`, `site/`, `.github/`, the config files), `docs/TECH.md`, `docs/screens/` and "State" below.
+- **Claude Code** is the builder: you. You build what the brief of the phase asks for. The brief says **what** and **why**; **how** is yours (see "How much freedom you have"). You own all the app code (`app/`, `src/`, `tools/`, `site/`, `.github/`, the config files), `docs/TECH.md`, `docs/screens/` and "State" below.
 - **I** decide, test on my phone, and merge. Nothing reaches `main` except through a pull request that I merge.
 - **Protected files**: `docs/` (except `docs/TECH.md` and `docs/screens/`), `src/theme/tokens.ts`, `shared/content-schema.ts`, `supabase/migrations/20261116000000_init.sql`, and this file except "State". They hold decisions, so:
-  - never change or remove what is in them;
+  - never change or remove a decision in them;
   - you may **add** when the work truly needs it (a new token, a new optional field in the schema, a new migration file next to the first one), in a separate commit whose message starts with `protected:`, and you list it at the top of the pull request under "Changes to protected files" with the reason;
-  - if one of them is wrong, do not fix it silently: work around it in the simplest way and say so in the pull request.
+  - you may **correct a plain factual mistake** in them (a command that does not work, a broken link, a wrong file name or version, a button a website has renamed, an old phase number), the same way: a `protected:` commit, listed in the pull request;
+  - if a *decision* in one of them looks wrong, do not change it: work around it in the simplest way and say so in the pull request.
 - **`content/`** is edited only when the job is adding or changing content, following `docs/ADDING-CONTENT.md`. Never during a phase.
-- When the brief is silent or contradicts itself, take the simplest option that matches the mockups and list it under "Choices made" instead of stopping: I may not be there to answer. **Stop and ask only** for something that costs money, needs a password or key I have not given, deletes data, or changes the app's package name.
+- When the brief is silent or contradicts itself, take the simplest option that fits the mockups and `docs/V2.md`, and list it under "Choices made" instead of stopping: I may not be there to answer. **Stop and ask only** for something that costs money, needs a password or key I have not given, deletes data, or changes the app's package name.
 - How the work flows and every decision so far: `docs/PLAN.md`.
 
+## How much freedom you have
+Since 17 Nov 2026 (evening). The briefs used to say "build exactly this". That kept you from things that were plainly good, like taking Expo's latest fixes. So, within the rules of this file and of `docs/V2.md`:
+- **Keep Expo up to date within its SDK.** At the start of every phase, run `npx expo install --check`. If newer releases of our SDK exist (58 for now), install them with `npx expo install --fix` as the phase's first commit (`deps: …`), run `npx expo-doctor` and the checks, and write the new versions in `docs/TECH.md`. This changes the build's fingerprint, so the pull request then says **"Does this need a new build? Yes"**. If the phase would otherwise need no new build, you may leave the update for the next phase that needs one, unless it fixes something that affects us: say which you did under "Choices made". The brief may decide for you (Phase 4 does).
+- **A new SDK** (59 and later) is never part of a phase: it can break things and needs a new build and a careful test. Say in the pull request that it exists; I will start a session just for it.
+- **Libraries.** You may add one when it makes the work clearly simpler, sturdier or better looking. Prefer, in this order: what the project already has; the Expo SDK, installed with `npx expo install`; a well-known, maintained library. Say why under "Choices made". Never a library that costs money, needs a key or an account I have not given, sends anything off the phone, or follows people (analytics, ads, crash reports that upload). A native library means a new build: say so.
+- **Your own code.** You may rename, move, split or tidy what you own when it makes the phase cleaner. Keep the folder layout of `docs/ARCHITECTURE.md` unless you have a reason, and give it.
+- **Bugs you find** in earlier work: fix them, each in its own commit (`fix: …`), and list them under "Also fixed".
+- **Small design calls.** Where the brief and the mockups are silent (a spacing, a transition, an empty state, a sentence in `src/strings.ts`), decide in the spirit of `docs/DESIGN.md` and `docs/V2.md`, and list what you decided. Bigger changes to the look (a new kind of screen, a new colour, a different layout for a drawn screen) belong to the architect: propose them in the pull request instead of building them.
+- **Reading.** Start with the brief and the documents it names. Read anything else in the repository that you need to do the job well. Just do not build ahead of the phase.
+
 ## Which phase
-My message names the phase. If it does not, build the first phase that "State" does not list as done. Read that phase's brief whole (`docs/phases/phase-N.md`) and the documents it names. Do not read the other briefs: they cost tokens and they will tempt you to build ahead. The briefs in `docs/phases/old/` are never built.
+My message names the phase. If it does not, build the first phase that "State" does not list as done. Read that phase's brief whole (`docs/phases/phase-N.md`) and the documents it names. Do not read the briefs of later phases: they will tempt you to build ahead. The briefs in `docs/phases/old/` are never built.
 
 ## Rules for the whole app
-- **Stack**: Expo (React Native) with TypeScript in strict mode and Expo Router. The reasons and the folder layout are in `docs/ARCHITECTURE.md`. Use the newest stable Expo SDK when the project is created and write the versions in `docs/TECH.md`. Expo changes fast: when unsure of an API, read the current docs (https://docs.expo.dev/llms.txt lists them) instead of guessing from memory.
-- **No new library** unless the brief names it. If one is really needed, prefer a package from the Expo SDK, install it with `npx expo install`, and say why under "Choices made".
+- **Stack**: Expo (React Native) with TypeScript in strict mode and Expo Router. The reasons and the folder layout are in `docs/ARCHITECTURE.md`. Keep Expo current within its SDK ("How much freedom you have") and write the versions in `docs/TECH.md`. Expo changes fast: when unsure of an API, read the current docs (https://docs.expo.dev/llms.txt lists them) instead of guessing from memory.
+- **Libraries**: see "How much freedom you have".
 - **Look**: every colour, size, radius and timing comes from `src/theme/tokens.ts`. No hex colour and no magic number in a screen. Build screens from the parts in `src/ui/`. The target is `docs/design/mockups.html` (picture: `docs/design/mockups.jpg`); the rules are in `docs/DESIGN.md`. Where `docs/V2.md` differs from the mockups (themes, colour by area, the tabs, Home), `docs/V2.md` wins.
 - **Words**: everything the user reads is in English and lives in `src/strings.ts`, never inside a component. Short, warm, calm. No exclamation marks.
 - **Content is data**: lessons, tips, photos and Maria's page come from `content.json`, built from `content/` and downloaded by the app (`docs/CONTENT.md`). Adding content never needs a code change or a new version in the store.
@@ -45,15 +56,15 @@ My message names the phase. If it does not, build the first phase that "State" d
 1. `npm run check` is green (types, lint, tests, content check, database rules).
 2. The web export builds. Open the screens you touched at 390 × 844 with Chrome (`CHROME_PATH`), save the pictures in `docs/screens/phase-N/`, and **look at them** next to `docs/design/mockups.jpg`. Fix what does not match before asking me to look.
 3. Update "State" (25 lines at most) and `docs/TECH.md`.
-4. The description starts with **"In short"** (3 to 5 plain sentences, no file names), then **"To test on your phone"** (a short checklist of taps), then **"Does this need a new build?"** (yes or no, with the one thing I must do), then **"Choices made"** and **"Changes to protected files"** if any. Everything technical goes inside a `<details>` block under them.
+4. The description starts with **"In short"** (3 to 5 plain sentences, no file names), then **"To test on your phone"** (a short checklist of taps), then **"Does this need a new build?"** (yes or no, with the one thing I must do), then **"Choices made"**, **"Also fixed"** and **"Changes to protected files"** if any. Everything technical goes inside a `<details>` block under them.
 5. Then wait for my go before the next phase.
 
 ## Phases
 0. The shell. Done.
 1. Content and reading. Done.
-2. The new look and the new map: light and dark, colour by area, five tabs, the billboard and Today.
-3. Maria and the welcome: Maria's page, the first-launch welcome, You (settings, about, privacy).
-4. My practice: marking a lesson done, "how did that feel", candles, saved lessons.
+2. The new look and the new map: light and dark, colour by area, five tabs, the billboard and Today. Done.
+3. Maria and the welcome: Maria's page, the first-launch welcome, You (settings, about, privacy). Brief ready.
+4. My practice: marking a lesson done, "how did that feel", candles, saved lessons. Brief ready.
 5. Journal, part one: free pages, the guided engine, the Gratitude journal.
 6. Journal, part two: the Habit and Health journals; Today offers a page.
 7. Breathe: exercises and the pacer.
@@ -62,12 +73,12 @@ My message names the phase. If it does not, build the first phase that "State" d
 10. Notifications: one daily nudge, and a nudge when Maria posts.
 11. The Play Store. May start any time after Phase 4.
 
-Only the next phase has a brief; the architect writes each one when the owner asks. Later (`docs/phases/later.md`): our own video and audio hosting with offline downloads, Maria posting from her phone, iPhone.
+A phase has a brief only once the architect has written it, one or two phases ahead, when the owner asks. Later (`docs/phases/later.md`): our own video and audio hosting with offline downloads, Maria posting from her phone, iPhone.
 
 ## State
 (Updated by Claude Code at the end of each phase. 25 lines at most. Start with the list of phases done.)
 
-**Phases done: 0 (the shell), 1 (content and reading), 2 (the new look and the new map).** Next: Phase 3 (its brief is not written yet: ask the architect).
+**Phases done: 0 (the shell), 1 (content and reading), 2 (the new look and the new map).** Next: Phase 3 (`docs/phases/phase-3.md`), then Phase 4 (`docs/phases/phase-4.md`), each in its own session.
 
 **Phase 0 (16 Nov) and 1 (17 Nov).** Expo SDK 58, React Native 0.88, TypeScript strict, Expo Router (`docs/TECH.md`). Two variants (`app.config.ts`), `eas.json`, fonts, the parts in `src/ui/`, the four workflows, the content build (`tools/content/`), `src/content/` (load, store, selectors), the lesson, series and note pages, `VideoPlayer` (YouTube, with a web twin).
 - Expo owner `invincirick`; package name still the placeholder `com.yogawithmaria.app` (one constant). Expo created the signing key by itself.
