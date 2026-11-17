@@ -11,10 +11,15 @@
     "lint": "expo lint",
     "test": "jest",
     "check:db": "node supabase/tests/rules.test.mjs",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run check:db",
+    "content:check": "tsx tools/content/check.ts",
+    "content:build": "tsx tools/content/build.ts",
+    "content:fallback": "tsx tools/content/fallback.ts",
+    "content:image": "tsx tools/content/image.ts",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run content:check && npm run check:db",
     "build:web": "expo export --platform web",
     "build:site": "node tools/site/build.mjs",
-    "shots": "node tools/shots.mjs"
+    "shots": "node tools/shots.mjs",
+    "eas-build-post-install": "npm run content:fallback"
   },
   "dependencies": {
     "@expo-google-fonts/cormorant-garamond": "^0.4.1",
@@ -26,6 +31,7 @@
     "expo-font": "~58.0.12",
     "expo-haptics": "~58.0.8",
     "expo-image": "~58.0.18",
+    "expo-keep-awake": "~58.0.4",
     "expo-linking": "~58.0.17",
     "expo-router": "~58.0.31",
     "expo-splash-screen": "~58.0.14",
@@ -42,20 +48,30 @@
     "react-native-screens": "~4.30.1",
     "react-native-svg": "15.16.0",
     "react-native-web": "~0.21.4",
+    "react-native-webview": "14.0.1",
     "react-native-worklets": "0.13.0",
+    "react-native-youtube-iframe": "^2.4.1",
     "zod": "^4.6.7",
     "zustand": "^5.1.0"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.16",
     "@types/jest": "^30.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/mdast": "^4.0.4",
     "@types/react": "~19.3.0",
+    "blurhash": "^2.0.5",
     "eslint": "^9.39.5",
+    "gray-matter": "^4.0.3",
     "jest": "^30.5.2",
     "jest-expo": "^58.0.14",
+    "js-yaml": "^5.5.0",
     "puppeteer-core": "^25.17.0",
+    "remark-parse": "^11.0.0",
     "sharp": "^0.35.5",
-    "typescript": "~6.0.3"
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "unified": "^11.0.5"
   },
   "jest": {
     "preset": "jest-expo",
@@ -65,6 +81,11 @@
     "roots": [
       "<rootDir>/src",
       "<rootDir>/tools"
+    ],
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|unified|remark-parse|mdast-util-[a-z-]+|micromark[a-z-]*|unist-util-[a-z-]+|vfile[a-z-]*|bail|trough|devlop|is-plain-obj|decode-named-character-reference|character-entities))",
+      "/node_modules/react-native-reanimated/plugin/",
+      "/node_modules/@react-native/babel-preset/"
     ]
   }
 }

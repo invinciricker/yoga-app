@@ -55,6 +55,10 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       - if: steps.token.outputs.present == 'yes'
         run: npm ci
+      - name: Make the copy of the content bundled inside the app
+        # assets/content-fallback.json is not kept in git: it is made fresh before each bundle.
+        if: steps.token.outputs.present == 'yes'
+        run: npm run content:fallback
       - name: Send the update to the preview app
         if: steps.token.outputs.present == 'yes'
         run: eas update --channel preview --platform android --message "${{ github.sha }}" --non-interactive

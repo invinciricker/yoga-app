@@ -27,6 +27,8 @@ export type Greeting = {
   hello: string;
   /** Second line, in italics, for example "Let the day settle." */
   line: string;
+  /** The label above the big card, for example "Tonight's practice". */
+  practice: string;
 };
 
 export function greetingFor(date: Date): Greeting {
@@ -37,5 +39,6 @@ export function greetingFor(date: Date): Greeting {
     overline: `${strings.today.weekdays[date.getDay()]} ${words.part}`,
     hello: words.hello,
     line: words.line,
+    practice: words.practice,
   };
 }

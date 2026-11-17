@@ -1,9 +1,11 @@
 # ANDROID BUILD
 # When it runs: only by hand. On GitHub: Actions → "Android build" → "Run workflow" → choose:
-#   preview     the test app "Yoga (preview)", installed from a link Expo emails you
+#   preview     the test app "Yoga (preview)", installed from the link on this run's Summary page
 #   production  the real app for Google Play (see docs/PLAY-STORE.md first)
-# What it does: asks Expo to build the Android app. This workflow finishes in a minute or two;
-#   the build itself happens at Expo (the free queue can take up to an hour) and Expo emails you.
+# What it does: asks Expo to build the Android app, then writes the link to the build's page on
+#   the run's Summary page (click the run, the link is at the bottom of the page that opens).
+#   This workflow finishes in a minute or two; the build itself happens at Expo, and the free
+#   queue can take an hour or more. Expo does NOT email you: open the link and refresh it.
 #   The free plan allows 15 builds a month: build only when a pull request says a new build is needed.
 # A red cross means: Expo refused the request. Open the run, read the last lines, and tell Claude Code.
 # If the EXPO_TOKEN secret is missing, it stops quietly with a message (no red cross).
@@ -23,12 +25,16 @@ jobs:
     runs-on: ubuntu-latest
     env:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      PROFILE: ${{ inputs.profile }}
+      # Where Expo shows the builds of this project (the owner and the name are in app.config.ts).
+      BUILDS_URL: https://expo.dev/accounts/invincirick/projects/yoga-app/builds
     steps:
       - name: Is the Expo token there?
         id: token
         run: |
           if [ -z "$EXPO_TOKEN" ]; then
             echo "::notice::Skipped: the EXPO_TOKEN secret is not set yet (docs/OWNER-SETUP.md). No build was started."
+            echo "No build was started: the EXPO_TOKEN secret is not set yet (docs/OWNER-SETUP.md)." >> "$GITHUB_STEP_SUMMARY"
             echo "present=no" >> "$GITHUB_OUTPUT"
           else
             echo "present=yes" >> "$GITHUB_OUTPUT"
@@ -48,5 +54,45 @@ jobs:
       - if: steps.token.outputs.present == 'yes'
         run: npm ci
       - name: Ask Expo to build the app
+        id: build
         if: steps.token.outputs.present == 'yes'
-        run: eas build --platform android --profile ${{ inputs.profile }} --non-interactive --no-wait
+        run: |
+          # --no-wait: only ask for the build, do not wait an hour for it.
+          # --json: Expo prints the build it started as JSON (a list with one build, which has an
+          #   "id"); its usual messages still go to this log. We keep the JSON in a file.
+          eas build --platform android --profile "$PROFILE" --non-interactive --no-wait --json > build.json
+          cat build.json
+          # Read the id of the build. If Expo ever changes this format, the id stays empty and
+          # the next step links to the list of builds instead: the run still succeeds.
+          BUILD_ID="$(node -e '
+            try {
+              const out = JSON.parse(require("fs").readFileSync("build.json", "utf8"));
+              const build = Array.isArray(out) ? out[0] : out;
+              const id = String((build && build.id) || "");
+              if (/^[0-9a-f-]{36}$/i.test(id)) process.stdout.write(id);
+            } catch {}
+          ')"
+          echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+      - name: Put the link on the Summary page
+        if: steps.token.outputs.present == 'yes'
+        env:
+          BUILD_ID: ${{ steps.build.outputs.build_id }}
+        run: |
+          if [ -n "$BUILD_ID" ]; then
+            LINK="$BUILDS_URL/$BUILD_ID"
+          else
+            # The id could not be read: the newest build is the first one in the list.
+            LINK="$BUILDS_URL"
+          fi
+          if [ "$PROFILE" = "production" ]; then
+            WHAT="Open this link and refresh until it shows Download: that gives the .aab file for Google Play. The free queue can take an hour or more."
+          else
+            WHAT="Open this on your phone, refresh until it shows Install; the free queue can take an hour or more."
+          fi
+          {
+            echo "## The build was requested ($PROFILE)"
+            echo
+            echo "[$LINK]($LINK)"
+            echo
+            echo "$WHAT"
+          } >> "$GITHUB_STEP_SUMMARY"

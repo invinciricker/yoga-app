@@ -19,6 +19,12 @@ describe('greetingFor', () => {
     expect(partOfDay(at(23, 59))).toBe('evening');
   });
 
+  it('labels the big card after the part of the day', () => {
+    expect(greetingFor(at(8)).practice).toBe('This morning’s practice');
+    expect(greetingFor(at(13)).practice).toBe('Today’s practice');
+    expect(greetingFor(at(20)).practice).toBe('Tonight’s practice');
+  });
+
   it('names the weekday and the part of the day above the greeting', () => {
     expect(greetingFor(at(19)).overline).toBe('Monday evening');
     expect(greetingFor(new Date(2026, 10, 22, 9)).overline).toBe('Sunday morning');

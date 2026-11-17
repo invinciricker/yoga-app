@@ -19,7 +19,7 @@ Keep one private note (a password manager, or a note on your phone, **not** a fi
 5. **Give the token to GitHub.** github.com → `yoga-app` → Settings → Secrets and variables → Actions → New repository secret → Name: `EXPO_TOKEN` → paste → Add secret.
 6. Start the Phase 0 session with the message in `docs/PLAN.md`, giving the account name and the project ID.
 
-**Installing the preview app later** (the Phase 0 pull request repeats this): Expo sends you a link when a build is ready. Open it on your Android phone → Install. Android will ask to allow your browser to install apps: allow it for this once. If "Play Protect" warns that it does not know the developer, choose "Install anyway": that developer is you.
+**Installing the preview app later** (the Phase 0 pull request repeats this): open the link on the Summary page of the Android build run. Open it on your Android phone → Install. Android will ask to allow your browser to install apps: allow it for this once. If "Play Protect" warns that it does not know the developer, choose "Install anyway": that developer is you.
 
 ## Before Phase 2
 

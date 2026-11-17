@@ -61,11 +61,18 @@ Later (`docs/phases/later.md`): our own video hosting with offline downloads, Ma
 ## State
 (Updated by Claude Code at the end of each phase. 25 lines at most. Start with the list of phases done.)
 
-**Phases done: 0 (the shell).** Next: Phase 1.
+**Phases done: 0 (the shell), 1 (content and reading).** Next: Phase 2.
 
 **16 Nov 2026, Phase 0.** Expo SDK 58, React Native 0.88, TypeScript strict, Expo Router (versions and notes: `docs/TECH.md`).
-- Built: `app.config.ts` with the two variants, `eas.json`, the theme helpers (`auraForSlug`), the six fonts, the parts in `src/ui/` (all except the four content cards and the three state parts), `src/strings.ts`, the four tabs with the floating tab bar, Today (greeting, candlelight, one "Coming next" cover), the design gallery (preview only), the site page, `tools/` (site build, screenshots, icons), the four workflows.
+- Built: the two variants (`app.config.ts`), `eas.json`, the theme helpers, the fonts, the base parts in `src/ui/`, `src/strings.ts`, the four tabs with the floating tab bar, the design gallery (preview only), the site page, the four workflows.
 - Expo: owner `invincirick`, project ID in `app.config.ts`. Package name still the placeholder `com.yogawithmaria.app` (one constant).
-- Checks: `npm run check` green (7 tests, 31 database checks), web export builds, pictures in `docs/screens/phase-0/`.
-- Not yet proven: no Android build has run. Whether Expo creates the signing key by itself in a non-interactive build is unknown until the owner runs "Android build" once.
-- Stand-ins to replace in Phase 1: `src/ui/QuietPlace.tsx` (empty tabs) and the "Coming next" cover on Today.
+- Android: the first build was requested without error and Expo created the signing key by itself. The owner has not installed it yet.
+
+**17 Nov 2026, Phase 1.**
+- Built: the content build in `tools/content/` (`content:check`, `content:build`, `content:fallback`, `content:image`), `src/config.ts`, `src/content/` (load, store, selectors), the four content cards, the states, `RichText`, `VideoPlayer` (YouTube, with a web twin), Today, Practice, Journal, the lesson, series and journal entry pages.
+- Content address: `https://invinciricker.github.io/yoga-app/content/v1/` (`preview.json` for the preview app, `content.json` for production). Published by `pages.yml` on every merge into `main`.
+- Checks: `npm run check` green (59 tests, content check, 31 database checks), `expo-doctor` 20/20, web export builds with and without the bundled copy, pictures in `docs/screens/phase-1/`.
+- **Needs a new Android build** (the video player is a native library, and new scripts change the fingerprint). "Android build" now writes the link to the build on the run's Summary page.
+- Not yet proven: nothing of Phase 1 has run on a real phone. The video player, the keep-awake and pull to refresh were only seen on the web mirror or in tests.
+- Left for later, on purpose: the week card and "Mark as done" (Phase 3), the Studio card and page (Phase 2), series progress (`seriesProgress` answers 0; no bar is drawn), `file` videos.
+- Still sample content everywhere (7 files marked `sample: true`). Stand-in left: `src/ui/QuietPlace.tsx`, used by the Studio tab only.

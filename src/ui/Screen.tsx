@@ -2,12 +2,16 @@
  * Screen: the ground every screen stands on.
  * It gives the background, the safe areas (status bar, navigation bar), the 20 gutter,
  * a centred column on wide screens, optional scrolling, and room at the bottom for the tab bar.
+ * It can also pull to refresh, and hold a bar fixed at the bottom (a lesson's "Begin practice").
  */
-import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { useId, useState, type ComponentRef, type ReactNode, type RefObject } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { color, layout, space } from '@/theme';
+
+import { size } from './sizes';
 
 export type ScreenProps = {
   children: ReactNode;
@@ -19,33 +23,94 @@ export type ScreenProps = {
   backdrop?: ReactNode;
   /** Extra style for the column, usually a gap between sections. */
   contentStyle?: StyleProp<ViewStyle>;
+  /**
+   * For a page that opens with a full-width cover: the content starts at the very top of the
+   * screen (under the status bar) and has no gutter. The page pads its own text.
+   */
+  bleed?: boolean;
+  /** A bar fixed at the bottom, fading in from the background. */
+  footer?: ReactNode;
+  /** Pull to refresh: give both. */
+  refreshing?: boolean;
+  onRefresh?: () => void;
+  /** To scroll the page from the outside (back to the top when a video starts). */
+  scrollRef?: RefObject<ComponentRef<typeof ScrollView> | null>;
 };
 
-export function Screen({ children, scroll = true, tabBar = false, backdrop, contentStyle }: ScreenProps) {
+export function Screen({
+  children,
+  scroll = true,
+  tabBar = false,
+  backdrop,
+  contentStyle,
+  bleed = false,
+  footer,
+  refreshing = false,
+  onRefresh,
+  scrollRef,
+}: ScreenProps) {
   const insets = useSafeAreaInsets();
+  const id = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const [footerHeight, setFooterHeight] = useState(0);
+
   const padding = {
     // Every screen starts 16 below the top inset.
-    paddingTop: insets.top + space.md,
-    paddingBottom:
-      insets.bottom + (tabBar ? layout.tabBarInset + layout.tabBarHeight + layout.sectionGap : space.xl),
+    paddingTop: bleed ? 0 : insets.top + space.md,
+    paddingBottom: footer
+      ? footerHeight + space.md
+      : insets.bottom + (tabBar ? layout.tabBarInset + layout.tabBarHeight + layout.sectionGap : space.xl),
   };
 
   const column = (
     <View style={[styles.column, padding]}>
       {backdrop}
-      <View style={[styles.content, contentStyle]}>{children}</View>
+      <View style={[styles.content, !bleed && styles.gutter, contentStyle]}>{children}</View>
     </View>
   );
 
   return (
     <View style={styles.root}>
       {scroll ? (
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={
+            onRefresh ? (
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={color.accent.gold}
+                colors={[color.accent.gold]}
+                progressBackgroundColor={color.bg.elevated}
+                progressViewOffset={insets.top}
+              />
+            ) : undefined
+          }
+        >
           {column}
         </ScrollView>
       ) : (
         column
       )}
+
+      {footer ? (
+        <View style={styles.footer} pointerEvents="box-none" onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}>
+          {/* The bar's ground: nothing at the top, the screen colour from a third of the way down. */}
+          <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
+            <Defs>
+              <LinearGradient id={`${id}f`} x1="0" y1="0" x2="0" y2="1">
+                <Stop offset={0} stopColor={color.bg.base} stopOpacity={0} />
+                <Stop offset={size.footerFade} stopColor={color.bg.base} stopOpacity={1} />
+                <Stop offset={1} stopColor={color.bg.base} stopOpacity={1} />
+              </LinearGradient>
+            </Defs>
+            <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${id}f)`} />
+          </Svg>
+          <View style={[styles.footerContent, { paddingBottom: insets.bottom + space.lg }]}>{footer}</View>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -60,5 +125,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     overflow: 'hidden', // keeps the backdrop from spilling sideways
   },
-  content: { flexGrow: 1, paddingHorizontal: layout.gutter },
+  content: { flexGrow: 1 },
+  gutter: { paddingHorizontal: layout.gutter },
+  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, alignItems: 'center' },
+  footerContent: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+    paddingTop: space.xxxl,
+    paddingHorizontal: layout.gutter,
+    gap: space.xxs,
+  },
 });

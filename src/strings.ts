@@ -3,6 +3,11 @@
  * Short, warm, calm. No exclamation marks. Never write user-facing text inside a component.
  */
 export const strings = {
+  // Used only until the content has been read (it carries the real names: content/site.yaml).
+  app: {
+    name: 'Yoga with Maria',
+    teacher: 'Maria',
+  },
   tabs: {
     today: 'Today',
     practice: 'Practice',
@@ -13,25 +18,87 @@ export const strings = {
   common: {
     back: 'Back',
     seeAll: 'See all',
+    clear: 'Clear',
+    draft: 'Draft',
+    // One quiet line under the title when the content could not be refreshed.
+    offline: 'Showing your saved copy.',
+    minutes: (n: number) => `${n} min`,
+    months: [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ],
+  },
+  // How the words written in the content files are shown (docs/CONTENT.md).
+  levels: { gentle: 'Gentle', steady: 'Steady', strong: 'Strong' },
+  focus: {
+    'whole-body': 'Whole body',
+    hips: 'Hips',
+    back: 'Back',
+    shoulders: 'Shoulders',
+    legs: 'Legs',
+    core: 'Core',
+    balance: 'Balance',
+    breath: 'Breath',
+    sleep: 'Sleep',
+    energy: 'Energy',
   },
   today: {
     weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-    // The greeting follows the clock. See src/lib/greeting.ts.
-    morning: { part: 'morning', hello: 'Good morning.', line: 'Begin gently.' },
-    afternoon: { part: 'afternoon', hello: 'Good afternoon.', line: 'A pause in the day.' },
-    evening: { part: 'evening', hello: 'Good evening.', line: 'Let the day settle.' },
+    // The greeting and the label above the big card follow the clock. See src/lib/greeting.ts.
+    morning: { part: 'morning', hello: 'Good morning.', line: 'Begin gently.', practice: 'This morning’s practice' },
+    afternoon: { part: 'afternoon', hello: 'Good afternoon.', line: 'A pause in the day.', practice: 'Today’s practice' },
+    evening: { part: 'evening', hello: 'Good evening.', line: 'Let the day settle.', practice: 'Tonight’s practice' },
     myPractice: 'My practice',
-    comingOverline: 'Coming next',
-    comingTitle: 'The first lessons',
-    comingBody: 'Maria’s lessons arrive in the next update.',
+    begin: 'Begin',
+    newFrom: (teacher: string) => `New from ${teacher}`,
+    fromJournal: 'From the journal',
+    readNote: 'Read the note',
+    readTip: 'Read the tip',
+    empty: 'The first lessons are on their way. Pull down to look again.',
     galleryLink: 'Design gallery',
   },
   practice: {
     title: 'Practice',
+    search: 'Search lessons',
+    clearSearch: 'Clear the search',
+    filterAll: 'All',
+    filterShort: 'Under 15 min',
+    series: 'Series',
+    seriesCount: (n: number) => (n === 1 ? 'Series · 1 lesson' : `Series · ${n} lessons`),
+    allLessons: 'All lessons',
+    lessonCount: (n: number) => (n === 1 ? '1 lesson' : `${n} lessons`),
+    noMatch: 'Nothing matches that yet. Try another word, or clear the search.',
     empty: 'Lessons and series will gather here, ready when you are.',
+  },
+  lesson: {
+    play: 'Play video',
+    begin: 'Begin practice',
+    need: 'You’ll need',
+    flow: 'The flow',
+    stepHint: 'Moves the video to this moment',
+    noteFrom: (teacher: string) => `A note from ${teacher}`,
+    place: (series: string, n: number, total: number) => `${series} · ${n} of ${total}`,
+    videoError: 'The video would not play here. It may open in YouTube.',
+    openYouTube: 'Open in YouTube',
+    gone: 'This lesson is no longer here.',
+    toPractice: 'Back to Practice',
+  },
+  series: {
+    facts: (lessons: number, minutes: number) =>
+      `${lessons === 1 ? '1 lesson' : `${lessons} lessons`} · ${minutes} min`,
+    gone: 'This series is no longer here.',
   },
   journal: {
     title: 'Journal',
+    filterAll: 'All',
+    filterTips: 'Tips',
+    filterNotes: 'Notes',
+    tip: 'Tip',
+    note: 'Note',
+    tryThis: 'Try this',
+    gone: 'This page is no longer here.',
+    toJournal: 'Back to the Journal',
+    noMatch: 'Nothing of that kind yet.',
     empty: 'Maria’s tips and notes will be kept here, a few lines at a time.',
   },
   studio: {
@@ -68,6 +135,12 @@ export const strings = {
     coverOverline: '12 min · Gentle',
     coverTitle: 'Evening wind-down',
     coverBody: 'A slow floor sequence to release the hips and lower back before bed.',
+    lessonParts: 'Lesson card and rows',
+    seriesParts: 'Series cards',
+    journalParts: 'Journal cards',
+    richText: 'Rich text',
+    search: 'Search field',
+    states: 'States: offline, draft, loading, empty',
     tabBar: 'Tab bar',
   },
 } as const;

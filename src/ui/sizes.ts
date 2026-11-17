@@ -6,7 +6,7 @@
 export const size = {
   icon: { sm: 18, md: 20, lg: 22 },
   stroke: { regular: 1.5, active: 1.9, hairline: 1 },
-  button: { primary: 56, ghost: 52, quiet: 48 },
+  button: { primary: 56, ghost: 52, quiet: 48, pill: 52 },
   iconButton: 48,
   chip: { select: 40, static: 36 },
   tabItem: 56,
@@ -20,4 +20,21 @@ export const size = {
   readWidth: 280, // the widest a short centred sentence may run
   candlelight: 460, // the soft circle of light behind a greeting
   breathScale: 1.06,
+  // --- Phase 1: the content cards and the pages (docs/design/mockups.html)
+  lessonCard: { width: 200, cover: 236 }, // a card of "New from Maria"
+  seriesCard: { large: 220, small: 152 },
+  cover: { lesson: 460, series: 320, note: 180 }, // the covers at the top of pages and notes
+  coverOverlap: 72, // how far a lesson's title climbs onto its cover
+  fadeHeight: 0.55, // the part of a lesson's cover that melts into the screen, from the bottom
+  rowPad: 10, // above and below a lesson row
+  search: 52, // the search field
+  play: 76, // the round gold play button
+  playIcon: 28,
+  playGlow: 2, // the glow around it is this many times the button
+  flowTime: 40, // the column of times in "The flow"
+  flowPad: 14, // above and below a step
+  draftChip: 24,
+  bullet: 6, // the gold dot of a list
+  videoAspect: 16 / 9,
+  footerFade: 0.34, // where the bar at the bottom of a lesson becomes solid
 } as const;

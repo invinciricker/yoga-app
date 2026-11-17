@@ -73,7 +73,7 @@ Main store listing → upload what Phase 6 put in `store/`:
 
 ## 6. Upload the first version, to the internal test
 
-1. On GitHub: Actions → "Android build" → Run workflow → **production**. Expo emails you; on the build's page press Download to get the **.aab** file.
+1. On GitHub: Actions → "Android build" → Run workflow → **production**. Open the link on the Summary page of the Android build run; on the build's page press Download to get the **.aab** file.
 2. Play Console → Testing → **Internal testing** → Create new release → accept **Play App Signing** when offered (Google then keeps the final signing key, which is the safe choice) → upload the `.aab` → release name and notes fill themselves → Save → Review → Start rollout.
 3. Testers tab → create a list with your address and Maria's → copy the **opt-in link** → open it on your phone → accept → install from the Play Store.
 

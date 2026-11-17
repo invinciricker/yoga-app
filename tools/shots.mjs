@@ -8,8 +8,14 @@
 // (a phone), waits for the fonts, and saves docs/screens/phase-<n>/<route>.jpg.
 // The route "/" is saved as today.jpg. Add ":full" to a route to capture the whole scrolling page.
 // Chrome is found through the environment variable CHROME_PATH.
+//
+// The content: the app downloads it from GitHub Pages. Here that address is answered from this
+// machine instead (dist-site/content/v1/, made by "npm run content:build"), so the pictures show
+// the content of this branch, not what is online. Add ":offline" to a route to cut that download
+// and see what the app shows without the network (its saved or bundled copy):
+//   npm run shots -- 1 /practice:offline      → practice-offline.jpg
 import { createReadStream } from 'node:fs';
-import { mkdir, stat } from 'node:fs/promises';
+import { mkdir, readFile, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,6 +23,9 @@ import puppeteer from 'puppeteer-core';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const dist = join(root, 'dist');
+// The same address as CONTENT_BASE in src/config.ts.
+const CONTENT_BASE = 'https://invinciricker.github.io/yoga-app/content/v1/';
+const contentDir = join(root, 'dist-site', 'content', 'v1');
 const [phase, ...routes] = process.argv.slice(2);
 
 if (!phase || routes.length === 0) {
@@ -38,7 +47,10 @@ const isFile = (path) => stat(path).then((s) => s.isFile(), () => false);
 // A very small web server for the exported files: /practice → dist/practice.html, and so on.
 const server = createServer(async (req, res) => {
   const path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname));
-  const candidates = [join(dist, path), join(dist, path + '.html'), join(dist, path, 'index.html')];
+  // An address with a slug the export does not know (/lesson/gone) is answered by the general
+  // page of its kind (lesson/[slug].html), which then shows "This lesson is no longer here".
+  const general = join(dist, path, '..', '[slug].html');
+  const candidates = [join(dist, path), join(dist, path + '.html'), join(dist, path, 'index.html'), general];
   for (const file of candidates) {
     if (file.startsWith(dist) && (await isFile(file))) {
       res.writeHead(200, { 'content-type': types[extname(file)] ?? 'application/octet-stream' });
@@ -62,12 +74,27 @@ const browser = await puppeteer.launch({
 
 try {
   for (const arg of routes) {
-    const full = arg.endsWith(':full');
-    const route = full ? arg.slice(0, -':full'.length) : arg;
-    const name = route.replace(/^\/+|\/+$/g, '').replace(/\//g, '-') || 'today';
+    const [route, ...options] = arg.split(':');
+    const full = options.includes('full');
+    const offline = options.includes('offline');
+    const name = (route.replace(/^\/+|\/+$/g, '').replace(/\//g, '-') || 'today') + (offline ? '-offline' : '');
 
     const page = await browser.newPage();
     await page.setViewport(PHONE);
+    // Answer the content address from this machine (or not at all, for ":offline").
+    await page.setRequestInterception(true);
+    page.on('request', async (request) => {
+      const url = request.url();
+      if (!url.startsWith(CONTENT_BASE)) return request.continue();
+      const file = normalize(join(contentDir, decodeURIComponent(new URL(url).pathname.split('/content/v1/')[1] ?? '')));
+      if (offline || !file.startsWith(contentDir) || !(await isFile(file))) return request.abort();
+      request.respond({
+        status: 200,
+        contentType: types[extname(file)] ?? 'application/octet-stream',
+        headers: { 'access-control-allow-origin': '*' },
+        body: await readFile(file),
+      });
+    });
     await page.goto(base + route, { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
     await new Promise((r) => setTimeout(r, 1200)); // let the arriving animation finish
