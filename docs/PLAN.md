@@ -23,28 +23,22 @@ Written by Claude chat, 16 Nov 2026. The owner's map of the work: who does what,
 ## Starting a phase
 
 1. Do the steps for that phase in `docs/OWNER-SETUP.md`, if any.
-2. Check that `CLAUDE.md`, section "The phase to build now", names the phase you want. (The builder updates it at the end of each phase.)
+2. Check that the brief exists (`docs/phases/phase-N.md`) and that "State" in `CLAUDE.md` lists the phases before it as done. (The builder updates "State" at the end of each phase.)
 3. Open a new Claude Code session on `invinciricker/yoga-app`, choose the cheaper model, and paste the message below.
 4. When the pull request arrives: read "In short", merge, and follow "To test on your phone".
 5. Tell the same session what is wrong, if anything. When you are happy, close it.
 
-**The message to paste** (fill in the brackets, delete the lines that do not apply):
+**The message to paste** (since 17 Nov 2026, evening; fill in the bracket):
 
 ```
-Read CLAUDE.md, then build Phase [N] exactly as docs/phases/phase-[N].md says.
-Read only the documents that brief names.
-
-Values from me:
-- Expo account name: [ ]            (Phase 0)
-- Expo project ID: [ ]              (Phase 0)
-- Supabase project address: [ ]     (Phase 4)
-- Supabase publishable key: [ ]     (Phase 4)
-- Final app name: [ ]               (Phases 5 and 6)
-- Final package name: [ ]           (Phases 5 and 6)
-
+Read CLAUDE.md, then build Phase [N] as docs/phases/phase-[N].md says.
 Work on a branch, run the checks, look at your own screens before asking me to,
 and open one pull request. I am a beginner: tell me exactly what to click.
 ```
+
+Some phases need values only you have. Add them under the first line when the brief asks:
+- Supabase project address and publishable key (Phase 9).
+- Final app name and package name (before Phase 10, or before the first upload to Google in Phase 11, whichever comes first).
 
 **Adding content** (any time after Phase 1):
 
@@ -87,15 +81,16 @@ After version 1: `docs/phases/later.md`.
 - **16 Nov 2026** · Working title "Yoga with Maria", placeholder package `com.yogawithmaria.app`.
 - **16 Nov 2026** · Small backend: Supabase (reactions, notification tokens, Maria's sign-in). Chosen over Firebase because one free account also gives the server functions and storage that Phase 8 needs. Firebase is still needed in Phase 5, only as Android's notification pipe.
 - **17 Nov 2026** · Version 2 of the plan: see "Decisions" in `docs/V2.md`.
+- **17 Nov 2026, evening** · The builder gets more freedom; Phases 3 and 4 briefed together; the architect now delivers briefs as pull requests. See "Decisions (17 Nov 2026, evening)" in `docs/V2.md`.
 
 ## Decisions waiting for the owner
 
-- **The name and the package name.** Needed before Phase 5 or before the first upload to Google, whichever comes first. The name can change later; the package name never can, and it shows in the store address: `play.google.com/store/apps/details?id=<package>`. Ask Maria what she wants to be called. A neutral package such as `com.yogawithmaria.app` survives a rename of the app.
+- **The name and the package name.** Needed before Phase 10 (notifications) or before the first upload to Google (Phase 11), whichever comes first. The name can change later; the package name never can, and it shows in the store address: `play.google.com/store/apps/details?id=<package>`. Ask Maria what she wants to be called. A neutral package such as `com.yogawithmaria.app` survives a rename of the app.
 - **Whose developer account.** Yours or Maria's. Google shows the account holder's legal name and country on the store page. If Maria should be the public face, either she opens the account, or you open it and accept that your name is shown. An app can be transferred to another account later.
 - **"Trader" or not.** Google asks whether you publish as a business (a "trader", in EU law). A trader's address and phone are shown publicly. The app is free but it advertises Maria's paid classes, so this is not obvious. Read Google's own page on it before answering; Claude is not a lawyer and neither answer is safe to guess.
 - **Maria's videos: unlisted or public on YouTube.** Unlisted keeps them for the app; public also makes them findable on YouTube, which is free advertising. It can differ per video.
-- **The contact email** shown on the privacy page and on the store listing. It is public. A dedicated address is wiser than a personal one.
-- **Where the students are**, for the hour notifications may be sent (`NOTIFY_TIMEZONE`, Phase 5).
+- **The contact email** shown on the privacy page and on the store listing. It is public. A dedicated address is wiser than a personal one. It goes in `content/site.yaml` as `contactEmail`, together with `publisher`, the name the store will show (Phase 3 adds that field).
+- **Where the students are**, for the hour notifications may be sent (`NOTIFY_TIMEZONE`, Phase 10).
 
 ## Not certain: to check when you get there
 

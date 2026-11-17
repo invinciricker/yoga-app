@@ -1,8 +1,19 @@
+---
+# Rewritten by Claude chat on 17 Nov 2026 to say what the app does after Phases 3 and 4, and nothing more.
+# The app (You → Privacy) and the website (privacy.html) are both made from this file at build time.
+# Placeholders in braces are filled from content/site.yaml: {appName}, {teacher}, {publisher}, {contactEmail}.
+# {updated} is the date below, written out ("17 November 2026"). Change it whenever the text changes.
+# Later phases add their own paragraph when they start sending something:
+#   Phase 9 (the answer to "How did that feel?" goes to Maria's totals), Phase 10 (notifications).
+#   Phase 5 adds the journal to "What stays on your phone".
+updated: 2026-11-17
+---
+
 # Privacy
 
-*Last updated: [DATE OF THE STORE RELEASE]*
+*Last updated: {updated}*
 
-[APP NAME] is a free app of yoga lessons by [TEACHER NAME]. It is published by [OWNER'S NAME]. This page says, in plain words, what the app knows about you. The short answer: almost nothing.
+{appName} is a free app of yoga lessons and quiet daily practice by {teacher}. This page says, in plain words, what the app knows about you. The short answer: almost nothing.
 
 ## No account, no name
 
@@ -10,14 +21,13 @@ You never sign up. The app does not ask for your name, your email address or you
 
 ## What stays on your phone
 
-Your progress (the lessons you finished, your streak, your saved lessons) is kept on your phone only. It is never sent anywhere. Uninstalling the app erases it.
+What you do in the app stays on your phone: the lessons you finished and your candles, your saved lessons, your answers to "How did that feel?", and your settings. None of it is sent anywhere. **You → Delete my data** erases it, and so does uninstalling the app.
 
-## What is sent, and only if you choose
+If backup is switched on in your phone's settings, Android may include this app's data in your phone's own backup to your Google account. That backup is yours: we cannot see it.
 
-- **How a lesson felt.** If you answer "How did that feel?" after a lesson, the app sends which lesson it was and your answer (and the feeling you picked, if any). It is stored with a random identifier created by the app, not with anything that says who you are. The teacher sees totals for each lesson, never individual people.
-- **Notifications.** If you switch on notifications, the app stores a notification address for your phone (a "push token") so that a message can be delivered when a new lesson is published. Switching notifications off stops this.
+## What the app downloads
 
-This information is stored with Supabase (a database service) and, for notifications, delivered through Expo and Google's notification service. They process it for us and for nothing else. It is not sold, not shared with advertisers, and not used to follow you.
+The lessons, pictures and notes, and the small page that holds the video player, are downloaded from GitHub Pages, a website service run by GitHub. Like any website, it receives your phone's internet address when the app asks for them, under [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 
 ## Videos
 
@@ -27,14 +37,10 @@ Lesson videos are played with YouTube's player. When you play a video, YouTube (
 
 The app shows no advertising and contains no analytics or tracking tools.
 
-## Deleting your data
-
-In the app: **My practice → Delete my data**. This erases your progress from the phone and your answers and notification address from our database. If you no longer have the app, write to [CONTACT EMAIL] and we will help; since nothing is stored under your name, we may need you to open the app once to complete it.
-
 ## Children
 
 The app is intended for adults.
 
-## Changes and contact
+## Who we are, and changes
 
-If this page changes, the date at the top changes with it. Questions: [CONTACT EMAIL].
+{appName} is published by {publisher}. If this page changes, the date at the top changes with it. Questions: {contactEmail}.
