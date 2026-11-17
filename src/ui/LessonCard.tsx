@@ -22,7 +22,7 @@ export function LessonCard({ lesson, onPress }: LessonCardProps) {
   return (
     <PressableScale onPress={onPress} accessibilityLabel={`${lesson.title}, ${meta}`} style={styles.card}>
       <Cover aura={lesson.aura} image={lesson.cover} height={size.lessonCard.cover} radius="lg">
-        <DraftChip item={lesson} style={styles.draft} />
+        <DraftChip item={lesson} onCover style={styles.draft} />
       </Cover>
       <View style={styles.words}>
         <Text variant="title" numberOfLines={2}>

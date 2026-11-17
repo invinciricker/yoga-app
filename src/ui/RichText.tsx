@@ -10,7 +10,8 @@ import { StyleSheet, View } from 'react-native';
 
 import type { Block, Span } from '../../shared/content-schema';
 
-import { color, font, space, type, type InkColor } from '@/theme';
+import { font, space, type, type InkColor } from '@/theme';
+import { makeStyles } from '@/theme/ThemeProvider';
 
 import { Card } from './Card';
 import { Cover } from './Cover';
@@ -51,6 +52,7 @@ function Spans({ spans, variant, ink }: { spans: Span[]; variant: TextVariant; i
 }
 
 export function RichText({ blocks, ink = 'text.primary' }: RichTextProps) {
+  const dots = useDots();
   return (
     <View style={styles.blocks}>
       {blocks.map((block, i) => {
@@ -78,7 +80,7 @@ export function RichText({ blocks, ink = 'text.primary' }: RichTextProps) {
                       </Text>
                     ) : (
                       <View style={styles.bulletBox}>
-                        <View style={styles.bullet} />
+                        <View style={dots.bullet} />
                       </View>
                     )}
                     <Text variant="bodyLarge" color={ink} style={styles.itemText}>
@@ -126,5 +128,10 @@ const styles = StyleSheet.create({
   number: { minWidth: space.lg },
   // The dot sits in a box as tall as one line of text, so it stays level with the first line.
   bulletBox: { width: space.lg, height: type.bodyLarge.lineHeight, alignItems: 'center', justifyContent: 'center' },
-  bullet: { width: size.bullet, height: size.bullet, borderRadius: size.bullet, backgroundColor: color.accent.gold },
 });
+
+const useDots = makeStyles((color) =>
+  StyleSheet.create({
+    bullet: { width: size.bullet, height: size.bullet, borderRadius: size.bullet, backgroundColor: color.accent.gold },
+  }),
+);

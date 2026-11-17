@@ -75,7 +75,8 @@ export async function fetchFresh(
 
 /**
  * For the web preview only: the pages to prepare when the website is built (one file per lesson,
- * series or journal entry), read from the bundled copy. On a phone this is never called.
+ * series or note), read from the bundled copy. On a phone this is never called.
+ * "journal" is the key of Maria's notes in content.json, a permanent data name (docs/V2.md).
  */
 export function slugsForStaticPages(kind: 'lessons' | 'series' | 'journal'): { slug: string }[] {
   const content = accept(bundledFallback());

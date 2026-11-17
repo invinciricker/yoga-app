@@ -4,9 +4,9 @@
  * of buttons, chips and icons, kept in one place so no part invents its own.
  */
 export const size = {
-  icon: { sm: 18, md: 20, lg: 22 },
+  icon: { xs: 16, sm: 18, md: 20, lg: 22 },
   stroke: { regular: 1.5, active: 1.9, hairline: 1 },
-  button: { primary: 56, ghost: 52, quiet: 48, pill: 52 },
+  button: { primary: 56, ghost: 52, quiet: 48, pill: 52, glass: 48, glassSmall: 40 },
   iconButton: 48,
   chip: { select: 40, static: 36 },
   tabItem: 56,
@@ -37,4 +37,10 @@ export const size = {
   bullet: 6, // the gold dot of a list
   videoAspect: 16 / 9,
   footerFade: 0.34, // where the bar at the bottom of a lesson becomes solid
+  // --- Phase 2: the new look and the new map (docs/phases/phase-2.md)
+  areaCard: { min: 88, disc: 40, discAlpha: 0.16 }, // a card of an area on Today, and its round disc
+  parallax: 0.5, // the billboard's picture rises at half the speed of the page
+  billboardFade: 0.4, // the billboard's words are gone after this part of its height has scrolled
+  scrollThrottle: 16, // how often a scrolling page reports where it is, in ms
+  tabLabelMinScale: 0.9, // a tab's label may shrink this far rather than be cut
 } as const;

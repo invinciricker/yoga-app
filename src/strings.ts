@@ -8,12 +8,18 @@ export const strings = {
     name: 'Yoga with Maria',
     teacher: 'Maria',
   },
+  // The five tabs (docs/V2.md, "The map").
   tabs: {
-    today: 'Today',
+    home: 'Home',
     practice: 'Practice',
+    breathe: 'Breathe',
+    meditate: 'Meditate',
     journal: 'Journal',
-    studio: 'Studio',
     barLabel: 'Main',
+  },
+  // A tab whose area is not built yet (preview app only).
+  areas: {
+    building: 'This room is being built.',
   },
   common: {
     back: 'Back',
@@ -42,20 +48,28 @@ export const strings = {
     sleep: 'Sleep',
     energy: 'Energy',
   },
+  // The top of Home: the billboard for Maria and her class.
+  home: {
+    yourTeacher: 'Your teacher',
+    nextClass: (weekday: string, time: string, name: string) => `Next class · ${weekday} ${time} · ${name}`,
+    meet: (teacher: string) => `Meet ${teacher}`,
+    today: 'Today',
+    todayHint: 'Moves down to today’s practice',
+    you: 'You',
+  },
   today: {
     weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
     // The greeting and the label above the big card follow the clock. See src/lib/greeting.ts.
     morning: { part: 'morning', hello: 'Good morning.', line: 'Begin gently.', practice: 'This morning’s practice' },
     afternoon: { part: 'afternoon', hello: 'Good afternoon.', line: 'A pause in the day.', practice: 'Today’s practice' },
     evening: { part: 'evening', hello: 'Good evening.', line: 'Let the day settle.', practice: 'Tonight’s practice' },
-    myPractice: 'My practice',
+    you: 'You',
     begin: 'Begin',
     newFrom: (teacher: string) => `New from ${teacher}`,
-    fromJournal: 'From the journal',
+    noteFrom: (teacher: string) => `A note from ${teacher}`,
     readNote: 'Read the note',
     readTip: 'Read the tip',
     empty: 'The first lessons are on their way. Pull down to look again.',
-    galleryLink: 'Design gallery',
   },
   practice: {
     title: 'Practice',
@@ -69,6 +83,7 @@ export const strings = {
     lessonCount: (n: number) => (n === 1 ? '1 lesson' : `${n} lessons`),
     noMatch: 'Nothing matches that yet. Try another word, or clear the search.',
     empty: 'Lessons and series will gather here, ready when you are.',
+    notes: (teacher: string) => `Notes from ${teacher}`,
   },
   lesson: {
     play: 'Play video',
@@ -88,8 +103,9 @@ export const strings = {
       `${lessons === 1 ? '1 lesson' : `${lessons} lessons`} · ${minutes} min`,
     gone: 'This series is no longer here.',
   },
-  journal: {
-    title: 'Journal',
+  // Maria's tips and notes (once the "Journal" tab; the data keeps the name "journal").
+  notes: {
+    title: (teacher: string) => `Notes from ${teacher}`,
     filterAll: 'All',
     filterTips: 'Tips',
     filterNotes: 'Notes',
@@ -97,13 +113,22 @@ export const strings = {
     note: 'Note',
     tryThis: 'Try this',
     gone: 'This page is no longer here.',
-    toJournal: 'Back to the Journal',
+    toNotes: 'Back to Notes',
     noMatch: 'Nothing of that kind yet.',
     empty: 'Maria’s tips and notes will be kept here, a few lines at a time.',
   },
-  studio: {
-    title: 'Studio',
+  // Maria's page, behind the billboard. Its real content arrives in Phase 3.
+  maria: {
     empty: 'Soon, a little about Maria and where to practise with her in person.',
+  },
+  // You: the person's own page (settings now; more in later phases).
+  me: {
+    title: 'You',
+    appearance: 'Appearance',
+    system: 'System',
+    light: 'Light',
+    dark: 'Dark',
+    galleryLink: 'Design gallery',
   },
   // The design gallery is a checking tool for the owner, shown in the preview app only.
   gallery: {
@@ -137,7 +162,16 @@ export const strings = {
     coverBody: 'A slow floor sequence to release the hips and lower back before bed.',
     lessonParts: 'Lesson card and rows',
     seriesParts: 'Series cards',
-    journalParts: 'Journal cards',
+    notesParts: 'Note cards',
+    areaCards: 'Area cards (Today, later phases)',
+    areaSamples: {
+      move: { overline: 'Move · 12 min', title: 'Evening wind-down', line: 'Slow, on the floor.' },
+      breathe: { overline: 'Breathe · 3 min', title: 'Long exhale', line: 'In for four, out for six.' },
+      sit: { overline: 'Sit · 5 min', title: 'A quiet timer', line: 'A bell to begin, a bell to end.' },
+      write: { overline: 'Write · 2 min', title: 'Three good things', line: 'Page 6 of 28.' },
+    },
+    theme: 'Theme',
+    areaColours: 'Area colours',
     richText: 'Rich text',
     search: 'Search field',
     states: 'States: offline, draft, loading, empty',

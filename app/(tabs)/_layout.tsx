@@ -1,36 +1,52 @@
 /**
- * The four tabs and the floating tab bar.
- * Each <Tabs.Screen> below matches a file in this folder (index = Today).
+ * The five tabs and the floating tab bar (docs/V2.md, "The map").
+ * Each <Tabs.Screen> below matches a file in this folder (index = Home).
+ *
+ * Breathe, Meditate and Journal are opened by their own phases (`areas` in src/config.ts). Until
+ * then the public app hides their tabs and the preview app shows a placeholder in them.
  */
 import { Tabs } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/tabs';
-import { BookOpen, MapPin, Play, Sun, type LucideIcon } from 'lucide-react-native';
+import { Feather, House, Moon, Play, Wind, type LucideIcon } from 'lucide-react-native';
 
+import { areas, type BuildingArea } from '@/config';
 import { tick } from '@/lib/haptics';
+import { isPreview } from '@/lib/variant';
 import { strings } from '@/strings';
-import { color } from '@/theme';
+import type { Area } from '@/theme';
+import { useTheme } from '@/theme/ThemeProvider';
 import { TabBar, type TabItem } from '@/ui';
 
-// The icon of each tab, by the name of its file (docs/DESIGN.md).
-const icons: Record<string, LucideIcon> = {
-  index: Sun,
-  practice: Play,
-  journal: BookOpen,
-  studio: MapPin,
+// The icon and the area (its colour) of each tab, by the name of its file.
+const tabs: Record<string, { icon: LucideIcon; area: Area; building?: BuildingArea }> = {
+  index: { icon: House, area: 'home' },
+  practice: { icon: Play, area: 'move' },
+  breathe: { icon: Wind, area: 'breathe', building: 'breathe' },
+  meditate: { icon: Moon, area: 'sit', building: 'meditate' },
+  journal: { icon: Feather, area: 'write', building: 'journal' },
 };
+
+/** A tab shows when its area is built, or in the preview app (which shows a placeholder). */
+function shown(name: string): boolean {
+  const tab = tabs[name];
+  if (!tab) return false;
+  return !tab.building || areas[tab.building] || isPreview;
+}
 
 /** Connects our TabBar part to the navigation. */
 function FloatingTabBar({ state, descriptors, emitter, navigateToTab }: BottomTabBarProps) {
   const items: TabItem[] = state.routes
-    .filter((route) => icons[route.name])
+    .filter((route) => shown(route.name))
     .map((route) => ({
       key: route.key,
       label: descriptors[route.key].options.title ?? route.name,
-      icon: icons[route.name],
+      icon: tabs[route.name].icon,
+      area: tabs[route.name].area,
     }));
 
   const onSelect = (key: string) => {
     const alreadyThere = state.routes[state.index].key === key;
+    // The screen hears this too: Home scrolls back to its top when its tab is tapped again.
     const event = emitter.emit({ type: 'tabPress', target: key, canPreventDefault: true });
     if (!alreadyThere && !event.defaultPrevented) {
       tick(); // a light haptic when changing tab
@@ -42,15 +58,17 @@ function FloatingTabBar({ state, descriptors, emitter, navigateToTab }: BottomTa
 }
 
 export default function TabsLayout() {
+  const { color } = useTheme();
   return (
     <Tabs
       tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: color.bg.base } }}
     >
-      <Tabs.Screen name="index" options={{ title: strings.tabs.today }} />
+      <Tabs.Screen name="index" options={{ title: strings.tabs.home }} />
       <Tabs.Screen name="practice" options={{ title: strings.tabs.practice }} />
+      <Tabs.Screen name="breathe" options={{ title: strings.tabs.breathe }} />
+      <Tabs.Screen name="meditate" options={{ title: strings.tabs.meditate }} />
       <Tabs.Screen name="journal" options={{ title: strings.tabs.journal }} />
-      <Tabs.Screen name="studio" options={{ title: strings.tabs.studio }} />
     </Tabs>
   );
 }

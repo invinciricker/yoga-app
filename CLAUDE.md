@@ -67,18 +67,17 @@ Only the next phase has a brief; the architect writes each one when the owner as
 ## State
 (Updated by Claude Code at the end of each phase. 25 lines at most. Start with the list of phases done.)
 
-**Phases done: 0 (the shell), 1 (content and reading).** Next: Phase 2.
+**Phases done: 0 (the shell), 1 (content and reading), 2 (the new look and the new map).** Next: Phase 3 (its brief is not written yet: ask the architect).
 
-**16 Nov 2026, Phase 0.** Expo SDK 58, React Native 0.88, TypeScript strict, Expo Router (versions and notes: `docs/TECH.md`).
-- Built: the two variants (`app.config.ts`), `eas.json`, the theme helpers, the fonts, the base parts in `src/ui/`, `src/strings.ts`, the four tabs with the floating tab bar, the design gallery (preview only), the site page, the four workflows.
-- Expo: owner `invincirick`, project ID in `app.config.ts`. Package name still the placeholder `com.yogawithmaria.app` (one constant).
-- Android: the first build was requested without error and Expo created the signing key by itself. The owner has not installed it yet.
+**Phase 0 (16 Nov) and 1 (17 Nov).** Expo SDK 58, React Native 0.88, TypeScript strict, Expo Router (`docs/TECH.md`). Two variants (`app.config.ts`), `eas.json`, fonts, the parts in `src/ui/`, the four workflows, the content build (`tools/content/`), `src/content/` (load, store, selectors), the lesson, series and note pages, `VideoPlayer` (YouTube, with a web twin).
+- Expo owner `invincirick`; package name still the placeholder `com.yogawithmaria.app` (one constant). Expo created the signing key by itself.
+- Content address: `https://invinciricker.github.io/yoga-app/content/v1/` (`preview.json` / `content.json`), published by `pages.yml` on every merge into `main`. Still sample content (7 files `sample: true`).
 
-**17 Nov 2026, Phase 1.**
-- Built: the content build in `tools/content/` (`content:check`, `content:build`, `content:fallback`, `content:image`), `src/config.ts`, `src/content/` (load, store, selectors), the four content cards, the states, `RichText`, `VideoPlayer` (YouTube, with a web twin), Today, Practice, Journal, the lesson, series and journal entry pages.
-- Content address: `https://invinciricker.github.io/yoga-app/content/v1/` (`preview.json` for the preview app, `content.json` for production). Published by `pages.yml` on every merge into `main`.
-- Checks: `npm run check` green (59 tests, content check, 31 database checks), `expo-doctor` 20/20, web export builds with and without the bundled copy, pictures in `docs/screens/phase-1/`.
-- **Needs a new Android build** (the video player is a native library, and new scripts change the fingerprint). "Android build" now writes the link to the build on the run's Summary page.
-- Not yet proven: nothing of Phase 1 has run on a real phone. The video player, the keep-awake and pull to refresh were only seen on the web mirror or in tests.
-- Left for later, on purpose: the week card and "Mark as done" (Phase 3), the Studio card and page (Phase 2), series progress (`seriesProgress` answers 0; no bar is drawn), `file` videos.
-- Still sample content everywhere (7 files marked `sample: true`). Stand-in left: `src/ui/QuietPlace.tsx`, used by the Studio tab only.
+**17 Nov 2026, Phase 2.** The plan of 17 Nov recorded (`docs/V2.md`, old briefs in `docs/phases/old/`).
+- Theme: `palette.dark` / `palette.light`; `ThemeProvider`, `ThemeScope`, `useTheme`, `makeStyles` (`src/theme/ThemeProvider.tsx`); setting `ywm:appearance:v1` (System, Light, Dark in You); `?scheme=` in preview and web; status bar follows dark tops (`src/theme/statusBar.tsx`). Every part and screen converted; nothing outside `src/theme/` imports a colour (a test checks).
+- Map: five tabs (Home, Practice, Breathe, Meditate, Journal). `areas` in `src/config.ts` is all `false`: those three tabs are hidden in production and show a placeholder in preview. Notes at `/notes` (data still `content.journal`), the newest three at the bottom of Practice. `/maria` is a stand-in (`QuietPlace`); `/me` is You (Appearance, gallery link).
+- Home: the billboard (once a day, `ywm:billboard-day:v1`), then Today. `nextClass`, `longDate`, `showBillboard` in `src/lib/billboard.ts`.
+- New parts: `AreaCard` (gallery only), `RoomPlaceholder`; `JournalCard` became `NoteCard`; `Button kind="glass"`; `Overline tone="area" | "cover"`.
+- Checks: `npm run check` green (118 tests, content check, 31 database checks). `expo-doctor` 19/20 (three Expo patch releases since Phase 1, not upgraded). Pictures in both themes in `docs/screens/phase-2/`.
+- **Needs a new Android build** (`userInterfaceStyle` changed). Not yet proven on a real phone: nothing of Phases 1 and 2 (video, pull to refresh, snapping, status bar icons, the theme following the phone).
+- Left on purpose: the week card and "Mark as done" (Phase 4), Maria's real page and the welcome (Phase 3), anything to do in Breathe, Meditate or Journal.

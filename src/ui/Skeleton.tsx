@@ -5,7 +5,8 @@
  */
 import { StyleSheet, View, type DimensionValue, type StyleProp, type ViewStyle } from 'react-native';
 
-import { color, radius as radii } from '@/theme';
+import { radius as radii } from '@/theme';
+import { makeStyles } from '@/theme/ThemeProvider';
 
 export type SkeletonProps = {
   height: number;
@@ -16,6 +17,7 @@ export type SkeletonProps = {
 };
 
 export function Skeleton({ height, width = '100%', radius = 'lg', style }: SkeletonProps) {
+  const styles = useStyles();
   return (
     <View
       style={[styles.shape, { height, width, borderRadius: radii[radius] }, style]}
@@ -25,6 +27,8 @@ export function Skeleton({ height, width = '100%', radius = 'lg', style }: Skele
   );
 }
 
-const styles = StyleSheet.create({
-  shape: { backgroundColor: color.bg.raised },
-});
+const useStyles = makeStyles((color) =>
+  StyleSheet.create({
+    shape: { backgroundColor: color.bg.raised },
+  }),
+);

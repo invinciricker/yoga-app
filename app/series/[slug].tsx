@@ -1,6 +1,7 @@
 /**
  * A series: its cover with its name, a few lines about it, then its lessons in order, numbered.
- * (From Phase 3: a tick on the lessons done, and a "Continue" button.)
+ * The words on the cover use the onCover colours (covers are pictures, the same in both themes).
+ * (From Phase 4: a tick on the lessons done, and a "Continue" button.)
  */
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
@@ -42,17 +43,17 @@ export default function SeriesScreen() {
   const lessons = lessonsOfSeries(content, series.slug);
 
   return (
-    <Screen bleed>
+    <Screen bleed darkTop={size.cover.series}>
       <Cover aura={series.aura} image={series.cover} height={size.cover.series} radius="none" scrim>
         <View style={[styles.coverTop, { top: insets.top + space.md }]}>
           <IconButton icon={ChevronLeft} kind="glass" accessibilityLabel={strings.common.back} onPress={back} />
         </View>
         <View style={styles.coverWords}>
           <View style={styles.labels}>
-            <Overline>{strings.series.facts(lessons.length, seriesMinutes(content, series.slug))}</Overline>
-            <DraftChip item={series} />
+            <Overline tone="cover">{strings.series.facts(lessons.length, seriesMinutes(content, series.slug))}</Overline>
+            <DraftChip item={series} onCover />
           </View>
-          <Text variant="h1" accessibilityRole="header">
+          <Text variant="h1" color="onCover.primary" accessibilityRole="header">
             {series.title}
           </Text>
         </View>

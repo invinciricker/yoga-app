@@ -6,13 +6,18 @@ import { useCallback } from 'react';
 
 /** The address of each page. The file app/lesson/[slug].tsx answers to "/lesson/<slug>". */
 export const routes = {
-  today: '/' as Href,
+  home: '/' as Href,
   practice: '/practice' as Href,
-  journal: '/journal' as Href,
+  /** Maria's tips and notes (all of them), and one of them. */
+  notes: '/notes' as Href,
+  note: (slug: string): Href => ({ pathname: '/notes/[slug]', params: { slug } }),
+  /** Maria's page, behind the billboard. */
+  maria: '/maria' as Href,
+  /** You: the person's own page (Appearance). */
+  me: '/me' as Href,
   gallery: '/gallery' as Href,
   lesson: (slug: string): Href => ({ pathname: '/lesson/[slug]', params: { slug } }),
   series: (slug: string): Href => ({ pathname: '/series/[slug]', params: { slug } }),
-  entry: (slug: string): Href => ({ pathname: '/journal/[slug]', params: { slug } }),
 };
 
 /**

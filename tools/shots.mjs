@@ -1,12 +1,19 @@
 // Takes pictures of screens, so that they can be looked at without a phone.
 //
 //   npm run build:web
-//   npm run shots -- <phase> <route> [<route>…]
-//   example: npm run shots -- 0 / /practice /journal /studio /gallery:full
+//   npm run shots -- <phase> [--both] <route> [<route>…]
+//   example: npm run shots -- 2 --both / /:today /practice /gallery:full
 //
 // It serves the web export (dist/) on this machine, opens each route in Chrome at 390 × 844
 // (a phone), waits for the fonts, and saves docs/screens/phase-<n>/<route>.jpg.
-// The route "/" is saved as today.jpg. Add ":full" to a route to capture the whole scrolling page.
+// The route "/" is saved as home.jpg. Each route opens in a fresh browser profile (nothing saved
+// from the one before), so Home always opens on its billboard.
+// Options after a route:
+//   :full     the whole scrolling page (the window keeps its phone size inside the page)
+//   :today    Home only: the whole of Today, under the billboard        → home-today.jpg
+//   :light    the light theme (?scheme=light in the address)            → <name>-light.jpg
+//   :dark     the dark theme (?scheme=dark)                             → <name>-dark.jpg
+// --both takes every route twice, dark and light.
 // Chrome is found through the environment variable CHROME_PATH.
 //
 // The content: the app downloads it from GitHub Pages. Here that address is answered from this
@@ -26,7 +33,11 @@ const dist = join(root, 'dist');
 // The same address as CONTENT_BASE in src/config.ts.
 const CONTENT_BASE = 'https://invinciricker.github.io/yoga-app/content/v1/';
 const contentDir = join(root, 'dist-site', 'content', 'v1');
-const [phase, ...routes] = process.argv.slice(2);
+const [phase, ...rest] = process.argv.slice(2);
+const both = rest.includes('--both');
+const routes = rest
+  .filter((arg) => arg !== '--both')
+  .flatMap((arg) => (both ? [`${arg}:dark`, `${arg}:light`] : [arg]));
 
 if (!phase || routes.length === 0) {
   console.error('Usage: npm run shots -- <phase> <route> [<route>…]');
@@ -75,12 +86,32 @@ const browser = await puppeteer.launch({
 try {
   for (const arg of routes) {
     const [route, ...options] = arg.split(':');
-    const full = options.includes('full');
+    const today = options.includes('today');
+    const full = options.includes('full') || today;
     const offline = options.includes('offline');
-    const name = (route.replace(/^\/+|\/+$/g, '').replace(/\//g, '-') || 'today') + (offline ? '-offline' : '');
+    const scheme = options.find((o) => o === 'light' || o === 'dark');
+    const name =
+      (route.replace(/^\/+|\/+$/g, '').replace(/\//g, '-') || 'home') +
+      (today ? '-today' : '') +
+      (offline ? '-offline' : '') +
+      (scheme ? `-${scheme}` : '');
 
-    const page = await browser.newPage();
+    // A fresh profile for each picture: no saved theme, no "billboard already seen today".
+    const context = await browser.createBrowserContext();
+    const page = await context.newPage();
     await page.setViewport(PHONE);
+    if (full) {
+      // The app reads the window's size once (react-native-web's Dimensions) and follows every
+      // "resize". For a whole-page picture the window is made taller, but parts sized to the
+      // window (the billboard) must keep their phone size: the app is not told about the resize.
+      await page.evaluateOnNewDocument(() => {
+        const add = EventTarget.prototype.addEventListener;
+        EventTarget.prototype.addEventListener = function (type, ...more) {
+          if (type === 'resize' && (this === window || this === window.visualViewport)) return;
+          return add.call(this, type, ...more);
+        };
+      });
+    }
     // Answer the content address from this machine (or not at all, for ":offline").
     await page.setRequestInterception(true);
     page.on('request', async (request) => {
@@ -95,7 +126,7 @@ try {
         body: await readFile(file),
       });
     });
-    await page.goto(base + route, { waitUntil: 'networkidle0' });
+    await page.goto(base + route + (scheme ? `?scheme=${scheme}` : ''), { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
     await new Promise((r) => setTimeout(r, 1200)); // let the arriving animation finish
 
@@ -110,8 +141,10 @@ try {
     }
 
     const file = join(outDir, `${name}.jpg`);
-    await page.screenshot({ path: file, type: 'jpeg', quality: 85 });
-    await page.close();
+    // ":today": Today starts where the billboard (one phone window) ends.
+    const clip = today ? await page.evaluate((top) => ({ x: 0, y: top, width: innerWidth, height: innerHeight - top }), PHONE.height) : undefined;
+    await page.screenshot({ path: file, type: 'jpeg', quality: 85, clip });
+    await context.close();
     console.log(`saved docs/screens/phase-${phase}/${name}.jpg`);
   }
 } finally {

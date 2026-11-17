@@ -1,13 +1,14 @@
 /**
- * Practice: every lesson and series. A search, a row of filters, the series, then all lessons.
- * With a search or a filter active, the series step aside and the list shows what matches.
- * ("Saved" joins the filters in Phase 3.)
+ * Practice: every lesson and series. A search, a row of filters, the series, then all lessons,
+ * and at the bottom the three newest of Maria's notes.
+ * With a search or a filter active, the series and the notes step aside and the list shows what
+ * matches. ("Saved" joins the filters in Phase 4.)
  */
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { searchLessons, type LessonFilter } from '@/content/selectors';
+import { notesOfKind, searchLessons, type LessonFilter } from '@/content/selectors';
 import { useContent } from '@/content/store';
 import { routes } from '@/lib/nav';
 import { strings } from '@/strings';
@@ -17,6 +18,7 @@ import {
   Chip,
   EmptyState,
   LessonRow,
+  NoteCard,
   OfflineNote,
   Screen,
   SearchField,
@@ -26,6 +28,9 @@ import {
   Skeleton,
   Text,
 } from '@/ui';
+
+/** How many of Maria's notes the bottom of Practice shows; "See all" leads to the rest. */
+const NOTES_SHOWN = 3;
 
 const filters: { key: LessonFilter; label: string }[] = [
   { key: 'all', label: strings.practice.filterAll },
@@ -46,6 +51,7 @@ export default function PracticeScreen() {
   const [filter, setFilter] = useState<LessonFilter>('all');
   const searching = query.trim() !== '' || filter !== 'all';
   const lessons = searchLessons(content, query, filter);
+  const notes = notesOfKind(content).slice(0, NOTES_SHOWN);
   const clear = () => {
     setQuery('');
     setFilter('all');
@@ -115,6 +121,21 @@ export default function PracticeScreen() {
       ) : status !== 'loading' ? (
         <EmptyState sentence={strings.practice.empty} aura="forest" />
       ) : null}
+
+      {!searching && notes.length > 0 ? (
+        <Arrive index={3} style={styles.block}>
+          <SectionHeader
+            title={strings.practice.notes(content.site.teacherFirstName)}
+            actionLabel={strings.common.seeAll}
+            onAction={() => router.push(routes.notes)}
+          />
+          <View style={styles.notes}>
+            {notes.map((entry) => (
+              <NoteCard key={entry.slug} entry={entry} onPress={() => router.push(routes.note(entry.slug))} />
+            ))}
+          </View>
+        </Arrive>
+      ) : null}
     </Screen>
   );
 }
@@ -128,4 +149,5 @@ const styles = StyleSheet.create({
   chips: { gap: space.xs, paddingRight: layout.gutter, paddingVertical: space.xxs },
   block: { gap: space.md },
   list: { gap: space.xs },
+  notes: { gap: space.xxl },
 });

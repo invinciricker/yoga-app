@@ -1,6 +1,6 @@
 /**
- * A journal entry: a reading page. The kind and the date, the title, the photo if there is one,
- * the text, and at the end the lessons Maria suggests ("Try this").
+ * One of Maria's notes or tips: a reading page. The kind and the date, the title, the photo if there
+ * is one, the text, and at the end the lessons Maria suggests ("Try this").
  */
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
@@ -8,37 +8,40 @@ import { StyleSheet, View } from 'react-native';
 
 import { dayLabel } from '@/content/labels';
 import { slugsForStaticPages } from '@/content/load';
-import { findEntry, findLesson } from '@/content/selectors';
+import { findLesson, findNote } from '@/content/selectors';
 import { useContent } from '@/content/store';
 import { routes, useBack } from '@/lib/nav';
 import { strings } from '@/strings';
 import { space } from '@/theme';
 import { Arrive, Cover, DraftChip, IconButton, LessonRow, LoadingPage, NotHere, Overline, RichText, Screen, SectionHeader, Text } from '@/ui';
 
-/** Web preview only: the journal pages to prepare when the website is built. */
+/**
+ * Web preview only: the pages to prepare when the website is built.
+ * "journal" is the key of Maria's notes in content.json: a permanent data name (docs/V2.md).
+ */
 export function generateStaticParams() {
   return slugsForStaticPages('journal');
 }
 
-export default function JournalEntryScreen() {
+export default function NoteScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
-  const back = useBack(routes.journal);
+  const back = useBack(routes.notes);
   const content = useContent((s) => s.content);
   const status = useContent((s) => s.status);
 
-  const entry = findEntry(content, slug);
+  const entry = findNote(content, slug);
   if (!entry) {
     if (status === 'loading') return <LoadingPage />;
     return (
       <NotHere
-        sentence={strings.journal.gone}
-        actionLabel={strings.journal.toJournal}
-        onAction={() => router.replace(routes.journal)}
+        sentence={strings.notes.gone}
+        actionLabel={strings.notes.toNotes}
+        onAction={() => router.replace(routes.notes)}
       />
     );
   }
-  const kind = entry.kind === 'tip' ? strings.journal.tip : strings.journal.note;
+  const kind = entry.kind === 'tip' ? strings.notes.tip : strings.notes.note;
   // A lesson that has been taken down since is simply not listed.
   const related = entry.related.map((s) => findLesson(content, s)).filter((l) => l !== undefined);
 
@@ -48,7 +51,7 @@ export default function JournalEntryScreen() {
         <IconButton icon={ChevronLeft} accessibilityLabel={strings.common.back} onPress={back} />
         <View style={styles.title}>
           <View style={styles.labels}>
-            <Overline>{`${kind} · ${dayLabel(entry.published)}`}</Overline>
+            <Overline tone="area" area="move">{`${kind} · ${dayLabel(entry.published)}`}</Overline>
             <DraftChip item={entry} />
           </View>
           <Text variant="h1" accessibilityRole="header">
@@ -73,7 +76,7 @@ export default function JournalEntryScreen() {
 
       {related.length > 0 ? (
         <Arrive index={3} style={styles.related}>
-          <SectionHeader title={strings.journal.tryThis} />
+          <SectionHeader title={strings.notes.tryThis} />
           <View>
             {related.map((lesson) => (
               <LessonRow key={lesson.slug} lesson={lesson} onPress={() => router.push(routes.lesson(lesson.slug))} />

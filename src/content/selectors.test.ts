@@ -1,7 +1,7 @@
 import {
   dayOf,
   featuredLesson,
-  journalEntries,
+  notesOfKind,
   latestQuote,
   lessonsOfSeries,
   newestLessons,
@@ -67,7 +67,7 @@ describe('series', () => {
     expect(placeInSeries(content, morning)).toBeUndefined();
   });
 
-  it('has no progress until Phase 3', () => {
+  it('has no progress until Phase 4', () => {
     expect(seriesProgress(content, 'evenings')).toBe(0);
   });
 });
@@ -94,15 +94,15 @@ describe('searchLessons', () => {
   });
 });
 
-describe('journal', () => {
+describe('notes (the data key is still "journal")', () => {
   it('finds the newest entry with a saying', () => {
     expect(latestQuote(content)?.slug).toBe('slow');
     expect(latestQuote({ ...content, journal: content.journal.filter((j) => !j.quote) })).toBeUndefined();
   });
 
   it('lists entries newest first, all or one kind', () => {
-    expect(slugs(journalEntries(content))).toEqual(['slow', 'jaw', 'old']);
-    expect(slugs(journalEntries(content, 'tip'))).toEqual(['jaw']);
-    expect(slugs(journalEntries(content, 'note'))).toEqual(['slow', 'old']);
+    expect(slugs(notesOfKind(content))).toEqual(['slow', 'jaw', 'old']);
+    expect(slugs(notesOfKind(content, 'tip'))).toEqual(['jaw']);
+    expect(slugs(notesOfKind(content, 'note'))).toEqual(['slow', 'old']);
   });
 });

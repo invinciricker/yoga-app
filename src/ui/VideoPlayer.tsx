@@ -14,7 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import YoutubePlayer, { type YoutubeIframeRef } from 'react-native-youtube-iframe';
 
-import { color } from '@/theme';
+import { makeStyles } from '@/theme/ThemeProvider';
 
 import { size } from './sizes';
 import { canPlay, type VideoPlayerProps } from './video';
@@ -22,6 +22,7 @@ import { canPlay, type VideoPlayerProps } from './video';
 const AWAKE_TAG = 'ywm-video'; // our own tag, so we never switch off someone else's request
 
 export function VideoPlayer({ video, seek, onError }: VideoPlayerProps) {
+  const styles = useStyles();
   const player = useRef<YoutubeIframeRef>(null);
   const [width, setWidth] = useState(0);
   const [ready, setReady] = useState(false);
@@ -87,8 +88,11 @@ export function VideoPlayer({ video, seek, onError }: VideoPlayerProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  // 16:9, square corners, on the darkest ground (the letterbox).
-  box: { width: '100%', aspectRatio: size.videoAspect, backgroundColor: color.bg.sunken },
-  blank: { backgroundColor: color.bg.sunken },
-});
+// The player is always dark: the lesson draws it inside <ThemeScope scheme="dark">.
+const useStyles = makeStyles((color) =>
+  StyleSheet.create({
+    // 16:9, square corners, on the darkest ground (the letterbox).
+    box: { width: '100%', aspectRatio: size.videoAspect, backgroundColor: color.bg.sunken },
+    blank: { backgroundColor: color.bg.sunken },
+  }),
+);

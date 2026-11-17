@@ -8,7 +8,8 @@ import { useId, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Defs, Ellipse, LinearGradient, RadialGradient, Rect, Stop } from 'react-native-svg';
 
-import { aura, color, type AuraName } from '@/theme';
+import { aura, type AuraName } from '@/theme';
+import { useTheme } from '@/theme/ThemeProvider';
 
 // How the scenes are drawn (same proportions as docs/design/mockups.html).
 const GROUND_STOPS = [0, 0.55, 1]; // where the three ground colours sit, top to bottom
@@ -21,6 +22,8 @@ export type AuraProps = { name: AuraName };
 
 export function Aura({ name }: AuraProps) {
   const scene = aura[name];
+  // Auras look the same in both themes: the halo is the light gold used on covers.
+  const { onCover } = useTheme();
   // Gradient ids must be unique on the page (the web shares one id space).
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
   const [box, setBox] = useState<{ w: number; h: number } | null>(null);
@@ -49,9 +52,9 @@ export function Aura({ name }: AuraProps) {
               </RadialGradient>
             ))}
             <RadialGradient id={`${id}h`} cx="50%" cy="50%" r="50%">
-              <Stop offset={1 / HALO_SCALE} stopColor={color.accent.goldBright} stopOpacity={HALO_OPACITY} />
-              <Stop offset={HALO_MID.at} stopColor={color.accent.goldBright} stopOpacity={HALO_MID.opacity} />
-              <Stop offset={1} stopColor={color.accent.goldBright} stopOpacity={0} />
+              <Stop offset={1 / HALO_SCALE} stopColor={onCover.accent} stopOpacity={HALO_OPACITY} />
+              <Stop offset={HALO_MID.at} stopColor={onCover.accent} stopOpacity={HALO_MID.opacity} />
+              <Stop offset={1} stopColor={onCover.accent} stopOpacity={0} />
             </RadialGradient>
           </Defs>
 
