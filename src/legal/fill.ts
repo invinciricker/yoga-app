@@ -3,7 +3,7 @@
  * from the content (content/site.yaml, downloaded as content.json), so the page is right as soon as
  * the content changes, with no new version of the app. A value that is not set yet shows as
  * "(not set yet)". Pure functions, tested in fill.test.ts. The website does the same in
- * tools/site/build.mjs.
+ * tools/site/build.ts.
  */
 import type { Block, ContentFile, Span } from '../../shared/content-schema';
 

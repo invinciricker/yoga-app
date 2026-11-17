@@ -3,6 +3,7 @@
 # What it does: builds Maria's content, the small website and the web version of the app, and
 #   publishes them at
 #   https://invinciricker.github.io/yoga-app/               (the website)
+#   https://invinciricker.github.io/yoga-app/privacy.html   (the privacy page; Google Play links to it)
 #   https://invinciricker.github.io/yoga-app/app/           (the web preview of the app)
 #   https://invinciricker.github.io/yoga-app/content/v1/    (what the app downloads: lessons, photos)
 #   So a change in content/ is live for everyone a few minutes after it is merged.
