@@ -9,11 +9,11 @@ import { strings } from '@/strings';
 export type StudioClass = Studio['classes'][number];
 
 /** The weekdays of the content, in the order of Date.getDay() (Sunday is 0). */
-const weekdayKeys: StudioClass['day'][] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-const DAYS_IN_WEEK = 7;
+export const weekdayKeys: StudioClass['day'][] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+export const DAYS_IN_WEEK = 7;
 
 /** "18:30" → [18, 30]; undefined when the time cannot be read. */
-function clock(text: string): [number, number] | undefined {
+export function clock(text: string): [number, number] | undefined {
   const m = /^(\d{1,2}):(\d{2})$/.exec(text);
   if (!m) return undefined;
   const [hour, minute] = [Number(m[1]), Number(m[2])];

@@ -117,9 +117,25 @@ export const strings = {
     noMatch: 'Nothing of that kind yet.',
     empty: 'Maria’s tips and notes will be kept here, a few lines at a time.',
   },
-  // Maria's page, behind the billboard. Its real content arrives in Phase 3.
+  // Maria's page, behind the billboard (docs/phases/phase-3.md). Every block hides when its content is missing.
   maria: {
-    empty: 'Soon, a little about Maria and where to practise with her in person.',
+    yourTeacher: 'Your teacher',
+    whyYoga: 'Why yoga',
+    classesWith: (teacher: string) => `Classes with ${teacher}`,
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    next: 'Next',
+    // "18:30 – 19:45" and "All levels · 75 min".
+    timeRange: (start: string, end: string) => `${start} – ${end}`,
+    joined: (parts: string[]) => parts.join(' · '),
+    openInMaps: 'Open in Maps',
+    message: (teacher: string) => `Message ${teacher}`,
+    call: 'Call',
+    instagram: 'Instagram',
+    email: 'Email',
+    website: 'Website',
+    // When a link has nothing on this phone to open it: one calm line, then the address itself.
+    notOpened: 'That did not open here.',
   },
   // You: the person's own page (settings now; more in later phases).
   me: {
