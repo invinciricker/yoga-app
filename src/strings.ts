@@ -70,6 +70,21 @@ export const strings = {
     readNote: 'Read the note',
     readTip: 'Read the tip',
     empty: 'The first lessons are on their way. Pull down to look again.',
+    // The big card, once its lesson is done today.
+    doneToday: 'Done today',
+  },
+  // The week card on Today and in You: seven candles, Monday to Sunday.
+  week: {
+    letters: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+    // Monday first, for screen readers.
+    names: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    thisWeek: 'This week',
+    streak: (n: number) => (n === 1 ? '1 day' : `${n} days in a row`),
+    first: 'Light your first candle',
+    today: 'Light today’s candle',
+    // Read aloud: "4 days in a row. This week, lit: Monday, Tuesday."
+    spoken: (title: string, lit: string[]) =>
+      lit.length > 0 ? `${title}. This week, lit: ${lit.join(', ')}.` : `${title}. Nothing lit this week yet.`,
   },
   practice: {
     title: 'Practice',
@@ -77,12 +92,15 @@ export const strings = {
     clearSearch: 'Clear the search',
     filterAll: 'All',
     filterShort: 'Under 15 min',
+    filterSaved: 'Saved',
     series: 'Series',
     seriesCount: (n: number) => (n === 1 ? 'Series · 1 lesson' : `Series · ${n} lessons`),
     allLessons: 'All lessons',
     lessonCount: (n: number) => (n === 1 ? '1 lesson' : `${n} lessons`),
     noMatch: 'Nothing matches that yet. Try another word, or clear the search.',
     empty: 'Lessons and series will gather here, ready when you are.',
+    // The "Saved" filter, and You → Saved, with nothing in them.
+    savedEmpty: 'Tap the bookmark on a lesson to keep it here.',
     notes: (teacher: string) => `Notes from ${teacher}`,
   },
   lesson: {
@@ -97,11 +115,47 @@ export const strings = {
     openYouTube: 'Open in YouTube',
     gone: 'This lesson is no longer here.',
     toPractice: 'Back to Practice',
+    markDone: 'Mark as done',
+    doneAgain: 'Done again',
+    // A quiet line above the bar, once the lesson was done.
+    doneToday: 'Done today',
+    doneYesterday: 'Done yesterday',
+    doneOn: (date: string) => `Done on ${date}`,
+    // The bookmark, on the cover and on Today's big card.
+    save: 'Save lesson',
+    unsave: 'Remove from saved',
+    // Read aloud after a lesson's name in a list.
+    isDone: 'done',
+    isSaved: 'saved',
+  },
+  // The closing screen, after a lesson (the "After practice" mockup).
+  done: {
+    wellDone: 'Well done.',
+    // "Twelve quiet minutes, just for you." The minutes are a word up to twelve, a number above.
+    words: ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'],
+    minutes: (n: number, word: string | undefined) =>
+      n === 1 ? 'One quiet minute, just for you.' : `${word ?? n} quiet minutes, just for you.`,
+    howFelt: 'How did that feel?',
+    difficulty: {
+      gentle: { title: 'Too gentle', line: 'I could have done more' },
+      right: { title: 'Just right', line: 'A good match for today' },
+      much: { title: 'Too much', line: 'I had to stop or skip parts' },
+    },
+    feelingTitle: 'And now you feel… (optional)',
+    feelings: { calmer: 'Calmer', energised: 'Energised', stronger: 'Stronger', tired: 'Tired' },
+    // Phase 9 changes this line, when the answers start reaching Maria.
+    privacy: 'Your answer stays on your phone.',
+    close: 'Done',
+    // The one hand-off to another area, once that area is built (src/day/record.ts, nextStep).
+    next: { breathe: 'Three minutes of breath?', sit: 'Sit for five?', write: 'Write a line about it?' },
   },
   series: {
     facts: (lessons: number, minutes: number) =>
       `${lessons === 1 ? '1 lesson' : `${lessons} lessons`} · ${minutes} min`,
     gone: 'This series is no longer here.',
+    progress: (done: number, total: number) => `${done} of ${total} done`,
+    allDone: (total: number) => `All ${total} done.`,
+    continue: 'Continue',
   },
   // Maria's tips and notes (once the "Journal" tab; the data keeps the name "journal").
   notes: {
@@ -179,6 +233,32 @@ export const strings = {
     about: 'About',
     privacy: 'Privacy',
     galleryLink: 'Design gallery',
+    // The three numbers at the top: "12 days", "184 minutes", "5 longest run".
+    days: (n: number) => (n === 1 ? 'day' : 'days'),
+    minutes: (n: number) => (n === 1 ? 'minute' : 'minutes'),
+    longest: 'longest run',
+    nothingYet: 'Your practice will gather here, a candle a day.',
+    saved: 'Saved',
+    history: 'History',
+    deleteData: 'Delete my data',
+  },
+  // You → Saved.
+  saved: {
+    title: 'Saved',
+  },
+  // You → History: what was done, by day.
+  history: {
+    title: 'History',
+    today: 'Today',
+    yesterday: 'Yesterday',
+  },
+  // You → Delete my data. A page of its own, not a pop-up.
+  deleteData: {
+    title: 'Delete my data',
+    sentence:
+      'This erases your candles, the lessons you finished and saved, and your answers, from this phone. Your settings stay.',
+    delete: 'Delete',
+    keep: 'Keep',
   },
   // You → About.
   about: {
@@ -257,5 +337,12 @@ export const strings = {
     search: 'Search field',
     states: 'States: offline, draft, loading, empty',
     tabBar: 'Tab bar',
+    sample: 'Sample progress',
+    sampleSwitch: 'Show sample progress',
+    sampleLine: 'Four days of candles, a series begun, a lesson saved. In memory only, never saved.',
+    weekCard: 'Week card',
+    choices: 'Answer choices (closing screen)',
+    marks: 'Lesson rows: done, saved',
+    progress: 'Series progress',
   },
 } as const;

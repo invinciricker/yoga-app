@@ -8,7 +8,6 @@ import {
   placeInSeries,
   searchLessons,
   seriesMinutes,
-  seriesProgress,
 } from './selectors';
 import { testContent as content } from './testContent';
 
@@ -66,10 +65,6 @@ describe('series', () => {
     const morning = content.lessons.find((l) => l.slug === 'morning')!;
     expect(placeInSeries(content, morning)).toBeUndefined();
   });
-
-  it('has no progress until Phase 4', () => {
-    expect(seriesProgress(content, 'evenings')).toBe(0);
-  });
 });
 
 describe('searchLessons', () => {
@@ -91,6 +86,14 @@ describe('searchLessons', () => {
     expect(slugs(searchLessons(content, '', 'short'))).toEqual(['wind-down', 'breath']);
     expect(slugs(searchLessons(content, 'breath', 'short'))).toEqual(['breath']);
     expect(searchLessons(content, 'breath', 'strong')).toEqual([]);
+  });
+});
+
+describe('searchLessons, saved', () => {
+  it('keeps the saved lessons, newest first, also with a search', () => {
+    expect(slugs(searchLessons(content, '', 'saved', ['legs', 'wind-down', 'gone']))).toEqual(['wind-down', 'legs']);
+    expect(slugs(searchLessons(content, 'strong', 'saved', ['legs', 'wind-down']))).toEqual(['legs']);
+    expect(searchLessons(content, '', 'saved', [])).toEqual([]);
   });
 });
 

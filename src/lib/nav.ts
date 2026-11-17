@@ -18,10 +18,22 @@ export const routes = {
   about: '/me/about' as Href,
   privacy: '/me/privacy' as Href,
   licences: '/me/licences' as Href,
+  saved: '/me/saved' as Href,
+  history: '/me/history' as Href,
+  deleteData: '/me/delete' as Href,
   /** The three screens of the first launch. */
   welcome: '/welcome' as Href,
   gallery: '/gallery' as Href,
   lesson: (slug: string): Href => ({ pathname: '/lesson/[slug]', params: { slug } }),
+  /**
+   * A lesson's closing screen ("Well done."), over the lesson. Its own address, not under
+   * /lesson/<slug>/: the web export would otherwise hold a folder and a page of the same name.
+   */
+  lessonDone: (slug: string): Href => ({ pathname: '/lesson-done/[slug]', params: { slug } }),
+  /** The tabs of the other areas, for the one hand-off a closing screen may offer. */
+  breathe: '/breathe' as Href,
+  meditate: '/meditate' as Href,
+  journal: '/journal' as Href,
   series: (slug: string): Href => ({ pathname: '/series/[slug]', params: { slug } }),
 };
 

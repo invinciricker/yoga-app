@@ -9,8 +9,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo, type ReactNode } from 'react';
 
 import { useContent } from '@/content/store';
+import { useDays } from '@/day/store';
 import { useReduceMotion } from '@/lib/motion';
 import { usePrefs } from '@/lib/prefs';
+import { SampleFromAddress } from '@/practice/demo';
+import { usePractice } from '@/practice/store';
 import { fontFiles } from '@/theme/fonts';
 import { ThemedStatusBar } from '@/theme/statusBar';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
@@ -54,6 +57,11 @@ function Screens(): ReactNode {
       >
         {/* The welcome fades in, whether it replaces the tabs on a first launch or opens from About. */}
         <Stack.Screen name="welcome" options={{ animation: 'fade' }} />
+        {/* A lesson's closing screen covers the lesson, rising from below (a fade with reduce motion). */}
+        <Stack.Screen
+          name="lesson-done/[slug]"
+          options={{ presentation: 'fullScreenModal', animation: reduce ? 'fade' : 'slide_from_bottom' }}
+        />
       </Stack>
     </NavigationTheme>
   );
@@ -65,11 +73,18 @@ export default function RootLayout() {
   const contentStarted = useContent((s) => s.started);
   // True once the preferences (theme, reduce motion, welcome seen, billboard's day) have been read.
   const prefsStarted = usePrefs((s) => s.started);
-  const ready = fontsReady && contentStarted && prefsStarted;
+  // True once the record of the day and the saved lessons have been read, so Today's week never pops in.
+  const daysStarted = useDays((s) => s.started);
+  const practiceStarted = usePractice((s) => s.started);
+  const progressStarted = daysStarted && practiceStarted;
+  const ready = fontsReady && contentStarted && prefsStarted && progressStarted;
 
-  // Once, when the app opens: read the preferences; show the saved content, then download the newest.
+  // Once, when the app opens: read the preferences and the person's progress; show the saved
+  // content, then download the newest.
   useEffect(() => {
     void usePrefs.getState().start();
+    void useDays.getState().start();
+    void usePractice.getState().start();
     void useContent.getState().start();
   }, []);
 
@@ -81,13 +96,14 @@ export default function RootLayout() {
   // If it ever did, that is a broken build: stop loudly instead of showing a fallback font.
   if (fontsError) throw fontsError;
 
-  // Nothing may ever render in a fallback font or in the wrong theme: draw nothing (the splash is
-  // still up) until ready.
-  if (!fontsReady || !prefsStarted) return null;
+  // Nothing may ever render in a fallback font, in the wrong theme or without the person's
+  // progress: draw nothing (the splash is still up) until ready.
+  if (!fontsReady || !prefsStarted || !progressStarted) return null;
 
   return (
     <ThemeProvider>
       <ThemedStatusBar />
+      <SampleFromAddress />
       <Screens />
     </ThemeProvider>
   );
