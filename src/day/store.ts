@@ -27,6 +27,13 @@ type DaysState = {
    * recorded now.
    */
   add: (entry: DayEntry, opening?: string) => boolean;
+  /**
+   * Records one thing done, or updates it: an entry of the same kind, ref and day is replaced
+   * (a page being written keeps one entry per day, its minutes growing). Phase 5.
+   */
+  upsert: (entry: DayEntry) => void;
+  /** Forgets every entry of one ref (a page deleted, or left with nothing written). Phase 5. */
+  removeRef: (ref: string) => void;
   /** Delete my data: forgets every entry, on the phone too. */
   clear: () => Promise<void>;
   /** Shows sample entries in memory (or, with undefined, the person's own again). */
@@ -59,6 +66,22 @@ export const useDays = create<DaysState>((set, get) => ({
     set({ entries });
     if (!get().sample) void writeJson(storageKeys.days, entries);
     return true;
+  },
+
+  upsert: (entry) => {
+    const same = (e: DayEntry) => e.kind === entry.kind && e.ref === entry.ref && e.day === entry.day;
+    const before = get().entries;
+    const entries = before.some(same) ? before.map((e) => (same(e) ? entry : e)) : [...before, entry];
+    set({ entries });
+    if (!get().sample) void writeJson(storageKeys.days, entries);
+  },
+
+  removeRef: (ref) => {
+    const before = get().entries;
+    const entries = before.filter((e) => e.ref !== ref);
+    if (entries.length === before.length) return;
+    set({ entries });
+    if (!get().sample) void writeJson(storageKeys.days, entries);
   },
 
   clear: async () => {

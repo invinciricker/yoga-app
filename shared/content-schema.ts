@@ -190,6 +190,110 @@ export const siteSource = z.object({
   publisher: z.string().min(1).max(60).optional(),
 }).strict();
 
+// ------------------------------------------------------------------ guided journals (added 19 Nov 2026, Phase 5)
+/**
+ * content/guided-journals/<slug>/journal.yaml: a guided journal (Gratitude, later Habit and Health).
+ * A journal is a list of sections; a section is a list of pages; a page is a list of prompts.
+ * The person's answers are kept on their phone under the prompt ids, so every id is PERMANENT:
+ * once published, never rename or reuse a section, page or prompt id. Change the words instead.
+ * Explained for humans in docs/CONTENT.md ("A guided journal"); the rules between ids (no two the
+ * same, a recall that points to a real prompt…) are checked by tools/content/journals.ts.
+ */
+export const promptKinds = ['note', 'text', 'list', 'choice', 'scale', 'yesno', 'fill', 'recall'] as const;
+
+/** A blank in a fill-in sentence: two underscores or more ("I am glad that ___"). */
+export const blankPattern = /_{2,}/;
+/** The pieces of a fill-in sentence between its blanks: "a ___ b ___" → ["a ", " b ", ""]. */
+export const sentencePieces = (sentence: string): string[] => sentence.split(/_{2,}/);
+
+/** A section, page or prompt id: lowercase letters, digits and single dashes, like g-d01-good. */
+const journalId = z.string().regex(slugPattern, 'an id like g-d01-good: lowercase letters, digits and single dashes').max(60);
+const ask = z.string().min(1).max(300);
+
+/** Shows a prompt only when an earlier prompt of the same page has the answer `is`, or any answer. */
+const showIfSource = z.object({
+  prompt: journalId,
+  is: z.union([z.string(), z.number(), z.boolean()]).optional(),
+  answered: z.literal(true).optional(),
+}).strict();
+
+export const promptSource = z.discriminatedUnion('kind', [
+  /** A short reading card (Markdown), nothing to answer. */
+  z.object({ kind: z.literal('note'), text: z.string().min(1).max(1500), showIf: showIfSource.optional() }).strict(),
+  /** A field that grows with the writing. `share`: the words of a button that sends the text elsewhere. */
+  z.object({
+    kind: z.literal('text'), id: journalId, ask, hint: z.string().min(1).max(200).optional(),
+    lines: z.number().int().min(1).max(12).optional(), share: z.string().min(1).max(30).optional(),
+    showIf: showIfSource.optional(),
+  }).strict(),
+  /** `count` short lines. */
+  z.object({
+    kind: z.literal('list'), id: journalId, ask, count: z.number().int().min(1).max(10),
+    hint: z.string().min(1).max(200).optional(), showIf: showIfSource.optional(),
+  }).strict(),
+  /** One option, or several with `many`. */
+  z.object({
+    kind: z.literal('choice'), id: journalId, ask, options: z.array(z.string().min(1).max(60)).min(2).max(8),
+    many: z.boolean().optional(), showIf: showIfSource.optional(),
+  }).strict(),
+  /** Round buttons from `from` to `to`, with words under the two ends. */
+  z.object({
+    kind: z.literal('scale'), id: journalId, ask, from: z.union([z.literal(0), z.literal(1)]),
+    to: z.union([z.literal(5), z.literal(10)]), low: z.string().min(1).max(30), high: z.string().min(1).max(30),
+    showIf: showIfSource.optional(),
+  }).strict(),
+  z.object({ kind: z.literal('yesno'), id: journalId, ask, showIf: showIfSource.optional() }).strict(),
+  /** A sentence with blanks written ___ (two or more underscores). */
+  z.object({
+    kind: z.literal('fill'), id: journalId,
+    sentence: z.string().min(1).max(300).regex(blankPattern, 'a sentence with at least one blank, written ___ (two or more underscores)'),
+    showIf: showIfSource.optional(),
+  }).strict(),
+  /** Shows an earlier answer (`of`: a prompt id of the same journal). */
+  z.object({
+    kind: z.literal('recall'), of: journalId, which: z.enum(['first', 'latest']).optional(),
+    label: z.string().min(1).max(80).optional(), showIf: showIfSource.optional(),
+  }).strict(),
+]);
+
+const pageSource = z.object({
+  id: journalId,
+  title: z.string().min(1).max(60),
+  /** The same page, this many times in a row. */
+  times: z.number().int().min(1).max(30).optional(),
+  /** The words of a quiet button that passes the page without writing ("Not today"). */
+  skip: z.string().min(1).max(30).optional(),
+  prompts: z.array(promptSource).min(1),
+}).strict();
+
+const sectionSource = z.object({
+  id: journalId,
+  title: z.string().min(1).max(60),
+  /** Default 1. "forever" is allowed on the last section only (the pool that keeps going). */
+  repeat: z.union([z.number().int().min(1).max(52), z.literal('forever')]).optional(),
+  /** Its pages may all be written on one day (a set-up). Default false. */
+  together: z.boolean().optional(),
+  pages: z.array(pageSource).min(1),
+}).strict();
+
+export const guidedJournalSource = z.object({
+  title: z.string().min(1).max(40),
+  /** One line under the title. */
+  summary: z.string().min(1).max(140),
+  /** Its cover. A journal's cover is always dark (auras are night pictures). */
+  aura: auraName,
+  /** Its place on the Journal tab, 1 first. */
+  order: z.number().int().min(1),
+  /** What a page usually takes: "3 min a page". */
+  minutes: z.number().int().min(1).max(60),
+  draft: z.boolean().default(false),
+  /** "About this journal", shown before page 1. Each text is Markdown. */
+  intro: z.array(z.object({ title: z.string().min(1).max(60), text: z.string().min(1).max(3000) }).strict()).min(1),
+  /** The research behind it, plain text, at the end of "About this journal". */
+  sources: z.array(z.string().min(1).max(400)).optional(),
+  sections: z.array(sectionSource).min(1),
+}).strict();
+
 // ------------------------------------------------------------------ what the app downloads (content.json)
 /** A picture prepared by the build: several widths of the same image, biggest last. Paths are relative to content.json. */
 export const image = z.object({
@@ -283,6 +387,103 @@ export const studio = z.object({
   body: z.array(block).default([]),
 });
 
+/**
+ * A guided journal as the app receives it (added 19 Nov 2026, Phase 5): the source with its slug,
+ * the defaults filled in, and every `intro` text and `note` text turned into blocks.
+ * Read LENIENTLY (`readableJournals` below), because Phase 6 and later add prompt kinds and fields
+ * that an older app must survive: unknown fields are ignored, a prompt it cannot read is left out
+ * of its page (a page left with nothing says so in the app), and a journal it cannot read is left
+ * out without stopping the rest of the content.
+ */
+const showIf = z.object({
+  prompt: z.string(),
+  is: z.union([z.string(), z.number(), z.boolean()]).optional(),
+  answered: z.boolean().optional(),
+});
+const promptId = z.string().min(1);
+export const guidedPrompt = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('note'), text: z.array(block), showIf: showIf.optional() }),
+  z.object({
+    kind: z.literal('text'), id: promptId, ask: z.string(), hint: z.string().optional(),
+    lines: z.number().int().min(1).max(30).default(3), share: z.string().optional(), showIf: showIf.optional(),
+  }),
+  z.object({
+    kind: z.literal('list'), id: promptId, ask: z.string(), count: z.number().int().min(1).max(10),
+    hint: z.string().optional(), showIf: showIf.optional(),
+  }),
+  z.object({
+    kind: z.literal('choice'), id: promptId, ask: z.string(), options: z.array(z.string()).min(1).max(12),
+    many: z.boolean().default(false), showIf: showIf.optional(),
+  }),
+  z.object({
+    kind: z.literal('scale'), id: promptId, ask: z.string(), from: z.number().int(), to: z.number().int(),
+    low: z.string(), high: z.string(), showIf: showIf.optional(),
+  }).refine((s) => s.to > s.from && s.to - s.from <= 10),
+  z.object({ kind: z.literal('yesno'), id: promptId, ask: z.string(), showIf: showIf.optional() }),
+  z.object({ kind: z.literal('fill'), id: promptId, sentence: z.string().regex(blankPattern), showIf: showIf.optional() }),
+  z.object({
+    kind: z.literal('recall'), of: z.string(), which: z.enum(['first', 'latest']).default('latest'),
+    label: z.string().optional(), showIf: showIf.optional(),
+  }),
+]);
+export const guidedPage = z.object({
+  id: z.string().min(1),
+  title: z.string(),
+  times: z.number().int().min(1).default(1),
+  skip: z.string().optional(),
+  /** May be empty in the app: every prompt of the page was of a kind this version cannot draw. */
+  prompts: z.array(guidedPrompt),
+});
+export const guidedSection = z.object({
+  id: z.string().min(1),
+  title: z.string(),
+  repeat: z.union([z.number().int().min(1), z.literal('forever')]).default(1),
+  together: z.boolean().default(false),
+  pages: z.array(guidedPage).min(1),
+});
+export const guidedJournal = z.object({
+  slug,
+  title: z.string(),
+  summary: z.string(),
+  aura: auraName.catch('rose'),
+  order: z.number(),
+  minutes: z.number(),
+  draft: z.boolean().default(false),
+  intro: z.array(z.object({ title: z.string(), text: z.array(block) })),
+  sources: z.array(z.string()).default([]),
+  sections: z.array(guidedSection).min(1),
+});
+
+/** The journals of a downloaded file that this version can read; see guidedJournal above. Never throws. */
+export function readableJournals(raw: unknown): unknown[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((journal: unknown) => {
+    const checked = guidedJournal.safeParse(withReadablePrompts(journal));
+    return checked.success ? [checked.data] : [];
+  });
+}
+
+/** The same journal with every prompt this version cannot read left out of its page. */
+function withReadablePrompts(journal: unknown): unknown {
+  const isObject = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v);
+  if (!isObject(journal) || !Array.isArray(journal.sections)) return journal;
+  return {
+    ...journal,
+    sections: journal.sections.map((section: unknown) =>
+      isObject(section) && Array.isArray(section.pages)
+        ? {
+            ...section,
+            pages: section.pages.map((page: unknown) =>
+              isObject(page) && Array.isArray(page.prompts)
+                ? { ...page, prompts: page.prompts.filter((prompt: unknown) => guidedPrompt.safeParse(prompt).success) }
+                : page,
+            ),
+          }
+        : section,
+    ),
+  };
+}
+
 /** content/v1/content.json (published items) and content/v1/preview.json (drafts included). */
 export const contentFile = z.object({
   schemaVersion: z.literal(SCHEMA_VERSION),
@@ -298,6 +499,11 @@ export const contentFile = z.object({
   series: z.array(series),
   lessons: z.array(lesson),
   journal: z.array(journalEntry),
+  /**
+   * Added 19 Nov 2026 (Phase 5): the guided journals, by `order`. Optional, so files built before
+   * still pass; read leniently, so a journal this version cannot read never stops the rest.
+   */
+  guidedJournals: z.preprocess(readableJournals, z.array(guidedJournal)).optional(),
 });
 
 export type Level = z.infer<typeof level>;
@@ -310,4 +516,9 @@ export type Lesson = z.infer<typeof lesson>;
 export type Series = z.infer<typeof series>;
 export type JournalEntry = z.infer<typeof journalEntry>;
 export type Studio = z.infer<typeof studio>;
+export type PromptKind = (typeof promptKinds)[number];
+export type GuidedPrompt = z.infer<typeof guidedPrompt>;
+export type GuidedPage = z.infer<typeof guidedPage>;
+export type GuidedSection = z.infer<typeof guidedSection>;
+export type GuidedJournal = z.infer<typeof guidedJournal>;
 export type ContentFile = z.infer<typeof contentFile>;

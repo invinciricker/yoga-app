@@ -31,4 +31,4 @@ export const CONTENT_TIMEOUT_MS = 6000;
  * to true: Breathe in Phase 7, Meditate in Phase 8, Journal in Phase 5.
  */
 export type BuildingArea = 'breathe' | 'meditate' | 'journal';
-export const areas: Record<BuildingArea, boolean> = { breathe: false, meditate: false, journal: false };
+export const areas: Record<BuildingArea, boolean> = { breathe: false, meditate: false, journal: true };

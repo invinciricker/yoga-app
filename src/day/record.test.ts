@@ -186,8 +186,9 @@ describe('nextStep', () => {
   const today = '2026-11-17';
   const all = { breathe: true, meditate: true, journal: true };
 
-  it('offers nothing in this phase: nothing after a lesson is built yet', () => {
-    expect(nextStep('move', [], today, areas)).toBeUndefined();
+  it('offers a line in the journal after a lesson in this phase (only the Journal is built after it)', () => {
+    expect(nextStep('move', [], today, areas)).toBe('write');
+    expect(nextStep('move', [did(today, 'page-1', 2, 'write')], today, areas)).toBeUndefined();
   });
 
   it('offers the next kind in the order move → breathe → sit → write', () => {

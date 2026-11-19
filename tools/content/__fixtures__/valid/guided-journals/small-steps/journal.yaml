@@ -1,0 +1,85 @@
+# A small guided journal for the tests of the content build: every kind of prompt once,
+# a section repeated, a page written several times, a skip, a showIf, and a pool that keeps going.
+title: Small steps
+summary: A test journal.
+aura: rose
+order: 2
+minutes: 2
+
+intro:
+  - title: What it is
+    text: |
+      A **small** journal for the tests.
+
+      - One line
+      - Another line
+sources:
+  - "Someone (2020). A study. A journal, 1, 1–2."
+
+sections:
+  - id: start
+    title: Start
+    together: true
+    pages:
+      - id: p1
+        title: First page
+        prompts:
+          - kind: note
+            text: Read this *first*.
+          - id: s-mood
+            kind: scale
+            ask: How are you?
+            from: 1
+            to: 5
+            low: Low
+            high: High
+          - id: s-good
+            kind: list
+            ask: Two good things.
+            count: 2
+      - id: p2
+        title: Second page
+        skip: Not today
+        prompts:
+          - id: s-letter
+            kind: text
+            ask: Write a letter.
+            lines: 6
+            share: Send it
+          - id: s-sent
+            kind: yesno
+            ask: Did you send it?
+          - id: s-felt
+            kind: text
+            ask: How did it feel?
+            showIf: { prompt: s-sent, is: true }
+  - id: middle
+    title: Middle
+    repeat: 2
+    pages:
+      - id: p3
+        title: Again
+        times: 2
+        prompts:
+          - id: s-which
+            kind: choice
+            ask: Which helped?
+            options: [Walking, Writing, Resting]
+            many: true
+          - id: s-fill
+            kind: fill
+            sentence: Today I was glad of ___ because ___.
+  - id: pool
+    title: Keep going
+    repeat: forever
+    pages:
+      - id: k1
+        title: Looking back
+        prompts:
+          - kind: recall
+            of: s-good
+            which: first
+            label: On your first page you wrote
+          - id: k-now
+            kind: text
+            ask: And now?

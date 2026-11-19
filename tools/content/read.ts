@@ -5,6 +5,7 @@
  *   1. read every folder and refuse what is wrong, each time with the file, the field and a
  *      plain sentence;
  *   2. turn the Markdown text into blocks.
+ * The guided journals (content/guided-journals/) are read by journals.ts.
  * It prepares no picture and writes nothing, so it is fast: `npm run content:check` uses it alone,
  * and the build (build.ts) starts from its result.
  */
@@ -22,6 +23,7 @@ import {
   slugPattern,
   studioSource,
 } from '../../shared/content-schema';
+import { readGuidedJournals, type GuidedJournalItem } from './journals';
 import { markdownToBlocks, type DraftBlock } from './markdown';
 import { checkPicture } from './pictures';
 import { problemsFromZod, type Problem } from './problems';
@@ -48,6 +50,8 @@ export type Loaded = {
   series: SeriesItem[];
   lessons: LessonItem[];
   journal: JournalItem[];
+  /** The guided journals (Phase 5), by folder name. */
+  guidedJournals: GuidedJournalItem[];
 };
 
 export type ReadResult = { loaded?: Loaded; problems: Problem[] };
@@ -211,6 +215,7 @@ export async function readContent(contentDir: string, shownRoot = 'content'): Pr
   const series = await readFolders(contentDir, shownRoot, 'series', 'series.md', seriesSource, problems, seriesSlugs);
   const lessons = await readFolders(contentDir, shownRoot, 'lessons', 'lesson.md', lessonSource, problems, lessonSlugs);
   const journal = await readFolders(contentDir, shownRoot, 'journal', 'entry.md', journalSource, problems, new Set());
+  const guidedJournals = await readGuidedJournals(contentDir, shownRoot, problems);
 
   // --- things that point to each other
   const placeTaken = new Map<string, LessonItem>(); // "series#order" → the lesson already there
@@ -249,5 +254,5 @@ export async function readContent(contentDir: string, shownRoot = 'content'): Pr
   }
 
   if (problems.length > 0 || !site || !studio) return { problems };
-  return { loaded: { site, studio, series, lessons, journal }, problems };
+  return { loaded: { site, studio, series, lessons, journal, guidedJournals }, problems };
 }

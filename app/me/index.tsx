@@ -1,8 +1,8 @@
 /**
  * You: the person's own page, opened from the round "You" button on Home. A settings page in the
  * phone's theme. From the top: the title; the person's practice (three numbers, the week card,
- * Saved and History); the settings: Appearance and Reduce motion, About and Privacy; Delete my
- * data; and in the preview app only the design gallery.
+ * Saved, History and, once something is written, Export my journal); the settings: Appearance and
+ * Reduce motion, About and Privacy; Delete my data; and in the preview app only the design gallery.
  *
  * Before anything has been done, the numbers, the week and History give their place to one quiet
  * line. Saved stays whenever something is saved (otherwise, with fewer than 8 lessons, the saved
@@ -16,6 +16,7 @@ import { useContent } from '@/content/store';
 import { useWeek } from '@/day/hooks';
 import { longestStreak, totals } from '@/day/record';
 import { useDays } from '@/day/store';
+import { useJournal } from '@/journal/store';
 import { tick } from '@/lib/haptics';
 import { routes, useBack } from '@/lib/nav';
 import { usePrefs } from '@/lib/prefs';
@@ -42,6 +43,7 @@ export default function YouScreen() {
   const content = useContent((s) => s.content);
   const entries = useDays((s) => s.entries);
   const saved = usePractice((s) => s.saved);
+  const written = useJournal((s) => s.entries.some((e) => !e.skipped));
   const weekCard = useWeek();
   const sum = totals(entries);
   const savedCount = savedLessons(content, saved).length;
@@ -54,6 +56,8 @@ export default function YouScreen() {
     savedCount > 0 || entries.length > 0 ? (
       <SettingsRow label={strings.me.saved} detail={String(savedCount)} onPress={() => router.push(routes.saved)} />
     ) : null;
+  // The journal leaves the phone only by the person's own hand (Phase 5).
+  const exportRow = written ? <SettingsRow label={strings.journal.exportTitle} onPress={() => router.push(routes.exportJournal)} /> : null;
 
   const choose = (key: Appearance) => {
     if (key === appearance) return;
@@ -90,6 +94,7 @@ export default function YouScreen() {
             <ListCard>
               {savedRow}
               <SettingsRow label={strings.me.history} onPress={() => router.push(routes.history)} />
+              {exportRow}
             </ListCard>
           </>
         ) : (
@@ -97,7 +102,12 @@ export default function YouScreen() {
             <Text variant="bodyLarge" color="text.secondary">
               {strings.me.nothingYet}
             </Text>
-            {savedRow ? <ListCard>{savedRow}</ListCard> : null}
+            {savedRow || exportRow ? (
+              <ListCard>
+                {savedRow}
+                {exportRow}
+              </ListCard>
+            ) : null}
           </>
         )}
       </Arrive>

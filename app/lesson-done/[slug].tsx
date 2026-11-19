@@ -7,7 +7,9 @@
  *     so leaving it in any way (Done, back, closing the app) still counts. A success vibration.
  *   - One tap on an answer is a complete answer: stored at once, on the phone. Then the optional
  *     feeling chips appear (one at most; a second tap clears it). Leaving without an answer is fine.
- *   - At most one hand-off to another area (nextStep), once those areas are built.
+ *   - At most one hand-off to another area (nextStep), once those areas are built. From Phase 5:
+ *     "Write a line about it?" opens a new free page with the "After practice" line chosen, in
+ *     place of this screen (back then leads to the lesson).
  */
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Flame } from 'lucide-react-native';
@@ -36,7 +38,7 @@ export function generateStaticParams() {
 }
 
 /** Where each hand-off leads. */
-const nextRoute = { breathe: routes.breathe, sit: routes.meditate, write: routes.journal };
+const nextRoute = { breathe: routes.breathe, sit: routes.meditate, write: routes.freePage({ prompt: 'after-practice' }) };
 
 export default function LessonDoneScreen() {
   return (
@@ -109,7 +111,13 @@ function LessonDone() {
           <Text variant="meta" color="text.muted" center style={styles.privacy}>
             {strings.done.privacy}
           </Text>
-          {next ? <Button kind="quiet" label={strings.done.next[next]} onPress={() => router.navigate(nextRoute[next])} /> : null}
+          {next ? (
+            <Button
+              kind="quiet"
+              label={strings.done.next[next]}
+              onPress={() => (next === 'write' ? router.replace(nextRoute.write) : router.navigate(nextRoute[next]))}
+            />
+          ) : null}
           <Button label={strings.done.close} onPress={back} />
         </>
       }

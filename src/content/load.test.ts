@@ -67,6 +67,61 @@ describe('accept', () => {
   });
 });
 
+describe('accept, with guided journals (Phase 5)', () => {
+  const page = (id: string, prompts: unknown[]) => ({ id, title: `Page ${id}`, prompts });
+  const journal = (slug: string, more: Record<string, unknown> = {}) => ({
+    slug,
+    title: 'Gratitude',
+    summary: 'Noticing.',
+    aura: 'rose',
+    order: 1,
+    minutes: 3,
+    intro: [{ title: 'About', text: [{ type: 'paragraph', spans: [{ text: 'Hello.' }] }] }],
+    sections: [
+      {
+        id: 'week-1',
+        title: 'Week 1',
+        pages: [
+          page('d01', [
+            { kind: 'text', id: 'why', ask: 'Why?' },
+            // A kind a later version of the app knows, and this one does not.
+            { kind: 'drawing', id: 'sketch', ask: 'Draw it.', colours: 3 },
+          ]),
+          page('d02', [{ kind: 'drawing', id: 'only', ask: 'Draw.' }]),
+        ],
+      },
+    ],
+    ...more,
+  });
+
+  it('reads a file built before guided journals existed', () => {
+    expect(accept(rawTestContent)?.guidedJournals).toBeUndefined();
+  });
+
+  it('survives newer content: skips a prompt kind it does not know, a field it does not know, a journal it cannot read', () => {
+    const content = accept({
+      ...rawTestContent,
+      guidedJournals: [
+        journal('gratitude', { mood: 'a field from a later version' }),
+        journal('broken', { sections: 'not a list' }),
+        { slug: 'no-title' },
+      ],
+    });
+    // The rest of the content still loads.
+    expect(content?.lessons.map((l) => l.slug)).toEqual(['wind-down', 'morning', 'breath', 'legs']);
+    // The journal it can read is there, without the prompt it cannot draw.
+    expect(content?.guidedJournals?.map((j) => j.slug)).toEqual(['gratitude']);
+    const [d01, d02] = content!.guidedJournals![0].sections[0].pages;
+    expect(d01.prompts).toEqual([{ kind: 'text', id: 'why', ask: 'Why?', lines: 3 }]);
+    // A page left with nothing to show: the app says it needs a newer version (src/journal/).
+    expect(d02.prompts).toEqual([]);
+  });
+
+  it('survives a list of journals that is not a list', () => {
+    expect(accept({ ...rawTestContent, guidedJournals: 'later' })?.guidedJournals).toEqual([]);
+  });
+});
+
 describe('fetchFresh', () => {
   it('saves a good download and gives it back', async () => {
     serverSays(rawTestContent);

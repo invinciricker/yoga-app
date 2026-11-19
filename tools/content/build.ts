@@ -12,17 +12,22 @@
  */
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+
 import type { z } from 'zod';
 
-import { contentFile, SCHEMA_VERSION, type Block, type Image } from '../../shared/content-schema';
+import { contentFile, guidedJournal, guidedPrompt, SCHEMA_VERSION, type Block, type Image } from '../../shared/content-schema';
 import { auraForSlug } from '../../src/theme/auraForSlug';
+import type { BuiltJournal } from './journals';
 import type { DraftBlock } from './markdown';
 import { preparePicture } from './pictures';
 import { formatProblem, type Problem } from './problems';
 import { readContent, type Loaded } from './read';
 
-/** What we write: the shape the app reads, before the app fills in the optional fields. */
-type ContentJson = z.input<typeof contentFile>;
+/**
+ * What we write: the shape the app reads, before the app fills in the optional fields. The guided
+ * journals are read through a lenient step in the app, so their written shape is given here.
+ */
+type ContentJson = Omit<z.input<typeof contentFile>, 'guidedJournals'> & { guidedJournals?: BuiltJournal[] };
 
 export const SIZE_WARNING_BYTES = 400 * 1024;
 
@@ -46,7 +51,7 @@ export type BuildResult =
       content: ContentJson;
       preview: ContentJson;
       /** Lines for the summary printed at the end. */
-      counts: { lessons: number; series: number; journal: number; pictures: number };
+      counts: { lessons: number; series: number; journal: number; guidedJournals: number; pictures: number };
       drafts: string[];
       samples: string[];
       warnings: string[];
@@ -161,6 +166,11 @@ export async function buildContent(options: BuildOptions): Promise<BuildResult> 
     body: await blocks(loaded.studio.dir, loaded.studio.body),
   };
 
+  // The guided journals (Phase 5): by "order", then by slug.
+  const guidedJournals = loaded.guidedJournals
+    .map((item) => item.built)
+    .sort((a, b) => (a.order !== b.order ? a.order - b.order : a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
+
   /** Step 6: one file from the lists, with or without the drafts. */
   const assemble = (withDrafts: boolean): ContentJson => {
     const keep = <T extends { draft?: boolean }>(items: T[]) => items.filter((item) => withDrafts || !item.draft);
@@ -186,15 +196,25 @@ export async function buildContent(options: BuildOptions): Promise<BuildResult> 
       lessons: keptLessons,
       // An entry never points to a lesson that is not in the same file.
       journal: keep(journal).map((entry) => ({ ...entry, related: (entry.related ?? []).filter((r) => keptSlugs.has(r)) })),
+      guidedJournals: keep(guidedJournals),
     };
   };
 
   const content = assemble(false);
   const preview = assemble(true);
 
-  // A safety net: what we write must be what the app accepts.
-  contentFile.parse(content);
-  contentFile.parse(preview);
+  // A safety net: what we write must be what the app accepts. The app reads the guided journals
+  // leniently (it would quietly leave out what it cannot read), so here each journal and each of
+  // its prompts is also checked strictly: a mistake stops the build instead.
+  for (const file of [content, preview]) {
+    contentFile.parse(file);
+    for (const journal of file.guidedJournals ?? []) {
+      guidedJournal.parse(journal);
+      for (const section of journal.sections) {
+        for (const page of section.pages) for (const prompt of page.prompts) guidedPrompt.parse(prompt);
+      }
+    }
+  }
 
   const contentText = JSON.stringify(content) + '\n';
   await writeFile(path.join(outDir, 'content.json'), contentText);
@@ -236,7 +256,13 @@ export async function buildContent(options: BuildOptions): Promise<BuildResult> 
     ok: true,
     content,
     preview,
-    counts: { lessons: content.lessons.length, series: content.series.length, journal: content.journal.length, pictures: prepared.size },
+    counts: {
+      lessons: content.lessons.length,
+      series: content.series.length,
+      journal: content.journal.length,
+      guidedJournals: content.guidedJournals?.length ?? 0,
+      pictures: prepared.size,
+    },
     drafts,
     samples,
     warnings,
@@ -247,7 +273,7 @@ export async function buildContent(options: BuildOptions): Promise<BuildResult> 
 export function listDraftsAndSamples(loaded: Loaded): { drafts: string[]; samples: string[] } {
   const all = [...loaded.lessons, ...loaded.series, ...loaded.journal];
   return {
-    drafts: all.filter((item) => item.data.draft).map((item) => item.shown),
+    drafts: [...all, ...loaded.guidedJournals].filter((item) => item.data.draft).map((item) => item.shown),
     samples: [...all, loaded.studio].filter((item) => item.data.sample).map((item) => item.shown),
   };
 }
@@ -302,7 +328,9 @@ export async function runBuild(argv: string[]): Promise<boolean> {
   }
   const c = result.counts;
   console.log(`Content built into ${outDir}`);
-  console.log(`  ${c.lessons} lessons, ${c.series} series, ${c.journal} journal entries, ${c.pictures} pictures (published)`);
+  console.log(
+    `  ${c.lessons} lessons, ${c.series} series, ${c.journal} journal entries, ${c.guidedJournals} guided journal${c.guidedJournals === 1 ? "" : "s"}, ${c.pictures} pictures (published)`,
+  );
   printLists(result.drafts, result.samples);
   for (const warning of result.warnings) console.warn(`Warning: ${warning}`);
   return true;

@@ -35,6 +35,20 @@ export const routes = {
   meditate: '/meditate' as Href,
   journal: '/journal' as Href,
   series: (slug: string): Href => ({ pathname: '/series/[slug]', params: { slug } }),
+  /**
+   * The Journal (Phase 5). Each page has its own first word, never under /journal/: the web export
+   * would otherwise hold both journal.html (the tab) and a folder journal/ (Phase 4's lesson).
+   *   /guided/<slug>          a guided journal: its cover, its progress, the pages written
+   *   /guided-about/<slug>    "About this journal"
+   *   /write?journal=<slug>   today's page of a guided journal; &entry=<id> a page written before
+   *   /free-pages             the free pages; /free-page?entry=<id> one of them, or a new one
+   */
+  guided: (slug: string): Href => ({ pathname: '/guided/[slug]', params: { slug } }),
+  guidedAbout: (slug: string): Href => ({ pathname: '/guided-about/[slug]', params: { slug } }),
+  write: (journal: string, entry?: string): Href => ({ pathname: '/write', params: entry ? { journal, entry } : { journal } }),
+  freePages: '/free-pages' as Href,
+  freePage: (params: { entry?: string; prompt?: string } = {}): Href => ({ pathname: '/free-page', params }),
+  exportJournal: '/me/export' as Href,
 };
 
 /**
