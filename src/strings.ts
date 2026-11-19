@@ -235,12 +235,14 @@ export const strings = {
     written: 'Today’s page is written.',
     writtenToday: 'Written today',
     readIt: 'Read it',
-    // "Gratitude · Page 6 of 28 · 3 min" (the card on Today writes "page" small: it runs on).
+    // "Gratitude · Page 6 of 28 · 3 min", "Habit · Week 3 · Day 5 · 1 min". The card on Today is given
+    // its page in lower case, because the line runs on: "Habit · week 3 · day 5 · 1 min".
     cardLine: (journal: string, page: string, minutes: number) => `${journal} · ${page} · ${minutes} min`,
-    todayLine: (journal: string, page: string, minutes: number) =>
-      `${journal} · ${page.charAt(0).toLowerCase()}${page.slice(1)} · ${minutes} min`,
+    todayLine: (journal: string, page: string, minutes: number) => `${journal} · ${page} · ${minutes} min`,
     pageOf: (n: number, total: number) => `Page ${n} of ${total}`,
     poolPage: (title: string, n: number) => `${title} · ${n}`,
+    // A section numbered in weeks (Phase 6): "Week 3 · Day 5", or "week 3 · day 5" inside a line that runs on.
+    weekDay: (week: number, day: number, runningOn = false) => (runningOn ? `week ${week} · day ${day}` : `Week ${week} · Day ${day}`),
     // The shelf: one row per journal, then the free pages.
     notStarted: 'Not started yet',
     keepGoing: (title: string, n: number) => (n === 0 ? title : `${title} · ${n === 1 ? '1 page' : `${n} pages`}`),
@@ -258,6 +260,13 @@ export const strings = {
     yourPages: 'Your pages',
     skipped: 'Skipped',
     noPagesYet: 'Your pages will gather here, one a day.',
+    // Phase 6: a long list of pages, and the pages written before the latest "start again".
+    showAll: (n: number) => `Show all ${n} pages`,
+    earlier: 'Earlier',
+    // Starting a journal again ("Start a new habit"): a confirmation in place, never a pop-up.
+    againSentence: 'Start again from the first page? Everything you wrote stays here.',
+    againConfirm: 'Start again',
+    againCancel: 'Not now',
     gone: 'This journal is no longer here.',
     goneLine: 'Your pages are still yours to read.',
     toJournal: 'Back to Journal',
@@ -274,6 +283,16 @@ export const strings = {
     no: 'No',
     outOf: (n: number, to: number) => `${n} out of ${to}`,
     // A scale button, read aloud: "7 out of 10".
+    // Phase 6. Under a choice filled in from today's lessons.
+    fromPractice: (minutes: number) => `From your practice today: ${minutes} min`,
+    // The dots of a week: the count of a yes or no row ("5 of 7"), and each row read aloud as one
+    // sentence: "Energy: 3 of 5, 4 of 5, no answer." or "Did it: yes, no, no answer. 5 of 7."
+    yesCount: (yes: number, of: number) => `${yes} of ${of}`,
+    dotYes: 'yes',
+    dotNo: 'no',
+    dotNone: 'no answer',
+    dotOf: (n: number, to: number) => `${n} of ${to}`,
+    dotsSentence: (label: string, cells: string[], count?: string) => `${label}: ${cells.join(', ')}.${count ? ` ${count}.` : ''}`,
     blank: (n: number) => `Blank ${n}`,
     line: (n: number) => `Line ${n}`,
     // Free pages.
@@ -455,6 +474,19 @@ export const strings = {
         'g-d04-who': 'Ana. She swapped her Saturday so I could rest, and did not make a fuss about it.',
         'g-d05-good': ['Hot water', 'A door that locks', 'Light in the evening'],
         'g-d05-why': 'Hot water. A cold morning would be a different day without it.',
+        // Habit (Phase 6)
+        'h-want': 'Stretch in the morning',
+        'h-tiny': 'One slow forward fold after I brush my teeth',
+        'h-plan': ['brush my teeth in the morning', 'do one slow forward fold'],
+        'h-obstacle': 'Running late for work',
+        'h-ifthen': ['I am running late', 'do the fold while the kettle boils'],
+        'h-easier': ['Put the mat by the bathroom door', 'Go to bed half an hour earlier', 'A note on the mirror'],
+        'h-helped': ['Leaving the mat where I can see it.', 'Doing it before checking my phone.'],
+        // Health (Phase 6): a text answer given as a list changes with each page.
+        'hl-mood': ['Calm, a bit tired', 'Restless', 'Hopeful', 'Tense, then lighter', 'Flat', 'Easy, content', 'Steady', 'Light'],
+        'hl-tomorrow': ['An earlier night', 'A walk at lunch', 'Stretch before bed', 'Water before coffee', 'Stairs, not the lift', 'Outside before noon', 'Phone away at ten', 'A walk at lunch'],
+        'hl-notice': ['The days I got outside I slept longer, and the next day had more energy.'],
+        'hl-change': ['A ten-minute walk after lunch'],
       } as Record<string, string | number | string[]>,
       // Any other prompt of a sample page.
       text: 'A few quiet words.',
@@ -472,5 +504,16 @@ export const strings = {
     fillSample: 'Today I was glad of ___ because ___.',
     recallLabel: 'On your first page you wrote',
     recallSample: ['Tea on the balcony', 'A long call with my sister'],
+    // Phase 6: dots and a choice filled in from today's practice.
+    phase6: {
+      label: 'Journal: the week as dots, and today’s practice',
+      dotsAsk: 'This week',
+      dotsHint: 'A bigger dot means more. An empty ring is a day without an answer.',
+      dotLabels: ['Did it', 'Energy', 'Sleep'],
+      sleepOptions: ['Under 5 hours', '5 to 6', '6 to 7', '7 to 8', '8 to 9', '9 or more'],
+      movedAsk: 'How much did you move today?',
+      movedHint: 'Walking, stairs, cycling, practice: it all counts.',
+      movedOptions: ['Hardly at all', 'A little', '20 minutes or more'],
+    },
   },
 } as const;

@@ -17,6 +17,7 @@ import { useContent } from '@/content/store';
 import { useWeek } from '@/day/hooks';
 import { addDays, week } from '@/day/record';
 import { useDays } from '@/day/store';
+import type { DotQuestion, DotsRow } from '@/journal/dots';
 import type { Answer } from '@/journal/types';
 import { longDate } from '@/lib/billboard';
 import { setSampleProgress } from '@/practice/demo';
@@ -112,6 +113,32 @@ function samplePrompts(journal: GuidedJournal | undefined): GuidedPrompt[] {
     return found ? { ...found, showIf: undefined } : { kind: 'yesno', id: `gallery-${kind}`, ask: g.journalParts };
   });
 }
+
+/**
+ * Phase 6: the week as dots, with a yes or no row, a scale row and a choice row (the last cell is
+ * the page on screen), and a choice filled in from today's practice.
+ */
+const p6 = strings.gallery.phase6;
+const dotsPrompt: GuidedPrompt = { kind: 'dots', ask: p6.dotsAsk, hint: p6.dotsHint, rows: [] };
+const dotQuestions: DotQuestion[] = [
+  { kind: 'yesno', id: 'gallery-did', ask: p6.dotsAsk },
+  { kind: 'scale', id: 'gallery-energy', ask: p6.dotsAsk, from: 1, to: 5, low: '1', high: '5' },
+  { kind: 'choice', id: 'gallery-slept', ask: p6.dotsAsk, options: [...p6.sleepOptions], many: false },
+];
+const dotRows: DotsRow[] = [
+  { label: p6.dotLabels[0], question: dotQuestions[0], values: [true, true, false, true, undefined, true, true], here: 6 },
+  { label: p6.dotLabels[1], question: dotQuestions[1], values: [3, 4, undefined, 2, 5, 4, 4], here: 6 },
+  { label: p6.dotLabels[2], question: dotQuestions[2], values: ['6 to 7', '5 to 6', '7 to 8', 'Under 5 hours', undefined, '8 to 9', '9 or more'], here: 6 },
+];
+const prefillPrompt: GuidedPrompt = {
+  kind: 'choice',
+  id: 'gallery-moved',
+  ask: p6.movedAsk,
+  hint: p6.movedHint,
+  options: [...p6.movedOptions],
+  many: false,
+  prefill: { from: 'lessons-today', pick: [{ atLeast: 20, option: p6.movedOptions[2] }] },
+};
 
 /** One labelled block of the gallery. */
 function Block({ label, children }: { label: string; children: ReactNode }) {
@@ -307,6 +334,18 @@ function GalleryPage({ choice, onChoose }: { choice: Choice; onChoose: (c: Choic
             recalled={prompt.kind === 'recall' ? { lines: [...g.recallSample], day: longDate(new Date()) } : undefined}
           />
         ))}
+      </Block>
+
+      <Block label={p6.label}>
+        <Prompt prompt={dotsPrompt} onAnswer={noop} dots={dotRows} />
+        <Prompt
+          prompt={prefillPrompt}
+          answer={galleryAnswers['gallery-moved'] ?? { ask: p6.movedAsk, value: p6.movedOptions[2] }}
+          onAnswer={(a) => setGalleryAnswers((all) => ({ ...all, 'gallery-moved': a }))}
+          prefillLine={
+            (galleryAnswers['gallery-moved']?.value ?? p6.movedOptions[2]) === p6.movedOptions[2] ? strings.journal.fromPractice(25) : undefined
+          }
+        />
       </Block>
 
       <Block label={g.weekCard}>

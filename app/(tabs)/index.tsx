@@ -36,7 +36,7 @@ import { useWeek } from '@/day/hooks';
 import { useDays } from '@/day/store';
 import { todayMove } from '@/day/todayMove';
 import { journalToday, pageAt, pageNumberText, type JournalSuggestion } from '@/journal/guided';
-import { useJournal } from '@/journal/store';
+import { useJournalPages } from '@/journal/usePages';
 import { longDate, nextClass, showBillboard } from '@/lib/billboard';
 import { greetingFor } from '@/lib/greeting';
 import { tick } from '@/lib/haptics';
@@ -85,8 +85,8 @@ export default function HomeScreen() {
   const refresh = useContent((s) => s.refresh);
   const entries = useDays((s) => s.entries);
   const savedSlugs = usePractice((s) => s.saved);
-  const journalEntries = useJournal((s) => s.entries);
-  const begun = useJournal((s) => s.begun);
+  // The pages of each journal's current start (a habit started again counts from its first page).
+  const { current: journalEntries, begun } = useJournalPages();
   const weekCard = useWeek();
 
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -374,7 +374,7 @@ function WriteCard({ suggestion }: { suggestion: JournalSuggestion }) {
       <AreaCard
         {...common}
         title={suggestion.page.title}
-        line={strings.journal.todayLine(journal.title, pageNumberText(suggestion.number), journal.minutes)}
+        line={strings.journal.todayLine(journal.title, pageNumberText(suggestion.number, true), journal.minutes)}
         onPress={() => router.push(routes.write(journal.slug))}
       />
     );

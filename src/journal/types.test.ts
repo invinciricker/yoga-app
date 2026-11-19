@@ -2,7 +2,7 @@
  * Reading pages back from the phone, and the small helpers on answers.
  */
 import { writingMinutes } from './dates';
-import { hasWriting, isEmptyValue, parseEntry, withAnswer, type JournalEntry } from './types';
+import { cycleOf, hasWriting, isEmptyValue, parseEntry, withAnswer, type JournalEntry } from './types';
 
 const guided = {
   id: 'abc',
@@ -86,5 +86,18 @@ describe('writingMinutes', () => {
 
   it('runs across midnight like any other minute', () => {
     expect(writingMinutes(Date.UTC(2026, 10, 19, 23, 55), Date.UTC(2026, 10, 20, 0, 10))).toBe(15);
+  });
+});
+
+describe('parseEntry, Phase 6', () => {
+  const page = { id: 'h1', kind: 'guided', day: '2026-11-20', created: 'x', updated: 'x', journal: 'habit', section: 'days', page: 'day', answers: {} };
+  it('reads the start a page was written in, and the suggestions tapped away', () => {
+    expect(parseEntry({ ...page, cycle: 2, declined: ['hl-moved', 3] })).toMatchObject({ cycle: 2, declined: ['hl-moved'] });
+  });
+  it('leaves both out when absent or unreadable (absent means the first start)', () => {
+    const read = parseEntry({ ...page, declined: [] })!;
+    expect('cycle' in read || 'declined' in read).toBe(false);
+    expect(cycleOf(read)).toBe(1);
+    expect(parseEntry({ ...page, cycle: 'two' })!.cycle).toBe(1);
   });
 });

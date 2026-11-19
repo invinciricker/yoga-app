@@ -1,0 +1,236 @@
+# The Habit journal.
+# Written by Claude chat (the architect) on 19 Nov 2026, from published research (the sources are at
+# the bottom of the intro). Nothing here is copied, adapted, sequenced or named after any other journal.
+#
+# Phase 6 copies this file, unchanged, to content/guided-journals/habit/journal.yaml.
+# Its format: docs/CONTENT.md ("A guided journal"), plus what Phase 6 adds (docs/phases/phase-6.md,
+# section 1): the same question asked again, showIf by round, dots, numbering, hints, again.
+#
+# Ids are permanent. Once published, never rename or reuse a section id, a page id or a prompt id:
+# people's answers are stored under them. To change a page, change its words, not its ids.
+# The same prompt id on two pages is the same question asked again: h-did on the daily page and on
+# the seventh page; h-plan in the set-up and in the weekly look back. Keep their kinds the same.
+
+title: Habit
+summary: One small habit at a time, until it runs by itself.
+aura: dawn
+order: 2
+minutes: 1
+again: Start a new habit
+
+intro:
+  - title: What it does, honestly
+    text: |
+      A habit is something you do without having to decide to. It forms when you repeat a small action in the same situation, again and again, until the situation starts it for you.
+
+      That takes longer than people think. In the best-known study, a new daily action took 66 days on average to feel automatic, and anywhere from 18 to 254 days depending on the person and the habit. A recent review of twenty studies found much the same: about two months, often more. So this journal has no last page. Most people can tell around week ten whether their habit runs by itself.
+  - title: How to make it work
+    text: |
+      - **Start tiny.** Two minutes or less: one stretch, one page, one glass of water. You can always do more. The point is never to skip it because it felt too big.
+      - **Tie it to something you already do.** "After I put the kettle on" is a cue. The same moment and the same place, each time, is what turns an action into a habit.
+      - **Decide now what you will do when something gets in the way.** If-then plans are among the best-tested tools in psychology. Newer, larger reviews find their effect smaller than the first ones did, but still real.
+      - **Write it down.** People who record their progress, rather than keep it in mind, are more likely to reach their goals. That is what the twenty seconds a day are for.
+      - **One habit at a time.**
+  - title: What it is not
+    text: |
+      It is not a streak to protect. In the study above, missing a day did not undo the progress. Just carry on the next day.
+
+      If a habit is not working, it is usually too big, or tied to the wrong moment. Every seventh page asks whether to keep your plan or change it.
+
+      The set-up takes three short pages, which you can write on the same day. After that, a page takes about twenty seconds. The evening is a good time for it, when you know whether it happened.
+
+sources:
+  - "Lally, van Jaarsveld, Potts and Wardle (2010). How are habits formed: modelling habit formation in the real world. European Journal of Social Psychology, 40, 998–1009."
+  - "Gardner, Lally and Wardle (2012). Making health habitual: the psychology of 'habit-formation' and general practice. British Journal of General Practice, 62(605), 664–666."
+  - "Singh, Murphy, Maher and Smith (2024). Time to form a habit: a systematic review and meta-analysis of health behaviour habit formation and its determinants. Healthcare, 12(23), 2488."
+  - "Gollwitzer and Sheeran (2006). Implementation intentions and goal achievement: a meta-analysis of effects and processes. Advances in Experimental Social Psychology, 38, 69–119."
+  - "Sheeran, Listrom and Gollwitzer (2025). The when and how of planning: meta-analysis of the scope and components of implementation intentions in 642 tests. European Review of Social Psychology, 36(1), 162–194."
+  - "Harkin, Webb, Chang, Prestwich, Conner, Kellar, Benn and Sheeran (2016). Does monitoring goal progress promote goal attainment? A meta-analysis of the experimental evidence. Psychological Bulletin, 142(2), 198–229."
+
+sections:
+  # ---------------------------------------------------------------- Set-up: all three pages may be written on one day
+  - id: getting-ready
+    title: Getting ready
+    together: true
+    pages:
+      - id: s01
+        title: Choose one habit
+        prompts:
+          - kind: note
+            text: |
+              Three short pages, which you can write one after the other, today. The daily pages begin tomorrow.
+          # A change carried from the Health journal's weekly page lands here ("Make it a habit").
+          - id: h-want
+            kind: text
+            ask: What would you like to do more often?
+            hint: Something you want for yourself, not something you feel you should do.
+            lines: 2
+          - id: h-tiny
+            kind: text
+            ask: Now make it tiny. What is a version that takes two minutes or less?
+            hint: Not "run three times a week" but "put my running shoes on after breakfast". Small enough to do on a bad day.
+            lines: 2
+
+      - id: s02
+        title: When and where
+        prompts:
+          - kind: recall
+            of: h-tiny
+            which: latest
+            label: Your habit
+          - kind: note
+            text: |
+              A habit needs a cue: something that already happens every day and can set it off. The moment right after something you always do works well, in the same place each time. For example: *After I pour my morning coffee, I will stretch for two minutes by the window.*
+          - id: h-plan
+            kind: fill
+            sentence: After I ___, I will ___.
+
+      - id: s03
+        title: When something gets in the way
+        prompts:
+          - id: h-obstacle
+            kind: text
+            ask: What is most likely to stop you?
+            hint: Tiredness, a late night, a busy morning, being away from home.
+            lines: 1
+          - kind: note
+            text: |
+              Decide now what you will do when it happens. For example: *If I wake up late, then I will do one stretch before I leave.*
+          - id: h-ifthen
+            kind: fill
+            sentence: If ___, then I will ___.
+          - kind: note
+            text: |
+              That is the set-up. Your first daily page opens tomorrow: did it happen, and how did it feel. About twenty seconds.
+
+  # ---------------------------------------------------------------- Day by day: weeks of seven pages, with no end
+  - id: days
+    title: Day by day
+    repeat: forever
+    numbering: weeks
+    pages:
+      - id: day
+        title: Did it happen?
+        times: 6
+        prompts:
+          - kind: recall
+            of: h-plan
+            which: latest
+            label: Your plan
+          - id: h-did
+            kind: yesno
+            ask: Did it happen today?
+            hint: Still early? Come back tonight and answer then.
+          - id: h-auto
+            kind: scale
+            ask: How automatic did it feel?
+            from: 1
+            to: 5
+            low: I had to push myself
+            high: I did it without thinking
+            showIf: { prompt: h-did, is: true }
+          - id: h-blocker
+            kind: choice
+            ask: What got in the way?
+            many: true
+            options: [I forgot, Too tired, No time, My day changed, Did not feel like it, Something else]
+            showIf: { prompt: h-did, is: false }
+          - id: h-easier
+            kind: text
+            ask: One thing that would make tomorrow easier.
+            hint: Smaller, earlier, or a reminder where you will see it.
+            lines: 1
+            showIf: { prompt: h-did, is: false }
+
+      - id: week
+        title: Looking back on the week
+        prompts:
+          - kind: recall
+            of: h-plan
+            which: latest
+            label: Your plan
+          # Today first, as on every other day (the same questions, the same ids).
+          - id: h-did
+            kind: yesno
+            ask: Did it happen today?
+            hint: Still early? Come back tonight and answer then.
+          - id: h-auto
+            kind: scale
+            ask: How automatic did it feel?
+            from: 1
+            to: 5
+            low: I had to push myself
+            high: I did it without thinking
+            showIf: { prompt: h-did, is: true }
+          - id: h-blocker
+            kind: choice
+            ask: What got in the way?
+            many: true
+            options: [I forgot, Too tired, No time, My day changed, Did not feel like it, Something else]
+            showIf: { prompt: h-did, is: false }
+          - id: h-easier
+            kind: text
+            ask: One thing that would make tomorrow easier.
+            hint: Smaller, earlier, or a reminder where you will see it.
+            lines: 1
+            showIf: { prompt: h-did, is: false }
+          # Then the week.
+          - kind: dots
+            ask: This week
+            hint: A full dot for each day it happened, a small one when it did not. In the second row, the bigger the dot, the more automatic it felt.
+            rows:
+              - { of: h-did, label: Did it }
+              - { of: h-auto, label: Automatic }
+          - kind: note
+            showIf: { round: 1 }
+            text: |
+              Your first week. Whatever the dots say, it is a start. The first weeks have the most gaps, for nearly everyone: what matters is coming back the next day.
+          - kind: note
+            showIf: { round: 3 }
+            text: |
+              Three weeks. You may have heard that a habit takes 21 days. That number comes from a self-help book of 1960, not from a measurement. When researchers did measure, it took 66 days on average. If this still takes effort, you are right on time.
+          - kind: note
+            showIf: { round: 6 }
+            text: |
+              Six weeks. Some habits start to run by themselves around now; others still need a push. Both are normal. If yours still feels like hard work, making it smaller is not giving up. It is how habits get built.
+          # Week 10: the usual moment to decide.
+          - kind: note
+            showIf: { round: 10 }
+            text: |
+              Ten weeks: about how long it takes, on average, for a daily action to become automatic. Here is your first week next to this one.
+          - kind: dots
+            showIf: { round: 10 }
+            ask: How automatic it felt
+            rows:
+              - { of: h-auto, label: Week 1, round: 1 }
+              - { of: h-auto, label: Week 10 }
+          - id: h-ten
+            kind: choice
+            showIf: { round: 10 }
+            ask: Does it run by itself now?
+            options: [Mostly it does, Not yet]
+          - kind: note
+            showIf: { prompt: h-ten, is: Mostly it does }
+            text: |
+              Then you could start a new one. On the Habit journal's page, choose **Start a new habit**: these pages stay, and this habit carries on without the journal. Or keep checking in a while longer, if you like.
+          - kind: note
+            showIf: { prompt: h-ten, is: Not yet }
+            text: |
+              That is common. For many people and many habits it takes longer, sometimes months. Keep going, a page a day, for as long as it helps. Making it a little smaller often helps more than trying harder.
+          # Every week: what helped, and the plan for the next one.
+          - id: h-helped
+            kind: text
+            ask: What helped this week?
+            lines: 2
+          - id: h-next
+            kind: choice
+            ask: And for next week?
+            options: [Keep my plan, Change my plan]
+          - kind: note
+            showIf: { prompt: h-next, is: Change my plan }
+            text: |
+              Make it smaller, or tie it to a better moment. Your daily pages will show the new plan.
+          - id: h-plan
+            kind: fill
+            sentence: After I ___, I will ___.
+            showIf: { prompt: h-next, is: Change my plan }

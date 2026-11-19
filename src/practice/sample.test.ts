@@ -13,6 +13,11 @@ describe('sampleProgress', () => {
     expect(streak(entries, today)).toBe(4);
   });
 
+  it('does a lesson of 25 minutes today (Phase 6: the pre-filled answer shows)', () => {
+    const { entries } = sampleProgress(content, today);
+    expect(entries.filter((e) => e.day === today).map((e) => e.minutes)).toEqual([25]);
+  });
+
   it('does two lessons of a series, saves one lesson and answers once', () => {
     const { entries, practice } = sampleProgress(content, today);
     // "evenings": wind-down, then breath (a third slug of it is gone from the content).

@@ -5,7 +5,8 @@
  *   the title, and "Private. It stays on this phone." with a small lock;
  *   today's page: the one suggestion (journalToday in src/journal/guided.ts): the next page to
  *     write, or "Begin" a journal, or "Today's page is written." with a quiet "Read it";
- *   the shelf: one row per guided journal by order, then the free pages with "New page".
+ *   the shelf: one row per guided journal by order ("Page 6 of 28", "Week 3 · Day 5"), then the
+ *     free pages with "New page".
  * Nothing else on the tab (docs/V2.md, "Limits that keep it calm").
  *
  * (Maria's tips and notes, which this tab once showed, are at /notes.)
@@ -19,7 +20,7 @@ import type { GuidedJournal } from '../../shared/content-schema';
 import { dayOf } from '@/content/selectors';
 import { useContent } from '@/content/store';
 import { journalToday, pageAt, pageNumberText, progressOf, type JournalSuggestion } from '@/journal/guided';
-import { useJournal } from '@/journal/store';
+import { useJournalPages } from '@/journal/usePages';
 import { freePages, type JournalEntry } from '@/journal/types';
 import { routes } from '@/lib/nav';
 import { strings } from '@/strings';
@@ -32,7 +33,7 @@ function shelfLine(journal: GuidedJournal, entries: readonly JournalEntry[], beg
   const p = progressOf(journal, entries, begun);
   if (!p.started) return strings.journal.notStarted;
   if (p.finished) return strings.journal.finished(p.total);
-  if (p.number?.pool) return strings.journal.keepGoing(p.number.title, p.pool);
+  if (p.number?.kind === 'pool') return strings.journal.keepGoing(p.number.title, p.pool);
   return p.number ? pageNumberText(p.number) : strings.journal.notStarted;
 }
 
@@ -40,8 +41,8 @@ export default function JournalScreen() {
   const router = useRouter();
   const { color } = useTheme();
   const content = useContent((s) => s.content);
-  const entries = useJournal((s) => s.entries);
-  const begun = useJournal((s) => s.begun);
+  // The pages the rules see: each journal's current start. The free pages are all there.
+  const { current: entries, begun } = useJournalPages();
   const journals = [...(content.guidedJournals ?? [])].sort((a, b) => a.order - b.order);
   const suggestion = journalToday(journals, entries, dayOf(new Date()), begun);
   const free = freePages(entries);

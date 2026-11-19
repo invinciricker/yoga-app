@@ -9,6 +9,7 @@ export { Card } from './Card';
 export { Chip } from './Chip';
 export { Cover } from './Cover';
 export { DoneTick } from './DoneTick';
+export { Dots } from './Dots';
 export { DraftChip } from './DraftChip';
 export { EmptyState } from './EmptyState';
 export { Fact } from './Fact';

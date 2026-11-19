@@ -73,4 +73,12 @@ export const size = {
   blank: 112, // the least width of a blank in a fill-in sentence
   freePage: 0.45, // a free page's field is at least this part of the window's height
   noteDisc: 0.16, // the strength of the area's colour behind a small icon
+  // --- Phase 6: the Habit and Health journals (docs/phases/phase-6.md)
+  dotCell: 24, // the least side of the square a dot sits in (a dot's size is in src/journal/dots.ts)
+  dotRow: 32, // the least height of a row of dots
+  dotRing: 0.7, // the empty ring of a day without an answer, as a part of its square
+  dotMark: 0.5, // the short line under the dot of the page on screen, as a part of its square
+  dotLabelMin: 64, // narrower than this, a row's label goes above its dots instead of beside them
+  measureSlack: 1, // a measured width comes rounded down on the web: one point more keeps a word on its line
+  pagesShown: 21, // "Your pages" shows this many, then "Show all 73 pages"
 } as const;

@@ -27,7 +27,7 @@ If backup is switched on in your phone's settings, Android may include this app'
 
 ## Your journal
 
-What you write in the Journal is kept only on this phone. It is never sent anywhere, and nobody, Maria included, can read it. The app does not count or analyse what you write. If you choose **You → Export my journal**, the app hands the text to the app you pick, such as your email or your notes: from there, that app's own rules apply.
+What you write in the Journal is kept only on this phone. It is never sent anywhere, and nobody, Maria included, can read it. The weekly look-backs in the Habit and Health journals are worked out on this phone, for you alone: nothing you write is counted or analysed anywhere else. The Health journal never asks about weight, calories or body measurements. If you choose **You → Export my journal**, the app hands the text to the app you pick, such as your email or your notes: from there, that app's own rules apply.
 
 ## What the app downloads
 
