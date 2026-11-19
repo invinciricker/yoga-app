@@ -11,6 +11,7 @@ content/
   series/<slug>/series.md         a series (a set of lessons in order)
   lessons/<slug>/lesson.md        a lesson
   journal/<slug>/entry.md         a tip or a note
+  guided-journals/<slug>/journal.yaml   a guided journal (Gratitude…): its pages and their questions
 ```
 
 - A **slug** is the folder's name: lowercase letters, digits and single dashes (`evening-wind-down`). It is the lesson's permanent address. It never changes after publication: reactions, saved lessons and progress on people's phones are filed under it.
@@ -87,6 +88,65 @@ related: [evening-wind-down]        # up to 3 lesson slugs shown under the entry
 The text, in Markdown.
 ```
 
+## A guided journal: `content/guided-journals/<slug>/journal.yaml`
+
+Added 19 Nov 2026 (Phase 5). A guided journal is content, so its pages can be added or reworded without a store update. The whole file is YAML (no `---` lines, no Markdown body). The folder's name is the journal's slug, permanent. The Gratitude journal is the full example.
+
+```yaml
+title: Gratitude                    # 40 characters at most
+summary: Four weeks of noticing what is good.   # one line under the title, 140 at most
+aura: rose                          # its cover (a journal's cover is always dark)
+order: 1                            # its place on the Journal tab, 1 first
+minutes: 3                          # what a page usually takes: "3 min a page"
+# draft: true                       # only the preview app shows it
+intro:                              # "About this journal", shown before page 1. text is Markdown
+  - title: What it does, honestly
+    text: |
+      One or two short paragraphs.
+sources:                            # optional: the research behind it, plain text, at the end of "About this journal"
+  - "Author (2005). Title. Journal, 60(5), 410–421."
+sections:
+  - id: week-1                      # permanent
+    title: "Week 1 · Noticing"
+    # repeat: 2                     # the section's pages, this many rounds (default 1). "forever" on the LAST section only
+    # together: true                # all its pages may be written on one day (a set-up)
+    pages:
+      - id: d01                     # permanent, unique in the journal
+        title: Three good things
+        # times: 3                  # the same page, this many times in a row: 1 to 30
+        # skip: Not today           # a quiet button that passes the page without writing
+        prompts:                    # at least one
+          - kind: note
+            text: A short reading card, in Markdown. Nothing to answer.
+          - id: g-d01-good          # permanent, unique in the journal: answers are kept under it
+            kind: list
+            ask: Three good things that happened.
+            count: 3
+```
+
+**The kinds of prompt.** Every one except `note` and `recall` has an `id`.
+
+| kind | lines it takes | what the person sees |
+|---|---|---|
+| `note` | `text` (Markdown) | a quiet reading card |
+| `text` | `ask`, optional `hint`, `lines` (1 to 12, default 3), `share` (a button's words, such as "Send it") | a field that grows with the writing; with `share`, a button that hands the text to another app |
+| `list` | `ask`, `count` (1 to 10), optional `hint` | that many one-line fields, numbered |
+| `choice` | `ask`, `options` (2 to 8), optional `many: true` | chips: one chosen, or several |
+| `scale` | `ask`, `from` (0 or 1), `to` (5 or 10), `low`, `high` | round buttons, the two words under the ends |
+| `yesno` | `ask` | "Yes" and "No" |
+| `fill` | `sentence` with blanks written `___` | the sentence, with a short field for each blank |
+| `recall` | `of` (a prompt id of the same journal), optional `which` (`first` or `latest`, default `latest`), `label` | an earlier answer, as a quote, with its day; nothing when there is none |
+
+Any prompt may have `showIf: { prompt: <id>, is: <answer> }` or `showIf: { prompt: <id>, answered: true }`: it shows only when that prompt, **earlier on the same page**, has that answer (or any answer). Answers of `yesno` are `true` or `false`, of `scale` a number, of `choice` one of its options.
+
+**Ids are permanent.** People's answers are kept under them on their phones. To change a page, change its words, never its ids, and never reuse an id. Each answer also keeps the words of its question as they were, so a page written before a rewording stays readable.
+
+**How the app uses it.** One new page a day per journal (except inside a `together` section); a missed day changes nothing; the next page is the first one after the last page done, in order (sections, their repeats, then `times`), so nobody is ever sent back. A page with `skip` can be passed, and a skip does not use up the day's page. In a `forever` section the pages come in order and start again after the last.
+
+**The check refuses**, with the file and a plain sentence: a folder name that is not a slug; two sections, two pages or two prompts with the same id in one journal; a `recall` whose `of` is not a prompt id of the journal; a `showIf` that does not name a prompt earlier on its page; `forever` anywhere but the last section; a list `count`, a text `lines`, a page `times` or a number of options outside its range; a `fill` without a blank; a page without prompts; a missing `title`, `summary`, `aura`, `order`, `minutes` or `intro`; pictures, tables or HTML in the Markdown.
+
+**Older apps.** The app reads the journals apart from the rest, and leniently: a journal it cannot read is left out (the lessons still load), a prompt of a kind it does not know is skipped, and a page left with nothing says "This page needs a newer version of the app." and offers a way past it. So a later phase may add kinds of prompt without breaking the phones that have not updated.
+
 ## Maria's page: `content/studio/studio.md`
 
 Everything is optional except `name`; a block with nothing in it is not shown.
@@ -156,6 +216,7 @@ The build (`tools/content/build.ts`, Phase 1) writes `content/v1/content.json` a
 4. Resolve `aura` when absent: `auraNames[hash(slug) % 5]`, with the same hash function as the app's `auraForSlug`.
 5. Sort lessons and journal entries by `published` (newest first), then by title. A series lists its lesson slugs by `order`.
 6. `content.json` leaves out everything with `draft: true` (and a series left with no lesson). `preview.json` keeps drafts, with `draft: true` on them.
+   Guided journals (Phase 5) go under the key `guidedJournals`, sorted by `order` then slug, with their defaults filled in and every `intro` and `note` text turned into blocks; drafts in `preview.json` only.
 7. Print a summary: counts, the list of drafts, the list of samples. With `--release`, exit with an error if any sample remains.
 8. Warn when `content.json` is larger than 400 KB: it is time to ask the architect about splitting it.
 
