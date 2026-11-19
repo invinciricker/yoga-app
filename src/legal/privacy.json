@@ -1,12 +1,12 @@
 {
   "title": "Privacy",
-  "updated": "17 November 2026",
+  "updated": "19 November 2026",
   "blocks": [
     {
       "type": "paragraph",
       "spans": [
         {
-          "text": "Last updated: 17 November 2026",
+          "text": "Last updated: 19 November 2026",
           "italic": true
         }
       ]
@@ -41,7 +41,7 @@
       "type": "paragraph",
       "spans": [
         {
-          "text": "What you do in the app stays on your phone: the lessons you finished and your candles, your saved lessons, your answers to \"How did that feel?\", and your settings. None of it is sent anywhere. "
+          "text": "What you do in the app stays on your phone: the lessons you finished and your candles, your saved lessons, your answers to \"How did that feel?\", everything you write in the Journal, and your settings. None of it is sent anywhere. "
         },
         {
           "text": "You → Delete my data",
@@ -57,6 +57,26 @@
       "spans": [
         {
           "text": "If backup is switched on in your phone's settings, Android may include this app's data in your phone's own backup to your Google account. That backup is yours: we cannot see it."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Your journal"
+    },
+    {
+      "type": "paragraph",
+      "spans": [
+        {
+          "text": "What you write in the Journal is kept only on this phone. It is never sent anywhere, and nobody, Maria included, can read it. The app does not count or analyse what you write. If you choose "
+        },
+        {
+          "text": "You → Export my journal",
+          "bold": true
+        },
+        {
+          "text": ", the app hands the text to the app you pick, such as your email or your notes: from there, that app's own rules apply."
         }
       ]
     },

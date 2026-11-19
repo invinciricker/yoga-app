@@ -6,7 +6,7 @@
 # Later phases add their own paragraph when they start sending something:
 #   Phase 9 (the answer to "How did that feel?" goes to Maria's totals), Phase 10 (notifications).
 #   Phase 5 adds the journal to "What stays on your phone".
-updated: 2026-11-17
+updated: 2026-11-19
 ---
 
 # Privacy
@@ -21,9 +21,13 @@ You never sign up. The app does not ask for your name, your email address or you
 
 ## What stays on your phone
 
-What you do in the app stays on your phone: the lessons you finished and your candles, your saved lessons, your answers to "How did that feel?", and your settings. None of it is sent anywhere. **You → Delete my data** erases it, and so does uninstalling the app.
+What you do in the app stays on your phone: the lessons you finished and your candles, your saved lessons, your answers to "How did that feel?", everything you write in the Journal, and your settings. None of it is sent anywhere. **You → Delete my data** erases it, and so does uninstalling the app.
 
 If backup is switched on in your phone's settings, Android may include this app's data in your phone's own backup to your Google account. That backup is yours: we cannot see it.
+
+## Your journal
+
+What you write in the Journal is kept only on this phone. It is never sent anywhere, and nobody, Maria included, can read it. The app does not count or analyse what you write. If you choose **You → Export my journal**, the app hands the text to the app you pick, such as your email or your notes: from there, that app's own rules apply.
 
 ## What the app downloads
 
