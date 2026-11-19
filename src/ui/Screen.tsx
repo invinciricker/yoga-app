@@ -6,6 +6,7 @@
  */
 import { useId, useState, type ComponentRef, type ReactNode, type RefObject } from 'react';
 import {
+  KeyboardAvoidingView,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -51,6 +52,11 @@ export type ScreenProps = {
   onRefresh?: () => void;
   /** To scroll the page from the outside (back to the top when a video starts). */
   scrollRef?: RefObject<ComponentRef<typeof ScrollView> | null>;
+  /**
+   * A page to write on: the page ends where the keyboard begins (React Native's own
+   * KeyboardAvoidingView), so the phone keeps the field being typed in, and its cursor, in view.
+   */
+  keyboard?: boolean;
 };
 
 export function Screen({
@@ -65,6 +71,7 @@ export function Screen({
   refreshing = false,
   onRefresh,
   scrollRef,
+  keyboard = false,
 }: ScreenProps) {
   const insets = useSafeAreaInsets();
   const { color } = useTheme();
@@ -98,8 +105,9 @@ export function Screen({
     </View>
   );
 
+  const Root = keyboard ? KeyboardAvoidingView : View;
   return (
-    <View style={styles.root}>
+    <Root style={styles.root} {...(keyboard ? { behavior: 'padding' as const } : null)}>
       {scroll ? (
         <ScrollView
           ref={scrollRef}
@@ -143,7 +151,7 @@ export function Screen({
           <View style={[styles.footerContent, { paddingBottom: insets.bottom + space.lg }]}>{footer}</View>
         </View>
       ) : null}
-    </View>
+    </Root>
   );
 }
 

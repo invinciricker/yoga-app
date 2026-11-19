@@ -64,4 +64,13 @@ export const size = {
   progressTrack: 0.22, // the strength of the line's empty part, over a cover
   candlelightWide: 560, // the light above "Well done.", centred at the top
   numberColumn: 88, // the least width of each of You's three numbers
+  // --- Phase 5: the Journal (docs/phases/phase-5.md)
+  todayPage: 300, // the card of today's page at the top of the Journal tab
+  shelfDisc: 44, // the small aura (or icon) at the start of a row of the shelf
+  shelfRow: 72, // the least height of a row of the shelf
+  scale: 48, // a round button of a scale ("7")
+  scaleRow: 6, // at most this many buttons on one row of a scale; 0 to 10 makes two rows
+  blank: 112, // the least width of a blank in a fill-in sentence
+  freePage: 0.45, // a free page's field is at least this part of the window's height
+  noteDisc: 0.16, // the strength of the area's colour behind a small icon
 } as const;

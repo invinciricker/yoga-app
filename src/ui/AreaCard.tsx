@@ -2,7 +2,7 @@
  * AreaCard: how Today will show one suggestion of an area (Breathe, Sit, Write…).
  * A card on the area's soft ground: a round disc holding the area's icon, an overline in the
  * area's colour, a title and one line, and a chevron on the right. At least 88 high.
- * Phase 2 shows it in the gallery only; the phases of each area put it on Today.
+ * With `done`, the line follows the sage tick ("Written today"). Phase 5 puts Write on Today.
  */
 import { ChevronRight, type LucideIcon } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
@@ -11,6 +11,7 @@ import { radius, space, withAlpha, type Area } from '@/theme';
 import { useTheme } from '@/theme/ThemeProvider';
 
 import { Card } from './Card';
+import { DoneTick } from './DoneTick';
 import { Overline } from './Overline';
 import { PressableScale } from './PressableScale';
 import { size } from './sizes';
@@ -24,10 +25,12 @@ export type AreaCardProps = {
   title: string;
   /** One line under the title. */
   line: string;
+  /** Done today: the sage tick before the line. */
+  done?: boolean;
   onPress: () => void;
 };
 
-export function AreaCard({ area, icon: Icon, overline, title, line, onPress }: AreaCardProps) {
+export function AreaCard({ area, icon: Icon, overline, title, line, done = false, onPress }: AreaCardProps) {
   const { color } = useTheme();
   const ink = color.area[area];
   return (
@@ -41,9 +44,12 @@ export function AreaCard({ area, icon: Icon, overline, title, line, onPress }: A
             {overline}
           </Overline>
           <Text variant="h3">{title}</Text>
-          <Text variant="body" color="text.secondary" numberOfLines={1}>
-            {line}
-          </Text>
+          <View style={styles.line}>
+            {done ? <DoneTick /> : null}
+            <Text variant="body" color="text.secondary" numberOfLines={1} style={styles.lineText}>
+              {line}
+            </Text>
+          </View>
         </View>
         <ChevronRight size={size.icon.md} strokeWidth={size.stroke.regular} color={color.text.muted} />
       </Card>
@@ -61,4 +67,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   words: { flex: 1, gap: space.xxs },
+  line: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
+  lineText: { flexShrink: 1 },
 });

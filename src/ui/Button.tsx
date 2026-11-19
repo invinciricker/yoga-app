@@ -2,7 +2,8 @@
  * Button: six kinds.
  *   primary  the gold one. ONE per screen. With shape="pill" it is the smaller rounded one
  *            that sits on a cover ("Begin"). Gold as a fill, with a hairline around it.
- *   ghost    a hairline outline, for second choices.
+ *   ghost    a hairline outline, for second choices. With small, 40 high (the touch area stays 48):
+ *            "New page" on a row of the Journal's shelf.
  *   quiet    text only, for the least important action.
  *   link     gold words, with the icon after them ("Read the note →").
  *   glass    a translucent pill for the top of a cover or the billboard ("Meet Maria →").
@@ -32,7 +33,7 @@ export type ButtonProps = {
   iconFilled?: boolean;
   /** "pill": 52 high with fully round ends, as wide as its words. */
   shape?: 'block' | 'pill';
-  /** Glass only: the smaller pill, 40 high. */
+  /** Glass and ghost only: the smaller pill, 40 high. */
   small?: boolean;
   /** Quiet and link only: drawn on a cover, so the words use the onCover.* colours. */
   onCover?: boolean;
@@ -72,7 +73,7 @@ export function Button({
   const styles = useStyles();
   const coverInk = onCover ? onCoverInk[kind] : undefined;
   const l = coverInk ? { ...look[kind], ink: coverInk, iconInk: coverInk } : look[kind];
-  const compact = kind === 'glass' && small;
+  const compact = (kind === 'glass' || kind === 'ghost') && small;
   const icon = Icon ? (
     <Icon
       size={compact ? size.icon.xs : kind === 'link' ? size.icon.sm : size.icon.md}
@@ -81,7 +82,7 @@ export function Button({
       fill={iconFilled ? inkColors(color)[l.iconInk] : 'none'}
     />
   ) : null;
-  // The small glass pill is 40 high; the touch area reaches 48.
+  // The small pill is 40 high; the touch area reaches 48.
   const slop = compact ? (layout.touchMin - size.button.glassSmall) / 2 : undefined;
   return (
     <PressableScale
@@ -91,7 +92,7 @@ export function Button({
       accessibilityHint={accessibilityHint}
       hitSlop={slop === undefined ? undefined : { top: slop, bottom: slop }}
       containerStyle={style}
-      style={[shapes.base, styles[kind], shape === 'pill' && shapes.pill, compact && shapes.small]}
+      style={[shapes.base, styles[kind], shape === 'pill' && shapes.pill, compact && shapes.small, compact && kind === 'ghost' && shapes.round]}
     >
       {l.iconAfter ? null : icon}
       <Text variant={l.text} color={l.ink} numberOfLines={1}>
@@ -115,6 +116,7 @@ const shapes = StyleSheet.create({
   },
   pill: { minHeight: size.button.pill, borderRadius: radius.pill },
   small: { minHeight: size.button.glassSmall, paddingHorizontal: space.md, gap: space.xxs },
+  round: { borderRadius: radius.pill },
 });
 
 const useStyles = makeStyles((color) =>

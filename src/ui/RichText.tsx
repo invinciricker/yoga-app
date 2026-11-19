@@ -22,6 +22,8 @@ export type RichTextProps = {
   blocks: Block[];
   /** The colour of paragraphs and lists: full ivory for a reading page, softer on a lesson. */
   ink?: InkColor;
+  /** The size of paragraphs and lists: bodyLarge for a reading page, body in a small card (a journal's note). */
+  size?: 'bodyLarge' | 'body';
 };
 
 /**
@@ -51,16 +53,17 @@ function Spans({ spans, variant, ink }: { spans: Span[]; variant: TextVariant; i
   );
 }
 
-export function RichText({ blocks, ink = 'text.primary' }: RichTextProps) {
+export function RichText({ blocks, ink = 'text.primary', size: textSize = 'bodyLarge' }: RichTextProps) {
   const dots = useDots();
+  const v: TextVariant = textSize;
   return (
-    <View style={styles.blocks}>
+    <View style={[styles.blocks, textSize === 'body' && styles.tight]}>
       {blocks.map((block, i) => {
         switch (block.type) {
           case 'paragraph':
             return (
-              <Text key={i} variant="bodyLarge" color={ink}>
-                <Spans spans={block.spans} variant="bodyLarge" ink={ink} />
+              <Text key={i} variant={v} color={ink}>
+                <Spans spans={block.spans} variant={v} ink={ink} />
               </Text>
             );
           case 'heading':
@@ -75,16 +78,16 @@ export function RichText({ blocks, ink = 'text.primary' }: RichTextProps) {
                 {block.items.map((item, n) => (
                   <View key={n} style={styles.item}>
                     {block.ordered ? (
-                      <Text variant="bodyLarge" color="accent.gold" tabular style={styles.number}>
+                      <Text variant={v} color="accent.gold" tabular style={styles.number}>
                         {n + 1}.
                       </Text>
                     ) : (
-                      <View style={styles.bulletBox}>
+                      <View style={[styles.bulletBox, { height: type[v].lineHeight }]}>
                         <View style={dots.bullet} />
                       </View>
                     )}
-                    <Text variant="bodyLarge" color={ink} style={styles.itemText}>
-                      <Spans spans={item} variant="bodyLarge" ink={ink} />
+                    <Text variant={v} color={ink} style={styles.itemText}>
+                      <Spans spans={item} variant={v} ink={ink} />
                     </Text>
                   </View>
                 ))}
@@ -119,6 +122,7 @@ export function RichText({ blocks, ink = 'text.primary' }: RichTextProps) {
 
 const styles = StyleSheet.create({
   blocks: { gap: space.lg },
+  tight: { gap: space.sm },
   bold: { fontFamily: font.bodyStrong },
   italic: { fontStyle: 'italic' },
   link: { textDecorationLine: 'underline' },
@@ -127,7 +131,7 @@ const styles = StyleSheet.create({
   itemText: { flex: 1 },
   number: { minWidth: space.lg },
   // The dot sits in a box as tall as one line of text, so it stays level with the first line.
-  bulletBox: { width: space.lg, height: type.bodyLarge.lineHeight, alignItems: 'center', justifyContent: 'center' },
+  bulletBox: { width: space.lg, alignItems: 'center', justifyContent: 'center' },
 });
 
 const useDots = makeStyles((color) =>
