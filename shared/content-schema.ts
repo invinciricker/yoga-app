@@ -199,7 +199,7 @@ export const siteSource = z.object({
  * Explained for humans in docs/CONTENT.md ("A guided journal"); the rules between ids (no two the
  * same, a recall that points to a real prompt…) are checked by tools/content/journals.ts.
  */
-export const promptKinds = ['note', 'text', 'list', 'choice', 'scale', 'yesno', 'fill', 'recall'] as const;
+export const promptKinds = ['note', 'text', 'list', 'choice', 'scale', 'yesno', 'fill', 'recall', 'dots'] as const;
 
 /** A blank in a fill-in sentence: two underscores or more ("I am glad that ___"). */
 export const blankPattern = /_{2,}/;
@@ -210,12 +210,32 @@ export const sentencePieces = (sentence: string): string[] => sentence.split(/_{
 const journalId = z.string().regex(slugPattern, 'an id like g-d01-good: lowercase letters, digits and single dashes').max(60);
 const ask = z.string().min(1).max(300);
 
-/** Shows a prompt only when an earlier prompt of the same page has the answer `is`, or any answer. */
+/** A round of a section, counted from 1 (Phase 6). */
+const roundNumber = z.number().int().min(1);
+
+/**
+ * Shows a prompt only when an earlier prompt of the same page has the answer `is`, or any answer
+ * (`prompt`); or, added 19 Nov 2026 (Phase 6), only in some rounds of its section (`round: 3`,
+ * `round: [1, 10]`). Never both: an older app cannot read a showIf without `prompt` and leaves the
+ * whole prompt out, which is what a "week 3" note needs. Written as one group of lines so that each
+ * mistake gets its own plain sentence.
+ */
 const showIfSource = z.object({
-  prompt: journalId,
+  prompt: journalId.optional(),
   is: z.union([z.string(), z.number(), z.boolean()]).optional(),
   answered: z.literal(true).optional(),
-}).strict();
+  round: z.union([roundNumber, z.array(roundNumber).min(1)]).optional(),
+}).strict()
+  .refine((v) => v.prompt === undefined || v.round === undefined, {
+    message: '"showIf" names a prompt or a round, never both: an older app would show this prompt in every round',
+  })
+  .refine((v) => v.prompt !== undefined || v.round !== undefined, {
+    message: '"showIf" needs "prompt" (an earlier question of the page) or "round"',
+  })
+  .refine((v) => v.round === undefined || (v.is === undefined && v.answered === undefined), {
+    message: '"is" and "answered" go with "prompt", not with "round"',
+  });
+const hint = z.string().min(1).max(200).optional();
 
 export const promptSource = z.discriminatedUnion('kind', [
   /** A short reading card (Markdown), nothing to answer. */
@@ -224,6 +244,11 @@ export const promptSource = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('text'), id: journalId, ask, hint: z.string().min(1).max(200).optional(),
     lines: z.number().int().min(1).max(12).optional(), share: z.string().min(1).max(30).optional(),
+    /**
+     * Added 19 Nov 2026 (Phase 6): once the field holds text, a quiet button with `label` hands the
+     * text to the prompt `prompt` on the first page of the journal `to`, when that journal is free.
+     */
+    carry: z.object({ to: slug, prompt: journalId, label: z.string().min(1).max(30) }).strict().optional(),
     showIf: showIfSource.optional(),
   }).strict(),
   /** `count` short lines. */
@@ -231,18 +256,28 @@ export const promptSource = z.discriminatedUnion('kind', [
     kind: z.literal('list'), id: journalId, ask, count: z.number().int().min(1).max(10),
     hint: z.string().min(1).max(200).optional(), showIf: showIfSource.optional(),
   }).strict(),
-  /** One option, or several with `many`. */
+  /** One option, or several with `many`. `hint` and `prefill` added 19 Nov 2026 (Phase 6). */
   z.object({
-    kind: z.literal('choice'), id: journalId, ask, options: z.array(z.string().min(1).max(60)).min(2).max(8),
-    many: z.boolean().optional(), showIf: showIfSource.optional(),
+    kind: z.literal('choice'), id: journalId, ask, hint, options: z.array(z.string().min(1).max(60)).min(2).max(8),
+    many: z.boolean().optional(),
+    /**
+     * A choice of one filled in from what the person did today, until they answer it themselves:
+     * `lessons-today` is the minutes of today's lessons marked done; the highest `atLeast` reached
+     * picks its `option`.
+     */
+    prefill: z.object({
+      from: z.literal('lessons-today'),
+      pick: z.array(z.object({ atLeast: z.number().int().min(1).max(600), option: z.string().min(1) }).strict()).min(1).max(8),
+    }).strict().optional(),
+    showIf: showIfSource.optional(),
   }).strict(),
-  /** Round buttons from `from` to `to`, with words under the two ends. */
+  /** Round buttons from `from` to `to`, with words under the two ends. `hint` added in Phase 6. */
   z.object({
-    kind: z.literal('scale'), id: journalId, ask, from: z.union([z.literal(0), z.literal(1)]),
+    kind: z.literal('scale'), id: journalId, ask, hint, from: z.union([z.literal(0), z.literal(1)]),
     to: z.union([z.literal(5), z.literal(10)]), low: z.string().min(1).max(30), high: z.string().min(1).max(30),
     showIf: showIfSource.optional(),
   }).strict(),
-  z.object({ kind: z.literal('yesno'), id: journalId, ask, showIf: showIfSource.optional() }).strict(),
+  z.object({ kind: z.literal('yesno'), id: journalId, ask, hint, showIf: showIfSource.optional() }).strict(),
   /** A sentence with blanks written ___ (two or more underscores). */
   z.object({
     kind: z.literal('fill'), id: journalId,
@@ -253,6 +288,16 @@ export const promptSource = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('recall'), of: journalId, which: z.enum(['first', 'latest']).optional(),
     label: z.string().min(1).max(80).optional(), showIf: showIfSource.optional(),
+  }).strict(),
+  /**
+   * Added 19 Nov 2026 (Phase 6). The week as rows of dots: one row per entry of `rows`, one dot per
+   * step of a round of its section (the round on screen, or the row's own `round`), each the answer
+   * to `of` (a yes or no, a scale or a choice of one of the same section). Nothing to answer.
+   */
+  z.object({
+    kind: z.literal('dots'), ask, hint,
+    rows: z.array(z.object({ of: journalId, label: z.string().min(1).max(16), round: roundNumber.optional() }).strict()).min(1).max(8),
+    showIf: showIfSource.optional(),
   }).strict(),
 ]);
 
@@ -273,6 +318,8 @@ const sectionSource = z.object({
   repeat: z.union([z.number().int().min(1).max(52), z.literal('forever')]).optional(),
   /** Its pages may all be written on one day (a set-up). Default false. */
   together: z.boolean().optional(),
+  /** Added 19 Nov 2026 (Phase 6): its pages are numbered "Week 3 · Day 5". Only where a round is seven steps. */
+  numbering: z.literal('weeks').optional(),
   pages: z.array(pageSource).min(1),
 }).strict();
 
@@ -291,6 +338,8 @@ export const guidedJournalSource = z.object({
   intro: z.array(z.object({ title: z.string().min(1).max(60), text: z.string().min(1).max(3000) }).strict()).min(1),
   /** The research behind it, plain text, at the end of "About this journal". */
   sources: z.array(z.string().min(1).max(400)).optional(),
+  /** Added 19 Nov 2026 (Phase 6): the words of a row on the journal's page that starts it again ("Start a new habit"). */
+  again: z.string().min(1).max(30).optional(),
   sections: z.array(sectionSource).min(1),
 }).strict();
 
@@ -395,35 +444,51 @@ export const studio = z.object({
  * of its page (a page left with nothing says so in the app), and a journal it cannot read is left
  * out without stopping the rest of the content.
  */
-const showIf = z.object({
+const showIfPrompt = z.object({
   prompt: z.string(),
   is: z.union([z.string(), z.number(), z.boolean()]).optional(),
   answered: z.boolean().optional(),
 });
+/** Added 19 Nov 2026 (Phase 6): only in these rounds of its section. An older app leaves such a prompt out. */
+const showIfRound = z.object({ round: z.union([z.number().int(), z.array(z.number().int())]) });
+const showIf = z.union([showIfPrompt, showIfRound]);
 const promptId = z.string().min(1);
+/** Phase 6 additions an app reads when it can, and ignores when a later version writes them differently. */
+const lenient = <T extends z.ZodType>(schema: T) => schema.optional().catch(undefined);
 export const guidedPrompt = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('note'), text: z.array(block), showIf: showIf.optional() }),
   z.object({
     kind: z.literal('text'), id: promptId, ask: z.string(), hint: z.string().optional(),
-    lines: z.number().int().min(1).max(30).default(3), share: z.string().optional(), showIf: showIf.optional(),
+    lines: z.number().int().min(1).max(30).default(3), share: z.string().optional(),
+    carry: lenient(z.object({ to: z.string(), prompt: z.string(), label: z.string() })),
+    showIf: showIf.optional(),
   }),
   z.object({
     kind: z.literal('list'), id: promptId, ask: z.string(), count: z.number().int().min(1).max(10),
     hint: z.string().optional(), showIf: showIf.optional(),
   }),
   z.object({
-    kind: z.literal('choice'), id: promptId, ask: z.string(), options: z.array(z.string()).min(1).max(12),
-    many: z.boolean().default(false), showIf: showIf.optional(),
+    kind: z.literal('choice'), id: promptId, ask: z.string(), hint: z.string().optional(), options: z.array(z.string()).min(1).max(12),
+    many: z.boolean().default(false),
+    /** Read only when `from` is one this version knows ("lessons-today"); later phases may add others. */
+    prefill: lenient(z.object({ from: z.string(), pick: z.array(z.object({ atLeast: z.number(), option: z.string() })) })),
+    showIf: showIf.optional(),
   }),
   z.object({
-    kind: z.literal('scale'), id: promptId, ask: z.string(), from: z.number().int(), to: z.number().int(),
+    kind: z.literal('scale'), id: promptId, ask: z.string(), hint: z.string().optional(), from: z.number().int(), to: z.number().int(),
     low: z.string(), high: z.string(), showIf: showIf.optional(),
   }).refine((s) => s.to > s.from && s.to - s.from <= 10),
-  z.object({ kind: z.literal('yesno'), id: promptId, ask: z.string(), showIf: showIf.optional() }),
+  z.object({ kind: z.literal('yesno'), id: promptId, ask: z.string(), hint: z.string().optional(), showIf: showIf.optional() }),
   z.object({ kind: z.literal('fill'), id: promptId, sentence: z.string().regex(blankPattern), showIf: showIf.optional() }),
   z.object({
     kind: z.literal('recall'), of: z.string(), which: z.enum(['first', 'latest']).default('latest'),
     label: z.string().optional(), showIf: showIf.optional(),
+  }),
+  /** Added 19 Nov 2026 (Phase 6): the week as rows of dots. Nothing to answer, never exported. */
+  z.object({
+    kind: z.literal('dots'), ask: z.string(), hint: z.string().optional(),
+    rows: z.array(z.object({ of: z.string(), label: z.string(), round: z.number().int().min(1).optional() })).min(1),
+    showIf: showIf.optional(),
   }),
 ]);
 export const guidedPage = z.object({
@@ -439,6 +504,8 @@ export const guidedSection = z.object({
   title: z.string(),
   repeat: z.union([z.number().int().min(1), z.literal('forever')]).default(1),
   together: z.boolean().default(false),
+  /** Added 19 Nov 2026 (Phase 6): "Week 3 · Day 5". A kind of numbering this version does not know is plain numbering. */
+  numbering: lenient(z.literal('weeks')),
   pages: z.array(guidedPage).min(1),
 });
 export const guidedJournal = z.object({
@@ -451,6 +518,8 @@ export const guidedJournal = z.object({
   draft: z.boolean().default(false),
   intro: z.array(z.object({ title: z.string(), text: z.array(block) })),
   sources: z.array(z.string()).default([]),
+  /** Added 19 Nov 2026 (Phase 6): the words of the row that starts the journal again. */
+  again: z.string().optional(),
   sections: z.array(guidedSection).min(1),
 });
 
@@ -518,6 +587,7 @@ export type JournalEntry = z.infer<typeof journalEntry>;
 export type Studio = z.infer<typeof studio>;
 export type PromptKind = (typeof promptKinds)[number];
 export type GuidedPrompt = z.infer<typeof guidedPrompt>;
+export type ShowIf = NonNullable<GuidedPrompt['showIf']>;
 export type GuidedPage = z.infer<typeof guidedPage>;
 export type GuidedSection = z.infer<typeof guidedSection>;
 export type GuidedJournal = z.infer<typeof guidedJournal>;

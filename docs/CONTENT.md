@@ -136,16 +136,39 @@ sections:
 | `yesno` | `ask` | "Yes" and "No" |
 | `fill` | `sentence` with blanks written `___` | the sentence, with a short field for each blank |
 | `recall` | `of` (a prompt id of the same journal), optional `which` (`first` or `latest`, default `latest`), `label` | an earlier answer, as a quote, with its day; nothing when there is none |
+| `dots` (Phase 6) | `ask`, optional `hint`, `rows` (1 to 8): each `{ of: <prompt id>, label: <16 characters at most>, round: <optional> }` | the week as rows of dots: one dot per page of a round of its section, its size the answer (see below) |
+
+`choice`, `scale` and `yesno` may have a `hint` too (Phase 6), drawn under the question as on a text.
 
 Any prompt may have `showIf: { prompt: <id>, is: <answer> }` or `showIf: { prompt: <id>, answered: true }`: it shows only when that prompt, **earlier on the same page**, has that answer (or any answer). Answers of `yesno` are `true` or `false`, of `scale` a number, of `choice` one of its options.
 
-**Ids are permanent.** People's answers are kept under them on their phones. To change a page, change its words, never its ids, and never reuse an id. Each answer also keeps the words of its question as they were, so a page written before a rewording stays readable.
+**Ids are permanent.** People's answers are kept under them on their phones. To change a page, change its words, never its ids, and never reuse an id for another question. Each answer also keeps the words of its question as they were, so a page written before a rewording stays readable.
+
+### What the format learned in Phase 6 (19 Nov 2026)
+
+Everything below is optional, and an app older than Phase 6 survives it (see "Older apps"). The Habit and Health journals use all of it.
+
+- **The same question asked again.** The same prompt id on several pages of a journal is the same question asked again: its answers form one series (a recall finds the latest or first answer whichever page it was on; the dots read them all). It must ask for the same kind of answer each time: the same `kind`; for a choice, the same `options` and `many`; for a scale, the same `from` and `to`; for a list, the same `count`; for a fill, the same number of blanks. The words of `ask` and `hint` may differ. Never the same id twice on one page.
+- **Weeks**: `numbering: weeks` on a section whose round is exactly seven pages (pages times their `times`). Its pages are numbered "Week 3 · Day 5": the week is the round, the day the page's place in the round. The "Page 2 of 3" of the sections before it counts only the sections without `numbering`.
+- **Show by week**: `showIf: { round: 3 }` or `showIf: { round: [1, 10] }`: the prompt shows only in those rounds of its section (counted from 1; for a page written before, the round it was written in). Only in a section that repeats. Never together with `prompt`: an older app leaves a prompt with a round out entirely, which is what a "week 3" note needs.
+- **Dots**: `kind: dots`, nothing to answer, never exported. Each row reads a `yesno`, a `scale` or a `choice` of one (`of`) **of the same section**, on every page of one round of that section: the round on screen, or the row's own `round` (Week 1 next to week 10). A full dot for Yes, a small one for No; for a scale or a choice, the bigger the dot the higher the answer (a choice's first option is the smallest); an empty ring for a day without an answer. At most seven pages to a round.
+- **Filled in from today's practice**: on a `choice` of one,
+  ```yaml
+  prefill:
+    from: lessons-today          # the minutes of today's lessons marked done
+    pick:                        # the highest rule reached wins
+      - { atLeast: 1, option: A little }
+      - { atLeast: 20, option: 20 minutes or more }
+  ```
+  On a page of today with no answer to it, that option shows chosen, with "From your practice today: 25 min" under it. It is kept with the page's first answer or by "Done"; tapped away, it never comes back on that page; it never replaces an answer. `atLeast` is a whole number from 1 to 600; each `option` must be one of the choice's options.
+- **Handed to another journal**: on a `text`, `carry: { to: habit, prompt: h-want, label: Make it a habit }`. Once the field holds text, a quiet button with the `label` hands the text to the prompt `prompt`, which must be a `text` on the first page of the first section of the journal `to` (another journal of `content/guided-journals/`). The button shows only while that journal has nothing written in it since it was last started. `label`: 30 characters at most.
+- **Starting again**: `again: Start a new habit` on the journal (30 characters at most). Once a page is written, the journal's page shows a row with these words; confirming starts the journal again from its first page. The pages written before stay, under "Earlier".
 
 **How the app uses it.** One new page a day per journal (except inside a `together` section); a missed day changes nothing; the next page is the first one after the last page done, in order (sections, their repeats, then `times`), so nobody is ever sent back. A page with `skip` can be passed, and a skip does not use up the day's page. In a `forever` section the pages come in order and start again after the last.
 
-**The check refuses**, with the file and a plain sentence: a folder name that is not a slug; two sections, two pages or two prompts with the same id in one journal; a `recall` whose `of` is not a prompt id of the journal; a `showIf` that does not name a prompt earlier on its page; `forever` anywhere but the last section; a list `count`, a text `lines`, a page `times` or a number of options outside its range; a `fill` without a blank; a page without prompts; a missing `title`, `summary`, `aura`, `order`, `minutes` or `intro`; pictures, tables or HTML in the Markdown.
+**The check refuses**, with the file and a plain sentence: a folder name that is not a slug; two sections or two pages with the same id in one journal; two prompts with the same id on one page, or on two pages with a different kind of answer (Phase 6); a `recall` whose `of` is not a prompt id of the journal; a `showIf` that does not name a prompt earlier on its page; `forever` anywhere but the last section; a list `count`, a text `lines`, a page `times` or a number of options outside its range; a `fill` without a blank; a page without prompts; a missing `title`, `summary`, `aura`, `order`, `minutes` or `intro`; pictures, tables or HTML in the Markdown. And, since Phase 6: a `showIf` with both `round` and `prompt`, a `round` below 1, in a section that does not repeat or beyond its repeats; `numbering: weeks` where a round is not seven pages; dots in a section whose round is more than seven pages, a row that reads a prompt of another section or one that is not a yes or no, a scale or a choice of one, a row `label` over 16 characters, a row `round` in a section that does not repeat or beyond its repeats; a `prefill` whose `from` is not `lessons-today`, whose `option` is not one of the choice's, whose `atLeast` is not a whole number from 1 to 600, or on a choice with `many`; a `carry` to a journal that is not there (or to its own), to a prompt that is not a text on that journal's first page, or with a `label` over 30 characters; an `again` over 30 characters.
 
-**Older apps.** The app reads the journals apart from the rest, and leniently: a journal it cannot read is left out (the lessons still load), a prompt of a kind it does not know is skipped, and a page left with nothing says "This page needs a newer version of the app." and offers a way past it. So a later phase may add kinds of prompt without breaking the phones that have not updated.
+**Older apps.** The app reads the journals apart from the rest, and leniently: a journal it cannot read is left out (the lessons still load), a prompt of a kind it does not know is skipped, and a page left with nothing says "This page needs a newer version of the app." and offers a way past it. So a later phase may add kinds of prompt without breaking the phones that have not updated. A Phase 5 app meeting the Phase 6 journals leaves out every `dots` and every prompt with `showIf: { round }`, ignores hints, weeks, `prefill`, `carry` and `again`, and keeps everything else (proved by `tools/content/olderApp.test.ts`). An app that meets a `prefill` with a `from` it does not know, or a `numbering` it does not know, shows a plain choice and plain numbers.
 
 ## Maria's page: `content/studio/studio.md`
 
