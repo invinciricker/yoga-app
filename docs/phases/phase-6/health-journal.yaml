@@ -1,0 +1,189 @@
+# The Health journal.
+# Written by Claude chat (the architect) on 19 Nov 2026, from published research (the sources are at
+# the bottom of the intro). Nothing here is copied, adapted, sequenced or named after any other journal.
+#
+# Phase 6 copies this file, unchanged, to content/guided-journals/health/journal.yaml.
+# Its format: docs/CONTENT.md ("A guided journal"), plus what Phase 6 adds (docs/phases/phase-6.md,
+# section 1): the same question asked again, dots, numbering, hints, prefill, carry.
+#
+# Ids are permanent. Once published, never rename or reuse a section id, a page id or a prompt id:
+# people's answers are stored under them. To change a page, change its words, not its ids.
+# The daily check-in and the seventh page ask the same questions under the same ids, so the week's
+# dots can read them all. Keep their kinds and options the same.
+#
+# Never add: weight, calories, body measurements, cycle tracking, or anything that reads like a
+# diagnosis (docs/V2.md, Decisions of 17 Nov 2026).
+
+title: Health
+summary: A one-minute check-in with your body each day, and a look back each week.
+aura: moss
+order: 3
+minutes: 1
+
+intro:
+  - title: What it does, honestly
+    text: |
+      This is a notebook for noticing. Each day, about a minute: how you slept, your energy and mood, whether you moved, got outside and talked with someone. On every seventh page, your week comes back to you as rows of dots, and you choose one small change.
+
+      Keeping a written record is a small but well-tested way to change things: people who record their progress are more likely to reach their goals than people who keep it in mind. The dots are only for you. Nothing here is a score.
+  - title: Why these questions
+    text: |
+      - **Sleep.** How long, and how rested you feel. The two do not always agree.
+      - **Energy and mood.** Putting a feeling into words can take a little of its edge off.
+      - **Moving.** Health guidelines suggest at least 150 minutes of moderate movement a week, and say that every bit counts. If you did a lesson in the app that day, the answer is filled in for you. You can change it.
+      - **Daylight.** In a study of over 400,000 adults, people who spent more time outside in daylight tended to sleep better and feel low less often. A link, not proof.
+      - **A real conversation.** People tend to feel better on days when they talk more with others, and closer to them after deeper conversations.
+  - title: What it is not
+    text: |
+      A notebook, not a diagnosis. It never asks about weight, calories or measurements, and it does not judge your answers.
+
+      If you have felt low for two weeks or more, talk to a doctor.
+
+      The evening is a good time for a page. A missed day changes nothing: the next page waits for you.
+
+sources:
+  - "Harkin, Webb, Chang, Prestwich, Conner, Kellar, Benn and Sheeran (2016). Does monitoring goal progress promote goal attainment? A meta-analysis of the experimental evidence. Psychological Bulletin, 142(2), 198–229."
+  - "Torre and Lieberman (2018). Putting feelings into words: affect labeling as implicit emotion regulation. Emotion Review, 10(2), 116–124."
+  - "Bull and others (2020). World Health Organization 2020 guidelines on physical activity and sedentary behaviour. British Journal of Sports Medicine, 54(24), 1451–1462."
+  - "Burns, Saxena, Vetter, Phillips, Lane and Cain (2021). Time spent in outdoor light is associated with mood, sleep, and circadian rhythm-related outcomes: a cross-sectional and longitudinal study in over 400,000 UK Biobank participants. Journal of Affective Disorders, 295, 347–352."
+  - "Sun, Harris and Vazire (2020). Is well-being associated with the quantity and quality of social interactions? Journal of Personality and Social Psychology, 119(6), 1478–1496."
+
+sections:
+  # ---------------------------------------------------------------- Day by day: weeks of seven pages, with no end
+  - id: days
+    title: Day by day
+    repeat: forever
+    numbering: weeks
+    pages:
+      - id: day
+        title: How was today?
+        times: 6
+        prompts:
+          - kind: recall
+            of: hl-tomorrow
+            which: latest
+            label: Last time, you planned
+          - id: hl-slept
+            kind: choice
+            ask: How long did you sleep last night?
+            options: [Under 5 hours, 5 to 6, 6 to 7, 7 to 8, 8 to 9, 9 or more]
+          - id: hl-rested
+            kind: scale
+            ask: How rested do you feel?
+            from: 1
+            to: 5
+            low: Worn out
+            high: Fully rested
+          - id: hl-energy
+            kind: scale
+            ask: How was your energy today?
+            from: 1
+            to: 5
+            low: Very low
+            high: Plenty
+          - id: hl-mood
+            kind: text
+            ask: Your mood today, in up to three words.
+            hint: Calm, a bit tense, hopeful… whatever fits.
+            lines: 1
+          - id: hl-moved
+            kind: choice
+            ask: How much did you move today?
+            hint: "Walking, stairs, cycling, practice: it all counts. Health guidelines suggest at least 150 minutes a week, a little over 20 a day."
+            options: [Hardly at all, A little, 20 minutes or more]
+            prefill:
+              from: lessons-today
+              pick:
+                - { atLeast: 1, option: A little }
+                - { atLeast: 20, option: 20 minutes or more }
+          - id: hl-outside
+            kind: yesno
+            ask: Did you spend time outside in daylight?
+          - id: hl-talked
+            kind: yesno
+            ask: Did you have a real conversation with someone?
+            hint: In person or by phone, more than small talk.
+          - id: hl-tomorrow
+            kind: text
+            ask: One thing you could do for your body tomorrow.
+            hint: Small and specific, like an earlier night or a walk at lunch.
+            lines: 1
+
+      - id: week
+        title: Looking back on the week
+        prompts:
+          # Today first, as on every other day (the same questions, the same ids).
+          - kind: recall
+            of: hl-tomorrow
+            which: latest
+            label: Last time, you planned
+          - id: hl-slept
+            kind: choice
+            ask: How long did you sleep last night?
+            options: [Under 5 hours, 5 to 6, 6 to 7, 7 to 8, 8 to 9, 9 or more]
+          - id: hl-rested
+            kind: scale
+            ask: How rested do you feel?
+            from: 1
+            to: 5
+            low: Worn out
+            high: Fully rested
+          - id: hl-energy
+            kind: scale
+            ask: How was your energy today?
+            from: 1
+            to: 5
+            low: Very low
+            high: Plenty
+          - id: hl-mood
+            kind: text
+            ask: Your mood today, in up to three words.
+            hint: Calm, a bit tense, hopeful… whatever fits.
+            lines: 1
+          - id: hl-moved
+            kind: choice
+            ask: How much did you move today?
+            hint: "Walking, stairs, cycling, practice: it all counts. Health guidelines suggest at least 150 minutes a week, a little over 20 a day."
+            options: [Hardly at all, A little, 20 minutes or more]
+            prefill:
+              from: lessons-today
+              pick:
+                - { atLeast: 1, option: A little }
+                - { atLeast: 20, option: 20 minutes or more }
+          - id: hl-outside
+            kind: yesno
+            ask: Did you spend time outside in daylight?
+          - id: hl-talked
+            kind: yesno
+            ask: Did you have a real conversation with someone?
+            hint: In person or by phone, more than small talk.
+          - id: hl-tomorrow
+            kind: text
+            ask: One thing you could do for your body tomorrow.
+            hint: Small and specific, like an earlier night or a walk at lunch.
+            lines: 1
+          # Then the week.
+          - kind: dots
+            ask: This week
+            hint: A bigger dot means more. An empty ring is a day without an answer.
+            rows:
+              - { of: hl-slept, label: Sleep }
+              - { of: hl-rested, label: Rested }
+              - { of: hl-energy, label: Energy }
+              - { of: hl-moved, label: Moved }
+              - { of: hl-outside, label: Outside }
+              - { of: hl-talked, label: Talked }
+          - id: hl-notice
+            kind: text
+            ask: What do you notice?
+            hint: Do the better days have something in common? And the harder ones?
+            lines: 3
+          - id: hl-change
+            kind: text
+            ask: One small change for next week.
+            hint: Small enough to manage on a busy day.
+            lines: 2
+            carry: { to: habit, prompt: h-want, label: Make it a habit }
+          - kind: note
+            text: |
+              A notebook, not a diagnosis. If you have felt low for two weeks or more, talk to a doctor.

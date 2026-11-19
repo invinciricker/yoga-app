@@ -88,6 +88,7 @@ After version 1: `docs/phases/later.md`.
 - **16 Nov 2026** · Small backend: Supabase (reactions, notification tokens, Maria's sign-in). Chosen over Firebase because one free account also gives the server functions and storage that Phase 8 needs. Firebase is still needed in Phase 5, only as Android's notification pipe.
 - **17 Nov 2026** · Version 2 of the plan: see "Decisions" in `docs/V2.md`.
 - **17 Nov 2026, evening** · The builder gets more freedom; Phases 3 and 4 briefed together; the architect now delivers briefs as pull requests. See "Decisions (17 Nov 2026, evening)" in `docs/V2.md`.
+- **19 Nov 2026** · Phases 5 and 6 briefed: the Journal (free pages and Gratitude, then Habit and Health). Both arrive over the air. See the two "Decisions (19 Nov 2026)" lists in `docs/V2.md`.
 
 ## Decisions waiting for the owner
 
