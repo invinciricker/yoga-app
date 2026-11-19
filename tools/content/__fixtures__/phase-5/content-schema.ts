@@ -2,7 +2,6 @@
 // copied unchanged below this comment. Used only by olderApp.test.ts, to prove that the Phase 5 app
 // still reads the journals written in Phase 6 and later (docs/phases/phase-6.md, "Watch out for" 5).
 // Never update it: it stands for the app that cannot be updated.
-/* eslint-disable */
 
 /**
  * The content contract, in one file, used by BOTH sides:
