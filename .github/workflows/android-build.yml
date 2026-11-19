@@ -4,6 +4,7 @@
 #   production  the real app for Google Play (see docs/PLAY-STORE.md first)
 # What it does: asks Expo to build the Android app, then writes the link to the build's page on
 #   the run's Summary page (click the run, the link is at the bottom of the page that opens).
+#   A build never changes the app on your phone by itself: open the link on the phone and install.
 #   This workflow finishes in a minute or two; the build itself happens at Expo, and the free
 #   queue can take an hour or more. Expo does NOT email you: open the link and refresh it.
 #   The free plan allows 15 builds a month: build only when a pull request says a new build is needed.
@@ -91,6 +92,9 @@ jobs:
           fi
           {
             echo "## The build was requested ($PROFILE)"
+            echo
+            # Said first, in plain words: a build never changes the phone by itself (docs/PLAN.md).
+            echo "This does not change the app on your phone. Open the link below on your phone and install the app from it, over the old one."
             echo
             echo "[$LINK]($LINK)"
             echo
