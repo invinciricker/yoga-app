@@ -20,7 +20,12 @@
 //             everything is drawn 1.3 times larger (a 277 × 492 layout): harder than the phone.
 //                                                                     → <name>-big.jpg
 //   :demo     sample progress (?demo=streak): four days of candles, a series begun, a lesson
-//             saved, an answer. In memory only.                       → <name>-demo.jpg
+//             saved, an answer, five pages of a journal, two free pages. In memory only.
+//                                                                     → <name>-demo.jpg
+//   :tap=<name>        press the button with that name first ("8 out of 10"), as a person would
+//   :type=<n>=<words>  type the words into the n-th field of the page (0 is the first)
+//   :as=<name>         the picture's name (an address with ?a=b makes a long one)
+// An address may carry its own query: /write?journal=gratitude&page=d13.
 // --both takes every route twice, dark and light.
 // Every picture except ":first" starts with the welcome already seen (as on a phone after the
 // first launch), so "/" shows Home.
@@ -99,6 +104,14 @@ const browser = await puppeteer.launch({
 try {
   for (const arg of routes) {
     const [route, ...options] = arg.split(':');
+    const taps = options.filter((o) => o.startsWith('tap=')).map((o) => o.slice(4));
+    const typing = options
+      .filter((o) => o.startsWith('type='))
+      .map((o) => {
+        const [, n, ...words] = o.split('=');
+        return { n: Number(n), words: words.join('=') };
+      });
+    const as = options.find((o) => o.startsWith('as='))?.slice(3);
     const today = options.includes('today');
     const full = options.includes('full') || today;
     const offline = options.includes('offline');
@@ -108,7 +121,7 @@ try {
     const big = options.includes('big');
     const demo = options.includes('demo');
     const name =
-      (route.replace(/^\/+|\/+$/g, '').replace(/\//g, '-') || 'home') +
+      (as ?? (route.replace(/^\/+|\/+$/g, '').replace(/[/?&=]+/g, '-') || 'home')) +
       (today ? '-today' : '') +
       (presses ? `-${presses + 1}` : '') +
       (first ? '-first' : '') +
@@ -155,12 +168,30 @@ try {
     const query = new URLSearchParams();
     if (scheme) query.set('scheme', scheme);
     if (demo) query.set('demo', 'streak');
-    await page.goto(base + route + (query.size > 0 ? `?${query}` : ''), { waitUntil: 'networkidle0' });
+    const joiner = route.includes('?') ? '&' : '?';
+    await page.goto(base + route + (query.size > 0 ? `${joiner}${query}` : ''), { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
     await new Promise((r) => setTimeout(r, 1200)); // let the arriving animation finish
     for (let i = 0; i < presses; i++) {
       await page.click('[aria-label="Next"]');
       await new Promise((r) => setTimeout(r, 900)); // let the slide finish
+    }
+    for (const label of taps) {
+      await page.click(`[aria-label="${label}"]`);
+      await new Promise((r) => setTimeout(r, 400));
+    }
+    for (const { n, words } of typing) {
+      const fields = await page.$$('textarea, input');
+      await fields[n].type(words);
+      await new Promise((r) => setTimeout(r, 400));
+    }
+    if (taps.length > 0 || typing.length > 0) {
+      // Back to the top, as the page first looked, and no field left focused.
+      await page.evaluate(() => {
+        document.activeElement?.blur();
+        for (const el of document.querySelectorAll('*')) if (el.scrollTop > 0) el.scrollTop = 0;
+      });
+      await new Promise((r) => setTimeout(r, 300));
     }
 
     if (full) {

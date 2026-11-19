@@ -260,3 +260,25 @@ export function progressOf(journal: GuidedJournal, entries: readonly JournalEntr
     ? { started, next, number, finished: false, total, done: total, pool: number.n - 1 }
     : { started, next, number, finished: false, total, done: number.n - 1, pool: 0 };
 }
+
+/** A prompt of the journal by its id (on any page), for a recall. */
+export function findPrompt(journal: GuidedJournal, id: string): GuidedPrompt | undefined {
+  for (const section of journal.sections) {
+    for (const page of section.pages) {
+      const found = page.prompts.find((p) => 'id' in p && p.id === id);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
+/** The first step of a page, by its id: only for checking screens (?page= in the preview app). */
+export function stepOfPage(journal: GuidedJournal, pageId: string): Step | undefined {
+  const section = journal.sections.find((s) => s.pages.some((p) => p.id === pageId));
+  return section ? { section: section.id, round: 1, page: pageId, time: 1 } : undefined;
+}
+
+/** True when a page has nothing to answer (only notes and recalls): "Done" alone writes it. */
+export function nothingToAnswer(page: GuidedPage): boolean {
+  return page.prompts.length > 0 && page.prompts.every((p) => p.kind === 'note' || p.kind === 'recall');
+}

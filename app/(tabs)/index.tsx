@@ -5,14 +5,15 @@
  *                  time the app is opened on a calendar day; later that day Home opens on Today.
  *   Today          in the phone's theme: a greeting that follows the clock, with the candlelight
  *                  behind it, this week's candles, the practice of the day (todayMove in
- *                  src/day/todayMove.ts), what is new, and one of Maria's sayings.
+ *                  src/day/todayMove.ts), the day's page of the Journal (journalToday in
+ *                  src/journal/guided.ts, Phase 5), what is new, and one of Maria's sayings.
  *
  * The scroll rests at two places only, the top and the start of Today; below that it moves freely.
- * (The cards of Breathe, Sit and Write arrive with their own phases.)
+ * (The cards of Breathe and Sit arrive with their own phases.)
  */
 import { useNavigation, useRouter } from 'expo-router';
 import type { BottomTabNavigationProp } from 'expo-router/tabs';
-import { ArrowRight, Bookmark, CalendarDays, ChevronDown, Play, User } from 'lucide-react-native';
+import { ArrowRight, Bookmark, CalendarDays, ChevronDown, Feather, Play, User } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { AppState, RefreshControl, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -34,6 +35,8 @@ import { useContent } from '@/content/store';
 import { useWeek } from '@/day/hooks';
 import { useDays } from '@/day/store';
 import { todayMove } from '@/day/todayMove';
+import { journalToday, pageAt, pageNumberText, type JournalSuggestion } from '@/journal/guided';
+import { useJournal } from '@/journal/store';
 import { longDate, nextClass, showBillboard } from '@/lib/billboard';
 import { greetingFor } from '@/lib/greeting';
 import { tick } from '@/lib/haptics';
@@ -46,6 +49,7 @@ import { layout, space } from '@/theme';
 import { useDarkTop } from '@/theme/statusBar';
 import { makeStyles, ThemeScope, useTheme } from '@/theme/ThemeProvider';
 import {
+  AreaCard,
   Arrive,
   Button,
   Candlelight,
@@ -81,6 +85,8 @@ export default function HomeScreen() {
   const refresh = useContent((s) => s.refresh);
   const entries = useDays((s) => s.entries);
   const savedSlugs = usePractice((s) => s.saved);
+  const journalEntries = useJournal((s) => s.entries);
+  const begun = useJournal((s) => s.begun);
   const weekCard = useWeek();
 
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -165,6 +171,8 @@ export default function HomeScreen() {
     tick(); // a light tick in the hand
     usePractice.getState().toggleSave(hero.slug);
   };
+  // The day's page of the Journal: one card in the area Write.
+  const page = journalToday(content.guidedJournals ?? [], journalEntries, dayOf(now), begun);
   const newest = newestLessons(content, 5, hero?.slug);
   const saying = latestQuote(content);
   const open = (slug: string) => router.push(routes.lesson(slug));
@@ -293,8 +301,14 @@ export default function HomeScreen() {
               <EmptyState sentence={strings.today.empty} aura="dusk" />
             )}
 
+            {page ? (
+              <Arrive index={3}>
+                <WriteCard suggestion={page} />
+              </Arrive>
+            ) : null}
+
             {newest.length > 0 ? (
-              <Arrive index={3} style={styles.block2}>
+              <Arrive index={4} style={styles.block2}>
                 <SectionHeader
                   title={strings.today.newFrom(teacher)}
                   actionLabel={strings.common.seeAll}
@@ -315,7 +329,7 @@ export default function HomeScreen() {
             ) : null}
 
             {saying?.quote ? (
-              <Arrive index={4}>
+              <Arrive index={5}>
                 <Card padding="xl" style={styles.saying}>
                   <Overline>{strings.today.noteFrom(teacher)}</Overline>
                   <Text variant="quote">{saying.quote}</Text>
@@ -333,6 +347,48 @@ export default function HomeScreen() {
         </View>
       </Animated.ScrollView>
     </View>
+  );
+}
+
+/**
+ * The Write card of Today: the day's page ("Three good things", "Gratitude · page 6 of 28 ·
+ * 3 min"); before anything is started, "Start the Gratitude journal"; once written today, the sage
+ * tick and "Written today" (it opens the page to read).
+ */
+function WriteCard({ suggestion }: { suggestion: JournalSuggestion }) {
+  const router = useRouter();
+  const { journal } = suggestion;
+  const common = { area: 'write' as const, icon: Feather, overline: strings.journal.write };
+  if (suggestion.kind === 'begin') {
+    return (
+      <AreaCard
+        {...common}
+        title={strings.journal.startThe(journal.title)}
+        line={journal.summary}
+        onPress={() => router.push(routes.guidedAbout(journal.slug))}
+      />
+    );
+  }
+  if (suggestion.kind === 'write') {
+    return (
+      <AreaCard
+        {...common}
+        title={suggestion.page.title}
+        line={strings.journal.todayLine(journal.title, pageNumberText(suggestion.number), journal.minutes)}
+        onPress={() => router.push(routes.write(journal.slug))}
+      />
+    );
+  }
+  const { entry } = suggestion;
+  const at = entry.section && entry.page ? pageAt(journal, { section: entry.section, page: entry.page }) : undefined;
+  return (
+    <AreaCard
+      {...common}
+      title={at?.page.title ?? entry.titles?.page ?? journal.title}
+      line={strings.journal.writtenToday}
+      done
+      onPress={() => router.push(routes.write(journal.slug, entry.id))}
+    />
   );
 }
 
