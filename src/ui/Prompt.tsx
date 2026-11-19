@@ -11,17 +11,23 @@
  *   yesno   two chips, "Yes" and "No"
  *   fill    the sentence, with a short field for each blank, wrapping like text
  *   recall  a quote: its label, an earlier answer, and the day it was written (given by the page)
+ *   dots    the week as rows of dots (Phase 6, the Dots part), its rows worked out by the page
+ *
+ * Phase 6 also gives a hint to a choice, a scale and a yes or no (drawn as on a text); a line under
+ * a choice filled in from today's practice ("From your practice today: 25 min"); and, on a text
+ * that hands its answer to another journal, a quiet button with an arrow ("Make it a habit").
  *
  * The question is in `title`, a hint under it in `meta`. Every field has its question as its name
  * for screen readers. The chips use the soft look: "Done" is the page's one gold fill, besides the
  * chosen number of a scale.
  */
-import { Send } from 'lucide-react-native';
+import { ArrowRight, Send } from 'lucide-react-native';
 import { useState } from 'react';
 import { Share, StyleSheet, View } from 'react-native';
 
 import { sentencePieces, type GuidedPrompt } from '../../shared/content-schema';
 
+import type { DotsRow } from '@/journal/dots';
 import type { Answer } from '@/journal/types';
 import { tick } from '@/lib/haptics';
 import { strings } from '@/strings';
@@ -31,6 +37,7 @@ import { makeStyles } from '@/theme/ThemeProvider';
 import { Button } from './Button';
 import { Card } from './Card';
 import { Chip } from './Chip';
+import { Dots } from './Dots';
 import { PressableScale } from './PressableScale';
 import { RichText } from './RichText';
 import { size } from './sizes';
@@ -45,6 +52,12 @@ export type PromptProps = {
   onAnswer: (answer: Answer) => void;
   /** A recall: the earlier answer as lines, and its day in words. Nothing shows without it. */
   recalled?: Recalled;
+  /** Dots: their rows, worked out by the page (dotsOf in src/journal/dots.ts). */
+  dots?: DotsRow[];
+  /** A choice filled in from today's practice: the line under its chips. */
+  prefillLine?: string;
+  /** A text whose answer can go to another journal: the button's words and what it does. */
+  carry?: { label: string; onPress: () => void };
 };
 
 /** The question and its hint. */
@@ -63,7 +76,7 @@ function Question({ ask, hint }: { ask: string; hint?: string }) {
   );
 }
 
-export function Prompt({ prompt, answer, onAnswer, recalled }: PromptProps) {
+export function Prompt({ prompt, answer, onAnswer, recalled, dots, prefillLine, carry }: PromptProps) {
   const value = answer?.value;
   switch (prompt.kind) {
     case 'note':
@@ -88,6 +101,9 @@ export function Prompt({ prompt, answer, onAnswer, recalled }: PromptProps) {
               onPress={() => void Share.share({ message: text }).catch(() => {})}
               style={styles.share}
             />
+          ) : null}
+          {carry && text.trim() !== '' ? (
+            <Button kind="quiet" icon={ArrowRight} label={carry.label} onPress={carry.onPress} style={styles.share} />
           ) : null}
         </View>
       );
@@ -132,12 +148,17 @@ export function Prompt({ prompt, answer, onAnswer, recalled }: PromptProps) {
       };
       return (
         <View style={styles.prompt}>
-          <Question ask={prompt.ask} />
+          <Question ask={prompt.ask} hint={prompt.hint} />
           <View style={styles.chips} accessibilityRole={prompt.many ? undefined : 'radiogroup'} accessibilityLabel={prompt.ask}>
             {prompt.options.map((option) => (
               <Chip key={option} look="soft" label={option} selected={chosen.includes(option)} onPress={() => choose(option)} />
             ))}
           </View>
+          {prefillLine ? (
+            <Text variant="meta" color="text.secondary">
+              {prefillLine}
+            </Text>
+          ) : null}
         </View>
       );
     }
@@ -153,7 +174,7 @@ export function Prompt({ prompt, answer, onAnswer, recalled }: PromptProps) {
       };
       return (
         <View style={styles.prompt}>
-          <Question ask={prompt.ask} />
+          <Question ask={prompt.ask} hint={prompt.hint} />
           <View style={styles.chips} accessibilityRole="radiogroup" accessibilityLabel={prompt.ask}>
             <Chip look="soft" label={strings.journal.yes} selected={value === true} onPress={() => choose(true)} />
             <Chip look="soft" label={strings.journal.no} selected={value === false} onPress={() => choose(false)} />
@@ -181,6 +202,9 @@ export function Prompt({ prompt, answer, onAnswer, recalled }: PromptProps) {
         </Card>
       );
 
+    case 'dots':
+      return <Dots ask={prompt.ask} hint={prompt.hint} rows={dots ?? []} />;
+
     default:
       // A kind this version does not know never reaches here (the content reader leaves it out).
       return null;
@@ -206,7 +230,7 @@ function Scale({ prompt, value, onAnswer }: { prompt: ScalePrompt; value: number
   };
   return (
     <View style={styles.prompt}>
-      <Question ask={prompt.ask} />
+      <Question ask={prompt.ask} hint={prompt.hint} />
       <View
         style={styles.scale}
         accessibilityRole="radiogroup"
