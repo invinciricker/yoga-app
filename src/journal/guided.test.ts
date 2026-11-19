@@ -70,6 +70,16 @@ describe('nextPageOf', () => {
     expect(nextPageOf(guidedJournal.parse(moved), entries)).toEqual(step('week', 'c'));
   });
 
+  it('finds a page moved to another section, and keeps going from there', () => {
+    const entries = [wrote('a', '2026-11-17T20:00'), wrote('b', '2026-11-18T20:00')];
+    const moved = structuredClone(rawTestJournal);
+    const [b] = moved.sections[0].pages.splice(1, 1);
+    moved.sections[1].pages.push(b); // b now ends the setup section
+    const journal = guidedJournal.parse(moved);
+    expect(pageAt(journal, { section: 'week', page: 'b' })?.section.id).toBe('setup');
+    expect(nextPageOf(journal, entries)).toEqual(step('twice', 'r'));
+  });
+
   it('keeps going forward when a whole section is removed', () => {
     const entries = ['a', 'b', 'c', 's1', 's2'].map((p, i) => wrote(p, `2026-11-${10 + i}T20:00`));
     const removed = structuredClone(rawTestJournal);

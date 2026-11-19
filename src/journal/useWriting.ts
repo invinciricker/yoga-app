@@ -38,10 +38,17 @@ export function useWriting(id: string): Writing {
   const createdHere = useRef(false);
   const kept = useRef(false);
 
+  // The minutes last written to the record: it is written again only when they change (at most
+  // once a minute), not on every keystroke.
+  const lastMinutes = useRef(0);
+
   const light = useCallback(
     (ref: string, now: Date) => {
       sessionDay.current ??= dayOf(now);
       const minutes = writingMinutes(openedAt, now.getTime());
+      const recorded = useDays.getState().entries.some((e) => e.kind === 'write' && e.ref === ref && e.day === sessionDay.current);
+      if (recorded && minutes === lastMinutes.current) return;
+      lastMinutes.current = minutes;
       useDays.getState().upsert({ day: sessionDay.current, kind: 'write', ref, minutes, at: now.toISOString() });
     },
     [openedAt],

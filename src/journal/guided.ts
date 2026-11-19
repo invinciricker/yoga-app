@@ -27,11 +27,17 @@ export type Step = { section: string; round: number; page: string; time: number 
 type Place = { si: number; round: number; pi: number; time: number };
 
 function placeOf(journal: GuidedJournal, step: Pick<Step, 'section' | 'page'> & Partial<Step>): Place | undefined {
+  const round = step.round ?? 1;
+  const time = step.time ?? 1;
   const si = journal.sections.findIndex((s) => s.id === step.section);
-  if (si < 0) return undefined;
-  const pi = journal.sections[si].pages.findIndex((p) => p.id === step.page);
-  if (pi < 0) return undefined;
-  return { si, round: step.round ?? 1, pi, time: step.time ?? 1 };
+  const pi = si < 0 ? -1 : journal.sections[si].pages.findIndex((p) => p.id === step.page);
+  if (pi >= 0) return { si, round, pi, time };
+  // The page moved to another section: page ids are unique in a journal, so it is found there.
+  for (const [sj, section] of journal.sections.entries()) {
+    const pj = section.pages.findIndex((p) => p.id === step.page);
+    if (pj >= 0) return { si: sj, round, pi: pj, time };
+  }
+  return undefined;
 }
 
 function stepOf(journal: GuidedJournal, place: Place): Step {
