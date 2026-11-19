@@ -6,14 +6,19 @@
  * memory only (src/practice/demo.ts), to look at Today, Practice and You with progress in them.
  */
 import { useRouter } from 'expo-router';
-import { ArrowRight, Bookmark, ChevronDown, ChevronLeft, Feather, House, MapPin, Moon, Play, Wind } from 'lucide-react-native';
+import { ArrowRight, Bookmark, ChevronDown, ChevronLeft, Feather, House, MapPin, Moon, PenLine, Play, Wind } from 'lucide-react-native';
 import { useState, type ReactNode } from 'react';
+
+import type { GuidedJournal, GuidedPrompt } from '../shared/content-schema';
+
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { useContent } from '@/content/store';
 import { useWeek } from '@/day/hooks';
 import { addDays, week } from '@/day/record';
 import { useDays } from '@/day/store';
+import type { Answer } from '@/journal/types';
+import { longDate } from '@/lib/billboard';
 import { setSampleProgress } from '@/practice/demo';
 import { strings } from '@/strings';
 import { areas, auraNames, layout, radius, space, type, type Area, type Palette, type Scheme } from '@/theme';
@@ -37,12 +42,14 @@ import {
   OfflineNote,
   Overline,
   PlayButton,
+  Prompt,
   RichText,
   Screen,
   SearchField,
   SectionHeader,
   SeriesCard,
   SettingsRow,
+  ShelfRow,
   size,
   Skeleton,
   TabBar,
@@ -90,6 +97,22 @@ const choices: { key: Choice; label: string }[] = [
   { key: 'dark', label: strings.me.dark },
 ];
 
+/**
+ * One prompt of each kind, taken from a journal of the content (a text with its share button when
+ * there is one), and a fill and a recall of the gallery's own when the journal has none.
+ */
+function samplePrompts(journal: GuidedJournal | undefined): GuidedPrompt[] {
+  const all = journal?.sections.flatMap((s) => s.pages.flatMap((p) => p.prompts)) ?? [];
+  const kinds = ['note', 'scale', 'choice', 'list', 'text', 'yesno', 'fill', 'recall'] as const;
+  return kinds.map((kind): GuidedPrompt => {
+    const found = kind === 'text' ? (all.find((p) => p.kind === 'text' && p.share) ?? all.find((p) => p.kind === 'text')) : all.find((p) => p.kind === kind);
+    if (found && !found.showIf) return found;
+    if (kind === 'fill') return { kind: 'fill', id: 'gallery-fill', sentence: g.fillSample };
+    if (kind === 'recall') return { kind: 'recall', of: 'gallery', which: 'first', label: g.recallLabel };
+    return found ? { ...found, showIf: undefined } : { kind: 'yesno', id: `gallery-${kind}`, ask: g.journalParts };
+  });
+}
+
 /** One labelled block of the gallery. */
 function Block({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -113,6 +136,7 @@ function GalleryPage({ choice, onChoose }: { choice: Choice; onChoose: (c: Choic
   const [chipOn, setChipOn] = useState(true);
   const [switchOn, setSwitchOn] = useState(true);
   const [query, setQuery] = useState('');
+  const [galleryAnswers, setGalleryAnswers] = useState<Record<string, Answer>>({});
   const content = useContent((state) => state.content);
   const lesson = content.lessons[0];
   const series = content.series[0];
@@ -257,6 +281,31 @@ function GalleryPage({ choice, onChoose }: { choice: Choice; onChoose: (c: Choic
       <Block label={g.areaCards}>
         {areaCards.map(({ area, icon }) => (
           <AreaCard key={area} area={area} icon={icon} {...g.areaSamples[area]} onPress={noop} />
+        ))}
+      </Block>
+
+      <Block label={g.journalParts}>
+        <AreaCard area="write" icon={Feather} {...g.areaSamples.write} line={strings.journal.writtenToday} done onPress={noop} />
+        <ListCard>
+          <ShelfRow aura="rose" title={g.areaSamples.write.title} line={strings.journal.pageOf(6, 28)} onPress={noop} />
+          <ShelfRow
+            icon={PenLine}
+            title={strings.journal.freePages}
+            line={strings.journal.freeEmpty}
+            onPress={noop}
+            action={{ label: strings.journal.newPage, onPress: noop }}
+          />
+        </ListCard>
+        {samplePrompts(content.guidedJournals?.[0]).map((prompt, i) => (
+          <Prompt
+            key={i}
+            prompt={prompt}
+            answer={'id' in prompt ? galleryAnswers[prompt.id] : undefined}
+            onAnswer={(a) => {
+              if ('id' in prompt) setGalleryAnswers((all) => ({ ...all, [prompt.id]: a }));
+            }}
+            recalled={prompt.kind === 'recall' ? { lines: [...g.recallSample], day: longDate(new Date()) } : undefined}
+          />
         ))}
       </Block>
 

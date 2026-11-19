@@ -468,5 +468,9 @@ export const strings = {
     choices: 'Answer choices (closing screen)',
     marks: 'Lesson rows: done, saved',
     progress: 'Series progress',
+    journalParts: 'Journal: shelf rows and prompts',
+    fillSample: 'Today I was glad of ___ because ___.',
+    recallLabel: 'On your first page you wrote',
+    recallSample: ['Tea on the balcony', 'A long call with my sister'],
   },
 } as const;
