@@ -65,8 +65,8 @@ My message names the phase. If it does not, build the first phase that "State" d
 2. The new look and the new map: light and dark, colour by area, five tabs, the billboard and Today. Done.
 3. Maria and the welcome: Maria's page, the first-launch welcome, You (settings, about, privacy). Done.
 4. My practice: marking a lesson done, "how did that feel", candles, saved lessons. Done.
-5. Journal, part one: free pages, the guided engine, the Gratitude journal; Today offers a page. Brief ready.
-6. Journal, part two: the Habit and Health journals.
+5. Journal, part one: free pages, the guided engine, the Gratitude journal; Today offers a page. Done.
+6. Journal, part two: the Habit and Health journals, and what the journal format learns for them. Brief ready.
 7. Breathe: exercises and the pacer.
 8. Meditate: the timer and guided sittings.
 9. Feedback reaches Maria: the reactions go online, Maria's sign-in and her totals.
