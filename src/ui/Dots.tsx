@@ -67,7 +67,7 @@ export function Dots({ ask, hint, rows, area = 'write' }: DotsProps) {
         <View style={styles.measure} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants" aria-hidden>
           {rows.map((row, i) => (
             <Text key={`l${i}`} variant="meta" numberOfLines={1} onLayout={(e) => {
-              const w = Math.ceil(e.nativeEvent.layout.width);
+              const w = Math.ceil(e.nativeEvent.layout.width) + size.measureSlack;
               setLabels((all) => (all[i] === w ? all : { ...all, [i]: w }));
             }}>
               {row.label}
@@ -76,7 +76,7 @@ export function Dots({ ask, hint, rows, area = 'write' }: DotsProps) {
           {countTexts.map((text, i) =>
             text === undefined ? null : (
               <Text key={`c${i}`} variant="meta" tabular numberOfLines={1} onLayout={(e) => {
-                const w = Math.ceil(e.nativeEvent.layout.width);
+                const w = Math.ceil(e.nativeEvent.layout.width) + size.measureSlack;
                 setCounts((all) => (all[i] === w ? all : { ...all, [i]: w }));
               }}>
                 {text}

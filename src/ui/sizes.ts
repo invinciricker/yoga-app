@@ -79,5 +79,6 @@ export const size = {
   dotRing: 0.7, // the empty ring of a day without an answer, as a part of its square
   dotMark: 0.5, // the short line under the dot of the page on screen, as a part of its square
   dotLabelMin: 64, // narrower than this, a row's label goes above its dots instead of beside them
+  measureSlack: 1, // a measured width comes rounded down on the web: one point more keeps a word on its line
   pagesShown: 21, // "Your pages" shows this many, then "Show all 73 pages"
 } as const;
