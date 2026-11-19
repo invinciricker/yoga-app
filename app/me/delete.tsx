@@ -1,14 +1,16 @@
 /**
  * You → Delete my data: a page of its own, not a system pop-up. It erases the record of the day
- * (the candles, the lessons done) and the saved lessons and answers from this phone: the keys
- * ywm:days:v1 and ywm:practice:v1, nothing else. The settings stay. Then back to Home, where
- * every screen shows its empty state at once, without a restart.
+ * (the candles, the lessons done), the saved lessons and answers, and everything in the journal
+ * from this phone: the keys ywm:days:v1, ywm:practice:v1 and every ywm:journal:v1:… key, nothing
+ * else. The settings stay. Then back to Home, where every screen shows its empty state at once,
+ * without a restart.
  */
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
 import { useDays } from '@/day/store';
+import { useJournal } from '@/journal/store';
 import { tick } from '@/lib/haptics';
 import { routes, useBack } from '@/lib/nav';
 import { usePractice } from '@/practice/store';
@@ -25,6 +27,7 @@ export default function DeleteDataScreen() {
     // The stores empty at once (every screen follows); the phone forgets in the background.
     void useDays.getState().clear();
     void usePractice.getState().clear();
+    void useJournal.getState().clear();
     if (router.canDismiss()) router.dismissAll();
     router.navigate(routes.home);
   };

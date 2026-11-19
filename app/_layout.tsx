@@ -10,6 +10,7 @@ import { useEffect, useMemo, type ReactNode } from 'react';
 
 import { useContent } from '@/content/store';
 import { useDays } from '@/day/store';
+import { useJournal } from '@/journal/store';
 import { useReduceMotion } from '@/lib/motion';
 import { usePrefs } from '@/lib/prefs';
 import { SampleFromAddress } from '@/practice/demo';
@@ -73,18 +74,21 @@ export default function RootLayout() {
   const contentStarted = useContent((s) => s.started);
   // True once the preferences (theme, reduce motion, welcome seen, billboard's day) have been read.
   const prefsStarted = usePrefs((s) => s.started);
-  // True once the record of the day and the saved lessons have been read, so Today's week never pops in.
+  // True once the record of the day, the saved lessons and the journal have been read, so Today's
+  // week and its Write card never pop in.
   const daysStarted = useDays((s) => s.started);
   const practiceStarted = usePractice((s) => s.started);
-  const progressStarted = daysStarted && practiceStarted;
+  const journalStarted = useJournal((s) => s.started);
+  const progressStarted = daysStarted && practiceStarted && journalStarted;
   const ready = fontsReady && contentStarted && prefsStarted && progressStarted;
 
-  // Once, when the app opens: read the preferences and the person's progress; show the saved
-  // content, then download the newest.
+  // Once, when the app opens: read the preferences, the person's progress and their journal; show
+  // the saved content, then download the newest.
   useEffect(() => {
     void usePrefs.getState().start();
     void useDays.getState().start();
     void usePractice.getState().start();
+    void useJournal.getState().start();
     void useContent.getState().start();
   }, []);
 

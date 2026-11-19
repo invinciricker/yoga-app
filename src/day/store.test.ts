@@ -83,3 +83,30 @@ it('Delete my data during sample progress empties both', async () => {
   useDays.getState().showSample(undefined);
   expect(useDays.getState()).toMatchObject({ sample: false, entries: [] });
 });
+
+describe('a page being written (Phase 5)', () => {
+  const page = (day: string, minutes: number, ref = 'page-1'): DayEntry => ({ day, kind: 'write', ref, minutes, at: `${day}T20:00:00.000Z` });
+
+  it('keeps one entry per page per day, its minutes kept up to date', () => {
+    useDays.getState().upsert(page('2026-11-20', 1));
+    useDays.getState().upsert(page('2026-11-20', 4));
+    useDays.getState().upsert(page('2026-11-21', 2));
+    expect(useDays.getState().entries).toEqual([page('2026-11-20', 4), page('2026-11-21', 2)]);
+    expect(write).toHaveBeenLastCalledWith('ywm:days:v1', [page('2026-11-20', 4), page('2026-11-21', 2)]);
+  });
+
+  it('forgets the entries of a page that is deleted, and nothing else', () => {
+    useDays.getState().add(did('2026-11-20'));
+    useDays.getState().upsert(page('2026-11-20', 3));
+    useDays.getState().upsert(page('2026-11-20', 3, 'page-2'));
+    useDays.getState().removeRef('page-1');
+    expect(useDays.getState().entries).toEqual([did('2026-11-20'), page('2026-11-20', 3, 'page-2')]);
+  });
+
+  it('saves nothing while sample progress shows', () => {
+    useDays.getState().showSample([]);
+    useDays.getState().upsert(page('2026-11-20', 1));
+    useDays.getState().removeRef('page-1');
+    expect(write).not.toHaveBeenCalled();
+  });
+});

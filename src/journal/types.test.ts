@@ -1,6 +1,7 @@
 /**
  * Reading pages back from the phone, and the small helpers on answers.
  */
+import { writingMinutes } from './dates';
 import { hasWriting, isEmptyValue, parseEntry, withAnswer, type JournalEntry } from './types';
 
 const guided = {
@@ -71,5 +72,19 @@ describe('answers', () => {
     expect(hasWriting({ ...page, answers: {} })).toBe(false);
     expect(hasWriting({ ...page, kind: 'free', text: ' ' })).toBe(false);
     expect(hasWriting({ ...page, kind: 'free', text: 'A line.' })).toBe(true);
+  });
+});
+
+describe('writingMinutes', () => {
+  const at = (minutes: number, seconds = 0) => Date.UTC(2026, 10, 20, 20, minutes, seconds);
+
+  it('counts from opening the page to its last change, rounded up, 1 to 30', () => {
+    expect(writingMinutes(at(0), at(0, 5))).toBe(1);
+    expect(writingMinutes(at(0), at(2, 1))).toBe(3);
+    expect(writingMinutes(at(0), at(59))).toBe(30);
+  });
+
+  it('runs across midnight like any other minute', () => {
+    expect(writingMinutes(Date.UTC(2026, 10, 19, 23, 55), Date.UTC(2026, 10, 20, 0, 10))).toBe(15);
   });
 });

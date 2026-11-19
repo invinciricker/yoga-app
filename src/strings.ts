@@ -355,7 +355,7 @@ export const strings = {
   deleteData: {
     title: 'Delete my data',
     sentence:
-      'This erases your candles, the lessons you finished and saved, and your answers, from this phone. Your settings stay.',
+      'This erases your candles, the lessons you finished and saved, your answers, and everything in your journal, from this phone. Your settings stay.',
     delete: 'Delete',
     keep: 'Keep',
   },
@@ -438,7 +438,32 @@ export const strings = {
     tabBar: 'Tab bar',
     sample: 'Sample progress',
     sampleSwitch: 'Show sample progress',
-    sampleLine: 'Four days of candles, a series begun, a lesson saved. In memory only, never saved.',
+    sampleLine:
+      'Four days of candles, a series begun, a lesson saved, five pages of a journal and two free pages. In memory only, never saved.',
+    // The words of the sample pages, as a person might write them (preview app and web only).
+    samplePages: {
+      answers: {
+        'g-start-satisfaction': 6,
+        'g-start-often': 'Now and then',
+        'g-d01-good': ['Tea on the balcony before anyone was up', 'A long call with my sister', 'The bus came just as I reached the stop'],
+        'g-d01-why': 'My sister called because she remembered my exam. She keeps track of things like that.',
+        'g-d02-good': ['The smell of bread at the corner shop', 'A stranger smiled at the dog', 'Finishing my book'],
+        'g-d02-why': 'The bread. I only noticed it because I was walking slowly for once.',
+        'g-d03-good': ['Leaving work on time', 'Soup for dinner', 'Ten minutes of practice'],
+        'g-d03-you': 'I asked for help instead of staying late. It was a small thing to ask.',
+        'g-d04-good': ['A quiet train', 'Ana covered my shift', 'Rain on the window at night'],
+        'g-d04-who': 'Ana. She swapped her Saturday so I could rest, and did not make a fuss about it.',
+        'g-d05-good': ['Hot water', 'A door that locks', 'Light in the evening'],
+        'g-d05-why': 'Hot water. A cold morning would be a different day without it.',
+      } as Record<string, string | number | string[]>,
+      // Any other prompt of a sample page.
+      text: 'A few quiet words.',
+      line: 'Something small',
+      free: [
+        { prompt: 'tomorrow', text: 'Call the dentist. Buy bread. Ask Ana about Saturday.\nThe rest can wait.' },
+        { prompt: undefined, text: 'A slow evening. The flat smelled of oranges and I sat by the window for a while without my phone.' },
+      ] as { prompt: string | undefined; text: string }[],
+    },
     weekCard: 'Week card',
     choices: 'Answer choices (closing screen)',
     marks: 'Lesson rows: done, saved',

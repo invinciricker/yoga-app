@@ -20,6 +20,13 @@ export const storageKeys = {
   days: 'ywm:days:v1',
   /** Saved lessons and the answers to "How did that feel?" (src/practice/). */
   practice: 'ywm:practice:v1',
+  /**
+   * The Journal (src/journal/), never sent anywhere. Every key starts with this; "Delete my data"
+   * erases them all. One key per page written (journalPage + its id), and the journals begun.
+   */
+  journal: 'ywm:journal:v1:',
+  journalPage: 'ywm:journal:v1:page:',
+  journalBegun: 'ywm:journal:v1:begun',
 } as const;
 
 /** Reads and parses a saved value. Returns undefined when there is none or it cannot be read. */
@@ -46,6 +53,36 @@ export async function writeJson(key: string, value: unknown): Promise<boolean> {
 export async function removeKey(key: string): Promise<boolean> {
   try {
     await AsyncStorage.removeItem(key);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Every saved value whose key starts with `prefix`, read in one go. Gives [] if the phone refuses. */
+export async function readAllStartingWith(prefix: string): Promise<{ key: string; value: unknown }[]> {
+  try {
+    const keys = (await AsyncStorage.getAllKeys()).filter((key) => key.startsWith(prefix));
+    if (keys.length === 0) return [];
+    const pairs = await AsyncStorage.multiGet(keys);
+    return pairs.flatMap(([key, text]) => {
+      if (text === null) return [];
+      try {
+        return [{ key, value: JSON.parse(text) as unknown }];
+      } catch {
+        return []; // one broken value never hides the others
+      }
+    });
+  } catch {
+    return [];
+  }
+}
+
+/** Forgets every saved value whose key starts with `prefix`. Returns false if the phone refused. */
+export async function removeAllStartingWith(prefix: string): Promise<boolean> {
+  try {
+    const keys = (await AsyncStorage.getAllKeys()).filter((key) => key.startsWith(prefix));
+    if (keys.length > 0) await AsyncStorage.multiRemove(keys);
     return true;
   } catch {
     return false;

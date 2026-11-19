@@ -19,3 +19,8 @@ export function longDay(day: string): string {
 export function longDayWithYear(day: string): string {
   return `${longDay(day)} ${noonOf(day).getFullYear()}`;
 }
+
+/** The minutes a page counts in the record of the day: from opening to the last change, rounded up, 1 to 30. */
+export function writingMinutes(openedAt: number, now: number): number {
+  return Math.min(30, Math.max(1, Math.ceil((now - openedAt) / 60_000)));
+}
