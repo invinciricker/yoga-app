@@ -272,17 +272,23 @@ function Scale({ prompt, value, onAnswer }: { prompt: ScalePrompt; value: number
   );
 }
 
-/** The sentence, word by word, with a short field for each blank, wrapping like text. */
+/**
+ * The sentence, word by word, with a short field for each blank, wrapping like text. What follows a
+ * blank without a space ("___, then", "___.") stays with it, so a line never starts with a comma.
+ */
 function Fill({ sentence, value, onAnswer }: { sentence: string; value: string[]; onAnswer: (a: Answer) => void }) {
   const look = useBlankStyles();
   const pieces = sentencePieces(sentence);
   const blanks = pieces.length - 1;
   const answer = Array.from({ length: blanks }, (_, i) => value[i] ?? '');
+  // The first word of each piece after a blank, when it is written right against the blank.
+  const glued = pieces.map((piece, i) => (i > 0 ? (/^\S+/.exec(piece)?.[0] ?? '') : ''));
   return (
     <View style={styles.fill}>
       {pieces.map((piece, i) => (
         <View key={i} style={styles.fillPiece}>
           {piece
+            .slice(glued[i].length)
             .split(/\s+/)
             .filter((word) => word !== '')
             .map((word, w) => (
@@ -291,14 +297,21 @@ function Fill({ sentence, value, onAnswer }: { sentence: string; value: string[]
               </Text>
             ))}
           {i < blanks ? (
-            <WritingField
-              single
-              bare
-              value={answer[i]}
-              label={`${sentence} ${strings.journal.blank(i + 1)}`}
-              onChangeText={(t) => onAnswer({ ask: sentence, value: answer.map((a, n) => (n === i ? t : a)) })}
-              style={[styles.blank, look.line]}
-            />
+            <View style={styles.fillBlank}>
+              <WritingField
+                single
+                bare
+                value={answer[i]}
+                label={`${sentence} ${strings.journal.blank(i + 1)}`}
+                onChangeText={(t) => onAnswer({ ask: sentence, value: answer.map((a, n) => (n === i ? t : a)) })}
+                style={[styles.blank, look.line]}
+              />
+              {glued[i + 1] ? (
+                <Text variant="bodyLarge" style={styles.fillWord}>
+                  {glued[i + 1]}
+                </Text>
+              ) : null}
+            </View>
           ) : null}
         </View>
       ))}
@@ -332,6 +345,7 @@ const styles = StyleSheet.create({
   fill: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: space.xs },
   fillPiece: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: space.xs, flexShrink: 1 },
   fillWord: { paddingVertical: space.xxs },
+  fillBlank: { flexDirection: 'row', alignItems: 'center' },
   blank: { minWidth: size.blank, paddingHorizontal: space.xxs },
   recall: { gap: space.xs },
 });
