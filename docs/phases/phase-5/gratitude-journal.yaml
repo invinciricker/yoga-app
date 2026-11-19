@@ -1,0 +1,681 @@
+# The Gratitude journal.
+# Written by Claude chat (the architect) on 19 Nov 2026, from published research (the sources are at
+# the bottom of the intro). Nothing here is copied, adapted, sequenced or named after any other journal.
+#
+# Phase 5 copies this file, unchanged, to content/guided-journals/gratitude/journal.yaml.
+# Its format is described in docs/phases/phase-5.md ("The guided journal format").
+#
+# Ids are permanent. Once published, never rename or reuse a section id, a page id or a prompt id:
+# people's answers are stored under them. To change a page, change its words, not its ids.
+
+title: Gratitude
+summary: Four weeks of noticing what is good. Then as often as suits you.
+aura: rose
+order: 1
+minutes: 3
+
+intro:
+  - title: What it does, honestly
+    text: |
+      Writing down what went well, and why, is one of the best-studied small habits in psychology. In one well-known study, people who did it every evening for a single week were happier, and less low, six months later.
+
+      The effect is real but small. On average, gratitude journals help a little, they are not a treatment for anything, and they suit some people more than others. Give it four weeks and see whether it suits you.
+  - title: How to make it work
+    text: |
+      - **Be specific.** "My sister called to ask about my exam" says more than "my family".
+      - **Say why.** Notice how a good thing came about: your part, someone else's, or luck.
+      - **Think of people** as much as things.
+      - **Let it change.** Each page asks something a little different, so it does not go stale.
+      - **Do not force it.** A sentence is enough. If a page feels hollow, write less.
+  - title: What it is not
+    text: |
+      It is not pretending that everything is fine. A bad day is allowed here, and a few pages ask about hard things on purpose. You can always skip those.
+
+      One new page opens each day. A missed day changes nothing: when you come back, the next page is waiting.
+
+sources:
+  - "Seligman, Steen, Park and Peterson (2005). Positive psychology progress: empirical validation of interventions. American Psychologist, 60(5), 410–421."
+  - "Lyubomirsky, Sheldon and Schkade (2005). Pursuing happiness: the architecture of sustainable change. Review of General Psychology, 9(2), 111–131."
+  - "Koo, Algoe, Wilson and Gilbert (2008). It's a wonderful life: mentally subtracting positive events improves people's affective states, contrary to their affective forecasts. Journal of Personality and Social Psychology, 95(5), 1217–1224."
+  - "Kumar and Epley (2018). Undervaluing gratitude: expressers misunderstand the consequences of showing appreciation. Psychological Science, 29(9), 1423–1435."
+  - "Cregg and Cheavens (2021). Gratitude interventions: effective self-help? A meta-analysis of the impact on symptoms of depression and anxiety. Journal of Happiness Studies, 22, 413–445."
+
+sections:
+  # ---------------------------------------------------------------- Week 1
+  - id: week-1
+    title: "Week 1 · Noticing"
+    pages:
+      - id: d01
+        title: Three good things
+        prompts:
+          - kind: note
+            text: |
+              Two quick questions first. You will meet the same two again on the last page of the four weeks, so you can see what changed.
+          - id: g-start-satisfaction
+            kind: scale
+            ask: All things considered, how satisfied are you with your life these days?
+            from: 0
+            to: 10
+            low: Not at all
+            high: Completely
+          - id: g-start-often
+            kind: choice
+            ask: In the past week, how often did you feel grateful for something?
+            options: [Hardly ever, Now and then, Most days, Every day]
+          - kind: note
+            text: |
+              Now the page itself. Think back over today, or yesterday if it is early.
+          - id: g-d01-good
+            kind: list
+            ask: Three good things that happened, however small.
+            count: 3
+          - id: g-d01-why
+            kind: text
+            ask: Choose one. Why did it happen?
+            hint: Your part in it, someone else's, or plain luck.
+
+      - id: d02
+        title: Small enough to miss
+        prompts:
+          - id: g-d02-good
+            kind: list
+            ask: Three good things from today. Let at least one be so small you would normally walk past it.
+            count: 3
+          - id: g-d02-why
+            kind: text
+            ask: Take the smallest one. What made it good?
+
+      - id: d03
+        title: Your part in it
+        prompts:
+          - id: g-d03-good
+            kind: list
+            ask: Three good things from today.
+            count: 3
+          - id: g-d03-you
+            kind: text
+            ask: Pick one you helped to happen. What did you do?
+            hint: Even a small choice counts, like getting up, asking, or turning up.
+
+      - id: d04
+        title: Someone else's doing
+        prompts:
+          - id: g-d04-good
+            kind: list
+            ask: Three good things from today.
+            count: 3
+          - id: g-d04-who
+            kind: text
+            ask: Pick one that someone else made possible. Who was it, and what did they do?
+
+      - id: d05
+        title: Ordinary things
+        prompts:
+          - id: g-d05-good
+            kind: list
+            ask: Three ordinary things you were glad of today. Things that are easy to take for granted, like hot water, a bus that came, a door that locks.
+            count: 3
+          - id: g-d05-why
+            kind: text
+            ask: Which of them would you miss most if it stopped? Why?
+
+      - id: d06
+        title: Seen, heard, tasted
+        prompts:
+          - id: g-d06-good
+            kind: list
+            ask: Three good things from today that came through your senses. Something you saw, heard, smelt, tasted or felt.
+            count: 3
+          - id: g-d06-keep
+            kind: text
+            ask: Which one would you like to remember a year from now?
+
+      - id: d07
+        title: Looking back on the week
+        prompts:
+          - kind: recall
+            of: g-d01-good
+            which: first
+            label: On your first page you wrote
+          - id: g-d07-stands-out
+            kind: text
+            ask: Read back over the week. Which good thing stands out now?
+          - id: g-d07-why
+            kind: text
+            ask: Why that one, do you think?
+          - id: g-d07-keep
+            kind: text
+            ask: One thing you noticed this week that you would like to keep noticing.
+            lines: 2
+
+  # ---------------------------------------------------------------- Week 2
+  - id: week-2
+    title: "Week 2 · People"
+    pages:
+      - id: d08
+        title: Someone who helped
+        prompts:
+          - id: g-d08-who
+            kind: text
+            ask: Think of someone who helped you recently, in a small way or a large one. What did they do?
+          - id: g-d08-difference
+            kind: text
+            ask: What difference did it make to you?
+
+      - id: d09
+        title: Always there
+        prompts:
+          - id: g-d09-who
+            kind: text
+            ask: Think of someone who is often there for you and rarely thanked. Who comes to mind, and what do they do?
+          - id: g-d09-without
+            kind: text
+            ask: Imagine a month without what they do. What would be harder?
+
+      - id: d10
+        title: A stranger's moment
+        prompts:
+          - id: g-d10-what
+            kind: text
+            ask: Think of a stranger, or someone you barely know, who made a moment better. What happened?
+            hint: A held door, a kind word at a counter, a driver who waited.
+          - id: g-d10-felt
+            kind: text
+            ask: How did it leave you feeling?
+            lines: 2
+
+      - id: d11
+        title: Someone who taught you
+        prompts:
+          - id: g-d11-what
+            kind: text
+            ask: Think of someone who taught you something you still use. What was it?
+          - id: g-d11-how
+            kind: text
+            ask: How did they teach it? What do you remember about them?
+
+      - id: d12
+        title: Someone to thank
+        prompts:
+          - kind: note
+            text: |
+              Tomorrow's page asks you to send someone a thank-you. Today, choose who.
+          - id: g-d12-who
+            kind: text
+            ask: Who would you like to thank, for real?
+            lines: 1
+          - id: g-d12-what
+            kind: text
+            ask: What exactly did they do, and what did it change for you? Be as specific as you can.
+            lines: 4
+
+      - id: d13
+        title: Send it
+        prompts:
+          - kind: note
+            text: |
+              People who send a thank-you tend to underestimate how glad it makes the other person, and to overestimate how awkward it will feel. In one set of studies, the people who received such messages were happier, and less uncomfortable, than the senders expected.
+          - kind: recall
+            of: g-d12-what
+            which: latest
+            label: Yesterday you wrote
+          - id: g-d13-message
+            kind: text
+            ask: Write your message, in your own words. A few sentences are plenty.
+            lines: 6
+            share: Send it
+          - id: g-d13-sent
+            kind: yesno
+            ask: Did you send it?
+          - id: g-d13-felt
+            kind: text
+            ask: How did it feel to send it?
+            lines: 2
+            showIf: { prompt: g-d13-sent, is: true }
+          - kind: note
+            text: |
+              That is fine. It will keep: you can send it whenever you are ready, or never.
+            showIf: { prompt: g-d13-sent, is: false }
+
+      - id: d14
+        title: Looking back on the week
+        prompts:
+          - id: g-d14-glad
+            kind: text
+            ask: Of the people you wrote about this week, who are you most glad of?
+          - id: g-d14-do
+            kind: text
+            ask: Is there anything you would like to do for them?
+            lines: 2
+
+  # ---------------------------------------------------------------- Week 3
+  - id: week-3
+    title: "Week 3 · Depth"
+    pages:
+      - id: d15
+        title: One thing, slowly
+        prompts:
+          - id: g-d15-what
+            kind: text
+            ask: Choose one good thing from the last day or two.
+            lines: 1
+          - id: g-d15-slowly
+            kind: text
+            ask: Now write about it slowly, in five lines or more. What happened, who was there, what it was like.
+            lines: 7
+
+      - id: d16
+        title: Imagine it never happened
+        prompts:
+          - kind: note
+            text: |
+              An odd finding: thinking about how a good thing might never have happened lifts the mood more than thinking about the good thing itself. Most people expect the opposite.
+          - id: g-d16-what
+            kind: text
+            ask: Think of something good in your life. A person, a place, a chance that came your way.
+            lines: 1
+          - id: g-d16-ways
+            kind: text
+            ask: Now write the ways it might never have happened. The choices, the timing, the luck.
+            lines: 5
+          - id: g-d16-missing
+            kind: text
+            ask: What would be missing from your life today without it?
+
+      - id: d17
+        title: One moment, five senses
+        prompts:
+          - id: g-d17-moment
+            kind: text
+            ask: Pick one good moment from today.
+            lines: 1
+          - id: g-d17-senses
+            kind: list
+            ask: What did you see, hear, smell, taste and feel in it?
+            count: 5
+            hint: One line for each, or leave some empty.
+
+      - id: d18
+        title: Your body
+        prompts:
+          - id: g-d18-did
+            kind: text
+            ask: What did your body let you do today? Moving, carrying, practising, resting, getting through.
+          - id: g-d18-thanks
+            kind: text
+            ask: Thank it for one thing, in a sentence.
+            lines: 2
+
+      - id: d19
+        title: A place
+        prompts:
+          - id: g-d19-place
+            kind: text
+            ask: Think of a place you are glad exists. A park, a room, a café, a view, a corner of your town.
+            lines: 1
+          - id: g-d19-why
+            kind: text
+            ask: What makes it good? When were you last there?
+
+      - id: d20
+        title: Once a wish
+        prompts:
+          - id: g-d20-what
+            kind: text
+            ask: Something you have now that you once only wished for. Big or small.
+          - id: g-d20-took
+            kind: text
+            ask: What did it take to get here, and who helped?
+
+      - id: d21
+        title: Looking back on the week
+        prompts:
+          - id: g-d21-deepest
+            kind: choice
+            ask: Which page this week stayed with you most?
+            options: ["One thing, slowly", Imagine it never happened, Five senses, Your body, A place, Once a wish]
+          - id: g-d21-noticed
+            kind: text
+            ask: What do you notice now that you might have walked past a month ago?
+
+  # ---------------------------------------------------------------- Week 4
+  - id: week-4
+    title: "Week 4 · Hard days and giving back"
+    pages:
+      - id: d22
+        title: Something hard
+        skip: Not today
+        prompts:
+          - kind: note
+            text: |
+              This page is about something difficult. If today is not the day for it, choose "Not today": the next page opens straight away.
+          - id: g-d22-hard
+            kind: text
+            ask: Think of something hard you have been through, long enough ago that it is not raw. What came from it that you value now?
+            lines: 5
+          - id: g-d22-who
+            kind: text
+            ask: Who or what helped you through it?
+
+      - id: d23
+        title: A small kindness
+        prompts:
+          - id: g-d23-plan
+            kind: text
+            ask: Choose one small kindness to do today, for anyone, without being asked. What will it be?
+            lines: 2
+          - kind: note
+            text: |
+              Come back to this page tonight if you like, and add how it went.
+          - id: g-d23-went
+            kind: text
+            ask: How did it go?
+            lines: 2
+
+      - id: d24
+        title: A letter
+        prompts:
+          - id: g-d24-to
+            kind: text
+            ask: Who is this letter for? Living or not, near or far.
+            lines: 1
+          - id: g-d24-letter
+            kind: text
+            ask: Write to them about what they gave you. You do not have to send it.
+            lines: 10
+            share: Send it
+
+      - id: d25
+        title: Thanks to yourself
+        prompts:
+          - id: g-d25-what
+            kind: text
+            ask: Something you did in the past month that you are glad of.
+          - id: g-d25-says
+            kind: text
+            ask: What does it say about you?
+            lines: 2
+
+      - id: d26
+        title: Good things ahead
+        prompts:
+          - id: g-d26-ahead
+            kind: list
+            ask: Three things you are looking forward to, however small.
+            count: 3
+          - id: g-d26-which
+            kind: text
+            ask: Which of them could you make a little better, or share with someone?
+            lines: 2
+
+      - id: d27
+        title: Your own words
+        prompts:
+          - id: g-d27-like
+            kind: text
+            ask: In a sentence or two, what have these four weeks of noticing been like?
+          - id: g-d27-helped
+            kind: choice
+            ask: Which kinds of page helped most?
+            many: true
+            options: [Three good things, People, Imagining it away, The senses, Hard days, Letters and thank-yous]
+
+      - id: d28
+        title: Where you are now
+        prompts:
+          - kind: note
+            text: |
+              On your first page you answered two questions. Here they are again. Answer first, then look back.
+          - id: g-end-satisfaction
+            kind: scale
+            ask: All things considered, how satisfied are you with your life these days?
+            from: 0
+            to: 10
+            low: Not at all
+            high: Completely
+          - kind: recall
+            of: g-start-satisfaction
+            which: first
+            label: Four weeks ago you answered
+            showIf: { prompt: g-end-satisfaction, answered: true }
+          - id: g-end-often
+            kind: choice
+            ask: In the past week, how often did you feel grateful for something?
+            options: [Hardly ever, Now and then, Most days, Every day]
+          - kind: recall
+            of: g-start-often
+            which: first
+            label: Four weeks ago you answered
+            showIf: { prompt: g-end-often, answered: true }
+          - id: g-end-keep
+            kind: text
+            ask: What would you like to keep from these four weeks?
+          - kind: note
+            text: |
+              From here the journal keeps going, with a new page whenever you want one. One study found that counting blessings once a week did more for people than doing it three times a week, perhaps because it stayed fresh. Two or three pages a week is plenty.
+
+  # ---------------------------------------------------------------- Keep going (forever)
+  - id: keep-going
+    title: Keep going
+    repeat: forever
+    pages:
+      - id: k01
+        title: Three good things
+        prompts:
+          - id: g-k01-good
+            kind: list
+            ask: Three good things from the last few days.
+            count: 3
+          - id: g-k01-why
+            kind: text
+            ask: Choose one. Why did it happen?
+
+      - id: k02
+        title: Someone this week
+        prompts:
+          - id: g-k02-who
+            kind: text
+            ask: Someone who made this week better. What did they do?
+          - id: g-k02-tell
+            kind: yesno
+            ask: Have you told them?
+
+      - id: k03
+        title: Imagine it away
+        prompts:
+          - id: g-k03-what
+            kind: text
+            ask: Something good in your life right now.
+            lines: 1
+          - id: g-k03-ways
+            kind: text
+            ask: How might it never have happened?
+            lines: 4
+
+      - id: k04
+        title: A small pleasure
+        prompts:
+          - id: g-k04-what
+            kind: text
+            ask: A small pleasure from this week.
+            lines: 2
+          - id: g-k04-again
+            kind: text
+            ask: How could you have it again soon?
+            lines: 2
+
+      - id: k05
+        title: Better than expected
+        prompts:
+          - id: g-k05-what
+            kind: text
+            ask: Something that went better than you expected. What happened?
+          - id: g-k05-why
+            kind: text
+            ask: Why do you think it went well?
+            lines: 2
+
+      - id: k06
+        title: Your body
+        prompts:
+          - id: g-k06-did
+            kind: text
+            ask: What did your body let you do this week?
+          - id: g-k06-thanks
+            kind: text
+            ask: One way you could thank it this week.
+            lines: 2
+
+      - id: k07
+        title: A thank-you to send
+        prompts:
+          - id: g-k07-who
+            kind: text
+            ask: Who deserves a thank-you they have not had?
+            lines: 1
+          - id: g-k07-message
+            kind: text
+            ask: Write it here.
+            lines: 6
+            share: Send it
+
+      - id: k08
+        title: If it were gone
+        prompts:
+          - id: g-k08-things
+            kind: list
+            ask: Three things you would only notice if they were gone.
+            count: 3
+
+      - id: k09
+        title: Something you learned
+        prompts:
+          - id: g-k09-what
+            kind: text
+            ask: Something you learned recently.
+            lines: 2
+          - id: g-k09-from
+            kind: text
+            ask: Who or what did you learn it from?
+            lines: 2
+
+      - id: k10
+        title: In a hard week
+        skip: Not this week
+        prompts:
+          - id: g-k10-what
+            kind: text
+            ask: If this week has been hard, what helped, even a little?
+          - id: g-k10-who
+            kind: text
+            ask: Who could you lean on a bit more?
+            lines: 2
+
+      - id: k11
+        title: Outside
+        prompts:
+          - id: g-k11-what
+            kind: text
+            ask: Something outdoors you noticed lately. The sky, a tree, the sea, a street at night.
+          - id: g-k11-like
+            kind: text
+            ask: What was it like to notice it?
+            lines: 2
+
+      - id: k12
+        title: A meal
+        prompts:
+          - id: g-k12-what
+            kind: text
+            ask: A meal or a taste you were glad of recently.
+            lines: 2
+          - id: g-k12-who
+            kind: text
+            ask: Who made it possible? Think as far back as you like, from the cook to the people who grew it.
+
+      - id: k13
+        title: A conversation
+        prompts:
+          - id: g-k13-what
+            kind: text
+            ask: A conversation that left you better off. Who was it with, and what was said?
+
+      - id: k14
+        title: Something you made
+        prompts:
+          - id: g-k14-what
+            kind: text
+            ask: Something you made, fixed, finished or managed lately.
+          - id: g-k14-proud
+            kind: text
+            ask: What part of it are you quietly proud of?
+            lines: 2
+
+      - id: k15
+        title: Help you gave
+        prompts:
+          - id: g-k15-what
+            kind: text
+            ask: A time you helped someone recently. What did you do?
+          - id: g-k15-felt
+            kind: text
+            ask: How did it feel?
+            lines: 2
+
+      - id: k16
+        title: One moment, five senses
+        prompts:
+          - id: g-k16-moment
+            kind: text
+            ask: One good moment from the last few days.
+            lines: 1
+          - id: g-k16-senses
+            kind: list
+            ask: What did you see, hear, smell, taste and feel?
+            count: 5
+
+      - id: k17
+        title: Ahead
+        prompts:
+          - id: g-k17-ahead
+            kind: list
+            ask: Three things you are looking forward to.
+            count: 3
+
+      - id: k18
+        title: Thanks to your past self
+        prompts:
+          - id: g-k18-what
+            kind: text
+            ask: Something your past self did that you are benefiting from now.
+          - id: g-k18-note
+            kind: text
+            ask: A line of thanks to them.
+            lines: 2
+
+      - id: k19
+        title: A place
+        prompts:
+          - id: g-k19-place
+            kind: text
+            ask: A place that did you good lately.
+            lines: 1
+          - id: g-k19-why
+            kind: text
+            ask: What was good about being there?
+            lines: 3
+
+      - id: k20
+        title: Reading back
+        prompts:
+          - kind: recall
+            of: g-k01-good
+            which: latest
+            label: Not long ago you wrote
+          - id: g-k20-notice
+            kind: text
+            ask: Read back over some of your recent pages. What do you notice?
+          - id: g-k20-next
+            kind: text
+            ask: Anything you would like to do differently in the weeks ahead?
+            lines: 2
