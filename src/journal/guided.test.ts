@@ -8,6 +8,7 @@ import { guidedJournal, type GuidedJournal } from '../../shared/content-schema';
 import { readContent } from '../../tools/content/read';
 
 import {
+  isFree,
   isOpenToday,
   isVisible,
   journalToday,
@@ -17,6 +18,7 @@ import {
   pageNumberText,
   progressOf,
   recallOf,
+  stepOfPage,
 } from './guided';
 import { rawTestJournal, testJournal, wrote } from './testJournal';
 import type { JournalEntry } from './types';
@@ -271,5 +273,63 @@ describe('the Gratitude journal', () => {
   it('starts the pool again from its first page after its last', () => {
     const e = { ...wrote('k20', '2026-12-30T20:00'), journal: 'gratitude', section: 'keep-going' };
     expect(nextPageOf(gratitude, [e])).toEqual({ section: 'keep-going', page: 'k01', round: 2, time: 1 });
+  });
+});
+
+// ------------------------------------------------------------------ Phase 6 (docs/phases/phase-6.md, section 1)
+describe('the Habit and Health journals', () => {
+  let habit: GuidedJournal;
+  let health: GuidedJournal;
+  beforeAll(async () => {
+    const { loaded } = await readContent(path.join(__dirname, '..', '..', 'content'));
+    const read = (slug: string) => guidedJournal.parse(loaded!.guidedJournals.find((g) => g.slug === slug)!.built);
+    [habit, health] = [read('habit'), read('health')];
+  });
+
+  it('number the set-up "Page 2 of 3" and the days "Week 3 · Day 5" (week 3 · day 5 when it runs on)', () => {
+    expect(pageNumberText(pageNumber(habit, step('getting-ready', 's02'))!)).toBe('Page 2 of 3');
+    const fifth = pageNumber(habit, step('days', 'day', 3, 5))!;
+    expect(fifth).toEqual({ kind: 'week', week: 3, day: 5, days: 7 });
+    expect(pageNumberText(fifth)).toBe('Week 3 · Day 5');
+    expect(pageNumberText(fifth, true)).toBe('week 3 · day 5');
+    expect(pageNumberText(pageNumber(health, step('days', 'week', 1))!)).toBe('Week 1 · Day 7');
+    expect(pageNumberText(pageNumber(habit, step('getting-ready', 's01'))!, true)).toBe('page 1 of 3');
+  });
+
+  it('show the days done in the week of the next page on the progress line (4 of 7 when Day 5 comes next)', () => {
+    const entries = [1, 2, 3, 4].map((t) => ({ ...wrote('a', `2026-11-0${t}T20:00`), journal: 'habit', section: 'days', page: 'day', round: 3, time: t }));
+    expect(progressOf(habit, entries, ['habit'])).toMatchObject({ number: { kind: 'week', week: 3, day: 5 }, done: 4, total: 7 });
+    // The set-up: "Page 2 of 3", one done.
+    const setUp = [{ ...wrote('a', '2026-11-01T20:00'), journal: 'habit', section: 'getting-ready', page: 's01' }];
+    expect(progressOf(habit, setUp, ['habit'])).toMatchObject({ number: { kind: 'page', n: 2, total: 3 }, done: 1, total: 3 });
+    // Health has no numbered part: Week 1 · Day 1 from the start.
+    expect(progressOf(health, [], ['health'])).toMatchObject({ number: { kind: 'week', week: 1, day: 1 }, done: 0, total: 7 });
+  });
+
+  it('show the notes of weeks 1, 3, 6 and 10 only in their weeks, and the comparison only in week 10', () => {
+    const weekPage = pageAt(habit, step('days', 'week'))!.page;
+    const shown = (round: number) => weekPage.prompts.filter((p) => p.showIf && 'round' in p.showIf && isVisible(p, {}, round)).map((p) => p.kind);
+    expect([1, 2, 3, 6, 9, 10, 11].map(shown)).toEqual([['note'], [], ['note'], ['note'], [], ['note', 'dots', 'choice'], []]);
+  });
+
+  it('keep the meaning of showIf by answer', () => {
+    const weekPage = pageAt(habit, step('days', 'week'))!.page;
+    const auto = weekPage.prompts.find((p) => 'id' in p && p.id === 'h-auto')!;
+    expect(isVisible(auto, { 'h-did': { ask: '', value: true } }, 10)).toBe(true);
+    expect(isVisible(auto, { 'h-did': { ask: '', value: false } }, 10)).toBe(false);
+  });
+
+  it('open a page in a round for checking screens, never beyond its section', () => {
+    expect(stepOfPage(habit, 'week', 10)).toEqual(step('days', 'week', 10));
+    expect(stepOfPage(habit, 's02', 4)).toEqual(step('getting-ready', 's02', 1));
+    expect(stepOfPage(habit, 'week', -2)).toEqual(step('days', 'week', 1));
+  });
+
+  it('are free to receive a carried answer only while nothing is written (skips do not count)', () => {
+    const written = { ...wrote('a', '2026-11-01T20:00'), journal: 'habit', section: 'getting-ready', page: 's01' };
+    expect(isFree(habit, [])).toBe(true);
+    expect(isFree(habit, [{ ...written, skipped: true }])).toBe(true);
+    expect(isFree(habit, [written])).toBe(false);
+    expect(isFree(habit, [{ ...written, journal: 'health' }])).toBe(true);
   });
 });

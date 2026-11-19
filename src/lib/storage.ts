@@ -22,11 +22,14 @@ export const storageKeys = {
   practice: 'ywm:practice:v1',
   /**
    * The Journal (src/journal/), never sent anywhere. Every key starts with this; "Delete my data"
-   * erases them all. One key per page written (journalPage + its id), and the journals begun.
+   * erases them all. One key per page written (journalPage + its id), the journals begun, and the
+   * current start of each journal started again.
    */
   journal: 'ywm:journal:v1:',
   journalPage: 'ywm:journal:v1:page:',
   journalBegun: 'ywm:journal:v1:begun',
+  /** The current start of each journal started again, { "habit": 2 } (Phase 6, "Start a new habit"). */
+  journalCycles: 'ywm:journal:v1:cycles',
 } as const;
 
 /** Reads and parses a saved value. Returns undefined when there is none or it cannot be read. */

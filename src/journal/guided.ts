@@ -1,5 +1,9 @@
 /**
- * The rules of a guided journal (docs/phases/phase-5.md, section 3), as pure functions.
+ * The rules of a guided journal (docs/phases/phase-5.md, section 3, and docs/phases/phase-6.md,
+ * section 1), as pure functions.
+ *
+ * The pages given here are those of the journal's current start ("Start a new habit"): they are
+ * filtered once, before reaching these rules, by src/journal/cycles.ts.
  *
  * A journal is read in one order: its sections, each section's rounds (`repeat`), each round's
  * pages, each page's `times`. A "step" is one place in that order. A pool (`repeat: forever`) has
@@ -118,42 +122,75 @@ export function isOpenToday(journal: GuidedJournal, entries: readonly JournalEnt
 /** How many steps one round of a section holds (every page, each as many times as it says). */
 const roundSize = (section: GuidedSection) => section.pages.reduce((sum, p) => sum + p.times, 0);
 
-/** The numbered part: every step of every section before the pool. */
+/** The pages of a section numbered by the plain count ("Page 6 of 28"): not the pool, not weeks. */
+const countsInTotal = (section: GuidedSection) => section.repeat !== 'forever' && section.numbering === undefined;
+
+/** The numbered part: every step of every section before the pool, except sections numbered in weeks. */
 function numberedTotal(journal: GuidedJournal): number {
   let total = 0;
   for (const section of journal.sections) {
     if (section.repeat === 'forever') break;
-    total += section.repeat * roundSize(section);
+    if (countsInTotal(section)) total += (section.repeat as number) * roundSize(section);
   }
   return total;
 }
 
-/** "Page 6 of 28", or, in the pool, its title and a count ("Keep going · 4"). */
-export type PageNumber = { pool: false; n: number; total: number } | { pool: true; title: string; n: number; total: number };
+/** The place of a step inside one round of its section, from 1 ("Day 5"). */
+function placeInRound(section: GuidedSection, place: Place): number {
+  const before = section.pages.slice(0, place.pi).reduce((sum, p) => sum + p.times, 0);
+  return before + Math.min(place.time, section.pages[place.pi].times);
+}
+
+/**
+ * "Page 6 of 28"; or, in the pool, its title and a count ("Keep going · 4"); or, in a section
+ * numbered in weeks (Phase 6), "Week 3 · Day 5": the week is the round, the day the step's place in
+ * the round, of `days` (seven).
+ */
+export type PageNumber =
+  | { kind: 'page'; n: number; total: number }
+  | { kind: 'pool'; title: string; n: number; total: number }
+  | { kind: 'week'; week: number; day: number; days: number };
 
 export function pageNumber(journal: GuidedJournal, step: Step): PageNumber | undefined {
   const place = placeOf(journal, step);
   if (!place) return undefined;
   const section = journal.sections[place.si];
-  const before = section.pages.slice(0, place.pi).reduce((sum, p) => sum + p.times, 0);
-  const inSection = (place.round - 1) * roundSize(section) + before + Math.min(place.time, section.pages[place.pi].times);
+  const inRound = placeInRound(section, place);
+  if (section.numbering === 'weeks') return { kind: 'week', week: place.round, day: inRound, days: roundSize(section) };
+  const inSection = (place.round - 1) * roundSize(section) + inRound;
   const total = numberedTotal(journal);
-  if (section.repeat === 'forever') return { pool: true, title: section.title, n: inSection, total };
+  if (section.repeat === 'forever') return { kind: 'pool', title: section.title, n: inSection, total };
   let earlier = 0;
-  for (const s of journal.sections.slice(0, place.si)) earlier += s.repeat === 'forever' ? 0 : s.repeat * roundSize(s);
-  return { pool: false, n: earlier + inSection, total };
-}
-
-export function pageNumberText(number: PageNumber): string {
-  return number.pool ? strings.journal.poolPage(number.title, number.n) : strings.journal.pageOf(number.n, number.total);
+  for (const s of journal.sections.slice(0, place.si)) if (countsInTotal(s)) earlier += (s.repeat as number) * roundSize(s);
+  return { kind: 'page', n: earlier + inSection, total };
 }
 
 /**
- * True when a prompt shows: it has no showIf, or the earlier prompt it names has the answer `is`
- * (among the answers chosen, for a choice of several), or any answer when `is` is not given.
+ * The number in words: "Page 6 of 28", "Keep going · 4", "Week 3 · Day 5". `runningOn`: inside a
+ * line that runs on (Today's card), in lower case: "page 6 of 28", "week 3 · day 5".
  */
-export function isVisible(prompt: GuidedPrompt, answers: Readonly<Record<string, Answer>>): boolean {
+export function pageNumberText(number: PageNumber, runningOn = false): string {
+  const text =
+    number.kind === 'week'
+      ? strings.journal.weekDay(number.week, number.day, runningOn)
+      : number.kind === 'pool'
+        ? strings.journal.poolPage(number.title, number.n)
+        : strings.journal.pageOf(number.n, number.total);
+  return runningOn && number.kind !== 'week' ? `${text.charAt(0).toLowerCase()}${text.slice(1)}` : text;
+}
+
+/**
+ * True when a prompt shows: it has no showIf; or the earlier prompt it names has the answer `is`
+ * (among the answers chosen, for a choice of several), or any answer when `is` is not given; or
+ * (Phase 6) `round` is one of the rounds it names: for a page being written, the round of its step;
+ * for a page written before, the round it was written in.
+ */
+export function isVisible(prompt: GuidedPrompt, answers: Readonly<Record<string, Answer>>, round = 1): boolean {
   if (!prompt.showIf) return true;
+  if ('round' in prompt.showIf) {
+    const rounds = prompt.showIf.round;
+    return Array.isArray(rounds) ? rounds.includes(round) : rounds === round;
+  }
   const answer = answers[prompt.showIf.prompt];
   if (!answer || isEmptyValue(answer.value)) return false;
   const { is } = prompt.showIf;
@@ -255,6 +292,10 @@ export type Progress = {
   pool: number;
 };
 
+/**
+ * Where a person is in a journal. In a section numbered in weeks, `done` and `total` are the days
+ * done in the week of the next page, of its seven (4 of 7 when Day 5 comes next).
+ */
 export function progressOf(journal: GuidedJournal, entries: readonly JournalEntry[], begun: readonly string[]): Progress {
   const started = isStarted(journal, entries, begun);
   const total = numberedTotal(journal);
@@ -262,9 +303,18 @@ export function progressOf(journal: GuidedJournal, entries: readonly JournalEntr
   if (!next) return { started, finished: true, total, done: total, pool: 0 };
   const number = pageNumber(journal, next);
   if (!number) return { started, next, finished: false, total, done: 0, pool: 0 };
-  return number.pool
+  if (number.kind === 'week') return { started, next, number, finished: false, total: number.days, done: number.day - 1, pool: 0 };
+  return number.kind === 'pool'
     ? { started, next, number, finished: false, total, done: total, pool: number.n - 1 }
     : { started, next, number, finished: false, total, done: number.n - 1, pool: 0 };
+}
+
+/**
+ * True when nothing is written (skips do not count) in a journal: never started, or started again
+ * and nothing written since (Phase 6). A `carry` to it shows only then: one habit at a time.
+ */
+export function isFree(journal: GuidedJournal, entries: readonly JournalEntry[]): boolean {
+  return entriesOf(journal.slug, entries).every((e) => e.skipped);
 }
 
 /** A prompt of the journal by its id (on any page), for a recall. */
@@ -278,13 +328,29 @@ export function findPrompt(journal: GuidedJournal, id: string): GuidedPrompt | u
   return undefined;
 }
 
-/** The first step of a page, by its id: only for checking screens (?page= in the preview app). */
-export function stepOfPage(journal: GuidedJournal, pageId: string): Step | undefined {
+/**
+ * The first step of a page, by its id, in a round (1 unless said, and never beyond the section's
+ * repeats): only for checking screens (?page= and &round= in the preview app and on the web).
+ */
+export function stepOfPage(journal: GuidedJournal, pageId: string, round = 1): Step | undefined {
   const section = journal.sections.find((s) => s.pages.some((p) => p.id === pageId));
-  return section ? { section: section.id, round: 1, page: pageId, time: 1 } : undefined;
+  if (!section) return undefined;
+  const most = section.repeat === 'forever' ? Infinity : section.repeat;
+  const wanted = Number.isInteger(round) && round >= 1 ? Math.min(round, most) : 1;
+  return { section: section.id, round: wanted, page: pageId, time: 1 };
 }
 
-/** True when a page has nothing to answer (only notes and recalls): "Done" alone writes it. */
+/** True when a page has nothing to answer (only notes, recalls and dots): "Done" alone writes it. */
 export function nothingToAnswer(page: GuidedPage): boolean {
-  return page.prompts.length > 0 && page.prompts.every((p) => p.kind === 'note' || p.kind === 'recall');
+  return page.prompts.length > 0 && page.prompts.every((p) => p.kind === 'note' || p.kind === 'recall' || p.kind === 'dots');
+}
+
+/** A step's place, to compare two steps: the same page of the same round, at the same time. */
+export function sameStep(a: Step, b: Pick<JournalEntry, 'section' | 'page' | 'round' | 'time'>): boolean {
+  return a.section === b.section && a.page === b.page && a.round === (b.round ?? 1) && a.time === (b.time ?? 1);
+}
+
+/** Every step of one round of a section, in order: each page, as many times as it says. */
+export function stepsOfRound(section: GuidedSection, round: number): Step[] {
+  return section.pages.flatMap((page) => Array.from({ length: page.times }, (_, i) => ({ section: section.id, round, page: page.id, time: i + 1 })));
 }

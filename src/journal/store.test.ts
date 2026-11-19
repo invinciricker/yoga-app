@@ -24,7 +24,7 @@ const page = (id: string, text: string): JournalEntry => ({
 
 /** The app closing and opening again: memory is gone, only the phone's storage remains. */
 async function restart(): Promise<void> {
-  useJournal.setState({ started: false, entries: [], begun: [], sample: false });
+  useJournal.setState({ started: false, entries: [], begun: [], cycles: {}, carried: undefined, sample: false });
   await useJournal.getState().start();
 }
 
@@ -34,7 +34,7 @@ beforeEach(async () => {
   jest.useRealTimers();
   await useJournal.getState().clear();
   await AsyncStorage.clear();
-  useJournal.setState({ started: false, entries: [], begun: [], sample: false });
+  useJournal.setState({ started: false, entries: [], begun: [], cycles: {}, carried: undefined, sample: false });
 });
 
 it('keeps a draft through a restart: one key per page', async () => {
@@ -127,4 +127,38 @@ it('saves nothing while sample progress shows, and gives the person their own pa
   expect(await savedKeys()).toEqual(['ywm:journal:v1:page:mine']);
   useJournal.getState().showSample(undefined);
   expect(useJournal.getState()).toMatchObject({ entries: [page('mine', 'Mine')], begun: [], sample: false });
+});
+
+// ------------------------------------------------------------------ Phase 6: starting again, carrying an answer
+it('remembers each journal started again, through a restart', async () => {
+  useJournal.getState().startAgain('habit');
+  useJournal.getState().startAgain('habit');
+  useJournal.getState().startAgain('health');
+  await restart();
+  expect(useJournal.getState().cycles).toEqual({ habit: 3, health: 2 });
+});
+
+it('"Delete my data" erases the starts too, and an answer on its way to another journal', async () => {
+  useJournal.getState().startAgain('habit');
+  useJournal.getState().carry({ journal: 'habit', prompt: 'h-want', text: 'Walk' });
+  await useJournal.getState().clear();
+  await restart();
+  expect(useJournal.getState()).toMatchObject({ cycles: {}, carried: undefined });
+  expect(await savedKeys()).toEqual([]);
+});
+
+it('keeps a carried answer in memory only: gone when the app closes', async () => {
+  useJournal.getState().carry({ journal: 'habit', prompt: 'h-want', text: 'Walk' });
+  expect(useJournal.getState().carried).toEqual({ journal: 'habit', prompt: 'h-want', text: 'Walk' });
+  expect(await savedKeys()).toEqual([]);
+});
+
+it('keeps sample starts in memory, and gives the person their own back after', async () => {
+  useJournal.getState().startAgain('habit');
+  useJournal.getState().showSample({ entries: [], begun: ['habit'], cycles: { habit: 5 } });
+  expect(useJournal.getState().cycles).toEqual({ habit: 5 });
+  useJournal.getState().startAgain('habit');
+  expect(JSON.parse((await AsyncStorage.getItem('ywm:journal:v1:cycles'))!)).toEqual({ habit: 2 });
+  useJournal.getState().showSample(undefined);
+  expect(useJournal.getState().cycles).toEqual({ habit: 2 });
 });

@@ -32,7 +32,7 @@ function shelfLine(journal: GuidedJournal, entries: readonly JournalEntry[], beg
   const p = progressOf(journal, entries, begun);
   if (!p.started) return strings.journal.notStarted;
   if (p.finished) return strings.journal.finished(p.total);
-  if (p.number?.pool) return strings.journal.keepGoing(p.number.title, p.pool);
+  if (p.number?.kind === 'pool') return strings.journal.keepGoing(p.number.title, p.pool);
   return p.number ? pageNumberText(p.number) : strings.journal.notStarted;
 }
 

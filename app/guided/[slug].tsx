@@ -83,7 +83,7 @@ function JournalPage({ slug, journal, pages, entries, begun }: PageProps) {
   const title = journal?.title ?? pages[0]?.titles?.journal ?? slug;
   const progress = journal ? progressOf(journal, entries, begun) : undefined;
   const open = journal ? isOpenToday(journal, entries, today) : false;
-  const label = progress?.number?.pool
+  const label = progress?.number?.kind === 'pool'
     ? strings.journal.poolProgress(progress.total, progress.pool)
     : progress?.number
       ? pageNumberText(progress.number)

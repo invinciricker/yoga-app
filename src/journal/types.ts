@@ -41,6 +41,16 @@ export type JournalEntry = {
   time?: number;
   /** Passed with "Not today": nothing written, no candle. */
   skipped?: boolean;
+  /**
+   * Which start of its journal it was written in, from 1 (Phase 6, "Start a new habit"). Set when the
+   * page is first written; absent means 1. The journal's current start is in src/journal/cycles.ts.
+   */
+  cycle?: number;
+  /**
+   * The prompts whose answer filled in from today's practice was tapped away or changed (Phase 6,
+   * `prefill`): never suggested again on this page.
+   */
+  declined?: string[];
   /** By prompt id, WITH the question's words as they were when answered. */
   answers?: Record<string, Answer>;
   /** The titles as they were when the page was first written (journal, section, page). */
@@ -87,6 +97,11 @@ export function parseEntry(raw: unknown): JournalEntry | undefined {
   if (typeof journal !== 'string' || typeof section !== 'string' || typeof page !== 'string') return undefined;
   Object.assign(entry, { journal, section, page, round: wholeFrom1(raw.round), time: wholeFrom1(raw.time) });
   if (raw.skipped === true) entry.skipped = true;
+  if (raw.cycle !== undefined) entry.cycle = wholeFrom1(raw.cycle);
+  if (Array.isArray(raw.declined)) {
+    const declined = raw.declined.filter((d): d is string => typeof d === 'string');
+    if (declined.length > 0) entry.declined = declined;
+  }
   const answers: Record<string, Answer> = {};
   if (isObject(raw.answers)) {
     for (const [promptId, answer] of Object.entries(raw.answers)) {
@@ -121,6 +136,9 @@ export function hasWriting(entry: JournalEntry): boolean {
   if (entry.kind === 'free') return (entry.text ?? '').trim() !== '';
   return Object.values(entry.answers ?? {}).some((a) => !isEmptyValue(a.value));
 }
+
+/** Which start of its journal a guided page was written in (1 when it does not say). */
+export const cycleOf = (entry: JournalEntry): number => entry.cycle ?? 1;
 
 /** The pages of one guided journal (written or skipped). */
 export function entriesOf(journal: string, entries: readonly JournalEntry[]): JournalEntry[] {

@@ -241,6 +241,8 @@ export const strings = {
       `${journal} · ${page.charAt(0).toLowerCase()}${page.slice(1)} · ${minutes} min`,
     pageOf: (n: number, total: number) => `Page ${n} of ${total}`,
     poolPage: (title: string, n: number) => `${title} · ${n}`,
+    // A section numbered in weeks (Phase 6): "Week 3 · Day 5", or "week 3 · day 5" inside a line that runs on.
+    weekDay: (week: number, day: number, runningOn = false) => (runningOn ? `week ${week} · day ${day}` : `Week ${week} · Day ${day}`),
     // The shelf: one row per journal, then the free pages.
     notStarted: 'Not started yet',
     keepGoing: (title: string, n: number) => (n === 0 ? title : `${title} · ${n === 1 ? '1 page' : `${n} pages`}`),
@@ -258,6 +260,13 @@ export const strings = {
     yourPages: 'Your pages',
     skipped: 'Skipped',
     noPagesYet: 'Your pages will gather here, one a day.',
+    // Phase 6: a long list of pages, and the pages written before the latest "start again".
+    showAll: (n: number) => `Show all ${n} pages`,
+    earlier: 'Earlier',
+    // Starting a journal again ("Start a new habit"): a confirmation in place, never a pop-up.
+    againSentence: 'Start again from the first page? Everything you wrote stays here.',
+    againConfirm: 'Start again',
+    againCancel: 'Not now',
     gone: 'This journal is no longer here.',
     goneLine: 'Your pages are still yours to read.',
     toJournal: 'Back to Journal',
@@ -274,6 +283,16 @@ export const strings = {
     no: 'No',
     outOf: (n: number, to: number) => `${n} out of ${to}`,
     // A scale button, read aloud: "7 out of 10".
+    // Phase 6. Under a choice filled in from today's lessons.
+    fromPractice: (minutes: number) => `From your practice today: ${minutes} min`,
+    // The dots of a week: the count of a yes or no row ("5 of 7"), and each row read aloud as one
+    // sentence: "Energy: 3 of 5, 4 of 5, no answer." or "Did it: yes, no, no answer. 5 of 7."
+    yesCount: (yes: number, of: number) => `${yes} of ${of}`,
+    dotYes: 'yes',
+    dotNo: 'no',
+    dotNone: 'no answer',
+    dotOf: (n: number, to: number) => `${n} of ${to}`,
+    dotsSentence: (label: string, cells: string[], count?: string) => `${label}: ${cells.join(', ')}.${count ? ` ${count}.` : ''}`,
     blank: (n: number) => `Blank ${n}`,
     line: (n: number) => `Line ${n}`,
     // Free pages.
