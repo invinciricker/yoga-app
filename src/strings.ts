@@ -221,6 +221,105 @@ export const strings = {
       sentence: 'Open the app and begin. What you do here stays on your phone.',
     },
   },
+  // The Journal: the person's own writing (docs/phases/phase-5.md). Never leaves the phone.
+  journal: {
+    title: 'Journal',
+    private: 'Private. It stays on this phone.',
+    // The one suggestion, on the Journal tab and on Today.
+    todaysPage: 'Today’s page',
+    write: 'Write',
+    beginOverline: 'Begin',
+    begin: 'Begin',
+    theJournal: (title: string) => `The ${title} journal`,
+    startThe: (title: string) => `Start the ${title} journal`,
+    written: 'Today’s page is written.',
+    writtenToday: 'Written today',
+    readIt: 'Read it',
+    // "Gratitude · Page 6 of 28 · 3 min" (the card on Today writes "page" small: it runs on).
+    cardLine: (journal: string, page: string, minutes: number) => `${journal} · ${page} · ${minutes} min`,
+    todayLine: (journal: string, page: string, minutes: number) =>
+      `${journal} · ${page.charAt(0).toLowerCase()}${page.slice(1)} · ${minutes} min`,
+    pageOf: (n: number, total: number) => `Page ${n} of ${total}`,
+    poolPage: (title: string, n: number) => `${title} · ${n}`,
+    // The shelf: one row per journal, then the free pages.
+    notStarted: 'Not started yet',
+    keepGoing: (title: string, n: number) => (n === 0 ? title : `${title} · ${n === 1 ? '1 page' : `${n} pages`}`),
+    finished: (total: number) => `All ${total} pages written`,
+    freePages: 'Free pages',
+    freeCount: (n: number) => (n === 1 ? '1 page' : `${n} pages`),
+    freeEmpty: 'A blank page, whenever you like.',
+    newPage: 'New page',
+    // A journal's own page.
+    minutesAPage: (n: number) => `${n} min a page`,
+    // Over the cover: "Page 6 of 28", or in the pool "28 pages, and 4 more".
+    poolProgress: (total: number, more: number) => (more === 0 ? `${total} pages` : `${total} pages, and ${more} more`),
+    writeToday: 'Write today’s page',
+    about: 'About this journal',
+    yourPages: 'Your pages',
+    skipped: 'Skipped',
+    noPagesYet: 'Your pages will gather here, one a day.',
+    gone: 'This journal is no longer here.',
+    goneLine: 'Your pages are still yours to read.',
+    toJournal: 'Back to Journal',
+    // About this journal.
+    research: 'The research behind it',
+    // Writing a page.
+    writtenOn: (date: string) => `Written on ${date}`,
+    done: 'Done',
+    newerApp: 'This page needs a newer version of the app.',
+    passPage: 'Go to the next page',
+    pageGone: 'This page is no longer in the journal. Your words are kept as you wrote them.',
+    nothingOpen: 'Today’s page is written. The next one opens tomorrow.',
+    yes: 'Yes',
+    no: 'No',
+    outOf: (n: number, to: number) => `${n} out of ${to}`,
+    // A scale button, read aloud: "7 out of 10".
+    blank: (n: number) => `Blank ${n}`,
+    line: (n: number) => `Line ${n}`,
+    // Free pages.
+    giveMePrompt: 'Give me a prompt',
+    anotherPrompt: 'Another prompt',
+    freeField: 'Your page',
+    deletePage: 'Delete this page',
+    deleteConfirm: 'Delete this page for good?',
+    delete: 'Delete',
+    keep: 'Keep',
+    // The pool of "Give me a prompt", in order. The ids are permanent: a page keeps the id it chose.
+    freePrompts: [
+      {
+        id: 'clear-head',
+        text: 'Clear my head. Write without stopping for three minutes. Spelling does not matter: nobody will read this but you.',
+      },
+      {
+        id: 'tomorrow',
+        text: 'Tomorrow’s list. Before sleep, what is on your mind for tomorrow? Put it here so it can wait until morning.',
+      },
+      {
+        id: 'best-future',
+        text: 'My best possible future. Imagine that, a few years from now, things have gone as well as they reasonably could. Describe an ordinary day.',
+      },
+      {
+        id: 'kind-letter',
+        text: 'A kind letter to myself. Write to yourself about something you find hard, the way a good friend would.',
+      },
+      {
+        id: 'after-practice',
+        text: 'After practice. You have just practised. What did you notice, in your body or in your mind?',
+      },
+    ],
+    // You → Export my journal.
+    exportTitle: 'Export my journal',
+    exportSentence:
+      'This hands your journal to the app you choose, such as your email or notes. From there, that app’s own rules apply.',
+    export: 'Export',
+    exportPart: (n: number, total: number) => `Export part ${n} of ${total}`,
+    exportParts: (total: number) => `Your journal is long, so it comes in ${total} parts. Send them one after the other.`,
+    exportHanded: (n: number, total: number) => (n === total ? `All ${total} parts handed over.` : `Part ${n} of ${total} handed over.`),
+    exportNothing: 'Nothing is written yet. Your pages will be here to export when there are some.',
+    exportFailed: 'Sharing does not work here.',
+    // The text that leaves the phone when the person exports it.
+    partHeader: (n: number, total: number) => `Part ${n} of ${total}`,
+  },
   // You: the person's own page (settings now; more in later phases).
   me: {
     title: 'You',
