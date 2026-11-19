@@ -63,10 +63,10 @@ My message names the phase. If it does not, build the first phase that "State" d
 0. The shell. Done.
 1. Content and reading. Done.
 2. The new look and the new map: light and dark, colour by area, five tabs, the billboard and Today. Done.
-3. Maria and the welcome: Maria's page, the first-launch welcome, You (settings, about, privacy). Brief ready.
-4. My practice: marking a lesson done, "how did that feel", candles, saved lessons. Brief ready.
-5. Journal, part one: free pages, the guided engine, the Gratitude journal.
-6. Journal, part two: the Habit and Health journals; Today offers a page.
+3. Maria and the welcome: Maria's page, the first-launch welcome, You (settings, about, privacy). Done.
+4. My practice: marking a lesson done, "how did that feel", candles, saved lessons. Done.
+5. Journal, part one: free pages, the guided engine, the Gratitude journal; Today offers a page. Brief ready.
+6. Journal, part two: the Habit and Health journals.
 7. Breathe: exercises and the pacer.
 8. Meditate: the timer and guided sittings.
 9. Feedback reaches Maria: the reactions go online, Maria's sign-in and her totals.
@@ -78,7 +78,7 @@ A phase has a brief only once the architect has written it, one or two phases ah
 ## State
 (Updated by Claude Code at the end of each phase. 25 lines at most. Start with the list of phases done.)
 
-**Phases done: 0 (the shell), 1 (content and reading), 2 (the new look and the new map), 3 (Maria and the welcome), 4 (my practice).** Next: Phase 5 (Journal, part one), once its brief is written.
+**Phases done: 0 (the shell), 1 (content and reading), 2 (the new look and the new map), 3 (Maria and the welcome), 4 (my practice).** Next: Phase 5 (`docs/phases/phase-5.md`).
 
 **Phases 0 to 2 (16 and 17 Nov).** Expo SDK 58, React Native 0.88, TypeScript strict, Expo Router (`docs/TECH.md`). Two variants (`app.config.ts`), `eas.json`, four workflows, the content build (`tools/content/`), `src/content/`, lesson, series and note pages, `VideoPlayer` (YouTube, web twin). Expo owner `invincirick`; package name still the placeholder `com.yogawithmaria.app` (one constant). Content at `https://invinciricker.github.io/yoga-app/content/v1/`, published by `pages.yml` on every merge into `main`; still sample content (7 files `sample: true`). Theme: `palette.dark`/`light`, `ThemeProvider`, `ThemeScope`, `useTheme`, `makeStyles` (a test forbids colour imports). Five tabs; `areas` in `src/config.ts` all `false`. Home = the billboard (once a day) then Today.
 

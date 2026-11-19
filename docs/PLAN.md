@@ -28,6 +28,12 @@ Written by Claude chat, 16 Nov 2026. The owner's map of the work: who does what,
 4. When the pull request arrives: read "In short", merge, and follow "To test on your phone".
 5. Tell the same session what is wrong, if anything. When you are happy, close it.
 
+**New builds and updates** (added 19 Nov 2026, after a mix-up):
+- Run "Android build" **only** when the pull request says "Does this need a new build? Yes", and only once.
+- A build never changes your phone by itself. When Expo has finished it, open the link from the run's Summary page **on your phone**, and install the app from it, over the old one.
+- When the pull request says "No", do not run a build: the new code reaches the app by itself. Close the app fully (swipe it away from the recent apps) and open it, twice. You → About then shows "Update of" and the date.
+- A build made after an update already contains that update, so About will rightly say "The code that came with this build".
+
 **The message to paste** (since 17 Nov 2026, evening; fill in the bracket):
 
 ```
