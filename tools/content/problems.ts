@@ -77,21 +77,52 @@ const formats: Record<string, string> = {
   url: 'a full web address starting with https://',
 };
 
-/** Turns one zod issue into one plain sentence. */
-function sentence(issue: z.core.$ZodIssue, data: unknown): string {
-  const field = fieldName(issue.path);
+/** The ways one choice between shapes could have been right: "5 or 10", "a whole number or "forever"". */
+function unionChoices(issue: z.core.$ZodIssueInvalidUnion): string[] | undefined {
+  const choices: string[] = [];
+  for (const branch of issue.errors ?? []) {
+    if (branch.length !== 1) return undefined;
+    const [only] = branch;
+    if (only.code === 'invalid_value') choices.push(...only.values.map((v) => (typeof v === 'string' ? `"${v}"` : String(v))));
+    else if (only.code === 'invalid_type') choices.push(kinds[only.expected] ?? only.expected);
+    else return undefined;
+  }
+  return choices.length > 0 ? choices : undefined;
+}
+
+/**
+ * Turns one zod issue into one plain sentence.
+ * @param path      the field as it is named in the sentence (the whole path unless said otherwise)
+ * @param whereToAdd what a missing field's sentence says ("add it to the lines at the top of the file")
+ */
+export function describeIssue(
+  issue: z.core.$ZodIssue,
+  data: unknown,
+  path: readonly PropertyKey[] = issue.path,
+  whereToAdd = 'add it to the lines at the top of the file',
+): string {
+  const field = fieldName(path);
   const found = valueAt(data, issue.path);
   const foundText = found === undefined ? '' : ` (found ${shown(found)})`;
 
   switch (issue.code) {
     case 'invalid_type':
-      if (found === undefined || found === null) return `${field} is missing: add it to the lines at the top of the file.`;
+      if (found === undefined || found === null) return `${field} is missing: ${whereToAdd}.`;
       return `${field} must be ${kinds[issue.expected] ?? issue.expected}${foundText}.`;
     case 'invalid_value':
       return `${field} must be ${listWithOr(issue.values)}${foundText}.`;
-    case 'invalid_union':
-      // Only "video" is a choice between shapes: the provider decides.
+    case 'invalid_union': {
+      // A kind it does not know ("kind: drawing"): name the kinds it does.
+      // (zod adds "discriminator" and "options" to the issue; its types do not list them.)
+      const known = issue as { discriminator?: unknown; options?: unknown };
+      if (known.discriminator !== undefined && known.discriminator !== 'provider' && Array.isArray(known.options)) {
+        return `${field} must be ${listWithOr(known.options)}${foundText}.`;
+      }
+      const choices = issue.path.length > 0 && issue.path[issue.path.length - 1] !== 'video' ? unionChoices(issue) : undefined;
+      if (choices) return `${field} must be ${listWithOr(choices)}${foundText}.`;
+      // "video" is a choice between shapes: the provider decides.
       return `${field} must say where the video is: "provider: youtube" with its "id"${foundText}.`;
+    }
     case 'too_big': {
       const size = typeof found === 'string' || Array.isArray(found) ? found.length : undefined;
       if (issue.origin === 'string') return `${field} is too long: ${issue.maximum} characters at most (it has ${size}).`;
@@ -118,5 +149,5 @@ function sentence(issue: z.core.$ZodIssue, data: unknown): string {
 
 /** Every problem zod found in one file, as plain sentences. */
 export function problemsFromZod(file: string, error: z.ZodError, data: unknown): Problem[] {
-  return error.issues.map((issue) => ({ file, message: sentence(issue, data) }));
+  return error.issues.map((issue) => ({ file, message: describeIssue(issue, data) }));
 }
