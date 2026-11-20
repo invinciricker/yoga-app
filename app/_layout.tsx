@@ -64,6 +64,9 @@ function Screens(): ReactNode {
           name="lesson-done/[slug]"
           options={{ presentation: 'fullScreenModal', animation: reduce ? 'fade' : 'slide_from_bottom' }}
         />
+        {/* The breathing player and its closing screen: the room dims, in a fade (Phase 7). */}
+        <Stack.Screen name="breath-play/[slug]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
+        <Stack.Screen name="breathe-done/[slug]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
       </Stack>
     </NavigationTheme>
   );

@@ -9,19 +9,23 @@
  *     feeling chips appear (one at most; a second tap clears it). Leaving without an answer is fine.
  *   - At most one hand-off to another area (nextStep), once those areas are built. From Phase 5:
  *     "Write a line about it?" opens a new free page with the "After practice" line chosen, in
- *     place of this screen (back then leads to the lesson).
+ *     place of this screen (back then leads to the lesson). From Phase 7: "Three minutes of
+ *     breath?" opens the player of the breath of the time of day (breatheNow) for 3 minutes, in
+ *     place of this screen.
  */
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Flame } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { areas } from '@/config';
+import { DEFAULT_LENGTH } from '@/breathe/session';
+import { breatheNow } from '@/breathe/words';
 import { slugsForStaticPages } from '@/content/load';
 import { dayOf, findLesson } from '@/content/selectors';
 import { useContent } from '@/content/store';
 import { lessonEntry, nextStep, streak } from '@/day/record';
 import { useDays } from '@/day/store';
+import { useAreas } from '@/lib/areas';
 import { success, tick } from '@/lib/haptics';
 import { routes, useBack } from '@/lib/nav';
 import { usePractice } from '@/practice/store';
@@ -37,8 +41,8 @@ export function generateStaticParams() {
   return slugsForStaticPages('lessons');
 }
 
-/** Where each hand-off leads. */
-const nextRoute = { breathe: routes.breathe, sit: routes.meditate, write: routes.freePage({ prompt: 'after-practice' }) };
+/** Where the hand-offs to Meditate and Write lead (Breathe opens its player: see `handOff`). */
+const nextRoute = { sit: routes.meditate, write: routes.freePage({ prompt: 'after-practice' }) };
 
 export default function LessonDoneScreen() {
   return (
@@ -56,6 +60,7 @@ function LessonDone() {
   const content = useContent((s) => s.content);
   const status = useContent((s) => s.status);
   const entries = useDays((s) => s.entries);
+  const available = useAreas();
   useDarkTop(true);
 
   // One name per opening of this screen: the record ignores a second write under the same name.
@@ -86,7 +91,15 @@ function LessonDone() {
   const today = dayOf(new Date());
   // Counting today: this lesson lights today's candle, even before the record has drawn again.
   const days = streak([...entries, lessonEntry(lesson, new Date())], today);
-  const next = nextStep('move', entries, today, areas);
+  const next = nextStep('move', entries, today, available);
+  // The one hand-off: breath and a line in the journal take this screen's place; Meditate is a tab.
+  const handOff = () => {
+    if (next === 'breathe') {
+      const breath = breatheNow(content.breath ?? [], new Date());
+      router.replace(breath ? routes.breathPlay(breath.slug, DEFAULT_LENGTH) : routes.breathe);
+    } else if (next === 'write') router.replace(nextRoute.write);
+    else if (next === 'sit') router.navigate(nextRoute.sit);
+  };
   const minutes = lesson.minutes;
 
   const choose = (d: Difficulty) => {
@@ -112,11 +125,7 @@ function LessonDone() {
             {strings.done.privacy}
           </Text>
           {next ? (
-            <Button
-              kind="quiet"
-              label={strings.done.next[next]}
-              onPress={() => (next === 'write' ? router.replace(nextRoute.write) : router.navigate(nextRoute[next]))}
-            />
+            <Button kind="quiet" label={strings.done.next[next]} onPress={handOff} />
           ) : null}
           <Button label={strings.done.close} onPress={back} />
         </>

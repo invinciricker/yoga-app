@@ -81,4 +81,12 @@ export const size = {
   dotLabelMin: 64, // narrower than this, a row's label goes above its dots instead of beside them
   measureSlack: 1, // a measured width comes rounded down on the web: one point more keeps a word on its line
   pagesShown: 21, // "Your pages" shows this many, then "Show all 73 pages"
+  // --- Phase 7: Breathe (docs/phases/phase-7.md)
+  pacer: {
+    disc: 0.2, // the disc at its largest (full lungs): its radius, as a part of the column's width
+    centre: 0.36, // where the disc's centre sits, as a part of the screen's height
+    reduced: 0.75, // with reduce motion the disc stays still, at this part of its largest size
+  },
+  timeLine: 2, // the thin line along the bottom of the player that shows how much is left
+  timeLineTrack: 0.18, // the strength of the line's spent part
 } as const;

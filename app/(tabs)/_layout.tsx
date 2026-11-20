@@ -3,7 +3,8 @@
  * Each <Tabs.Screen> below matches a file in this folder (index = Home).
  *
  * Breathe, Meditate and Journal are opened by their own phases (`areas` in src/config.ts). Until
- * then the public app hides their tabs and the preview app shows a placeholder in them.
+ * then the public app hides their tabs and the preview app shows a placeholder in them. A built area
+ * with nothing in it (Breathe with no exercise published) is hidden the same way (src/lib/areas.ts).
  *
  * The very first time the app opens (the welcome not yet seen), the tabs give their place to the
  * welcome before anything is drawn. The answer is read once, when the tabs first appear: "Show the
@@ -14,7 +15,8 @@ import { useState } from 'react';
 import type { BottomTabBarProps } from 'expo-router/tabs';
 import { Feather, House, Moon, Play, Wind, type LucideIcon } from 'lucide-react-native';
 
-import { areas, type BuildingArea } from '@/config';
+import type { BuildingArea } from '@/config';
+import { useAreas } from '@/lib/areas';
 import { tick } from '@/lib/haptics';
 import { routes } from '@/lib/nav';
 import { usePrefs } from '@/lib/prefs';
@@ -33,17 +35,21 @@ const tabs: Record<string, { icon: LucideIcon; area: Area; building?: BuildingAr
   journal: { icon: Feather, area: 'write', building: 'journal' },
 };
 
-/** A tab shows when its area is built, or in the preview app (which shows a placeholder). */
-function shown(name: string): boolean {
+/**
+ * A tab shows when its area is built and has something in it, or in the preview app (which shows a
+ * placeholder, or a quiet line when there is nothing in it yet).
+ */
+function shown(name: string, available: Record<BuildingArea, boolean>): boolean {
   const tab = tabs[name];
   if (!tab) return false;
-  return !tab.building || areas[tab.building] || isPreview;
+  return !tab.building || available[tab.building] || isPreview;
 }
 
 /** Connects our TabBar part to the navigation. */
 function FloatingTabBar({ state, descriptors, emitter, navigateToTab }: BottomTabBarProps) {
+  const available = useAreas();
   const items: TabItem[] = state.routes
-    .filter((route) => shown(route.name))
+    .filter((route) => shown(route.name, available))
     .map((route) => ({
       key: route.key,
       label: descriptors[route.key].options.title ?? route.name,

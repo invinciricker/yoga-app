@@ -5,15 +5,16 @@
  *                  time the app is opened on a calendar day; later that day Home opens on Today.
  *   Today          in the phone's theme: a greeting that follows the clock, with the candlelight
  *                  behind it, this week's candles, the practice of the day (todayMove in
- *                  src/day/todayMove.ts), the day's page of the Journal (journalToday in
+ *                  src/day/todayMove.ts), the breath of the time of day (breatheNow in
+ *                  src/breathe/words.ts, Phase 7), the day's page of the Journal (journalToday in
  *                  src/journal/guided.ts, Phase 5), what is new, and one of Maria's sayings.
  *
  * The scroll rests at two places only, the top and the start of Today; below that it moves freely.
- * (The cards of Breathe and Sit arrive with their own phases.)
+ * (The card of Sit arrives with its own phase.)
  */
 import { useNavigation, useRouter } from 'expo-router';
 import type { BottomTabNavigationProp } from 'expo-router/tabs';
-import { ArrowRight, Bookmark, CalendarDays, ChevronDown, Feather, Play, User } from 'lucide-react-native';
+import { ArrowRight, Bookmark, CalendarDays, ChevronDown, Feather, Play, User, Wind } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { AppState, RefreshControl, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -29,6 +30,10 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 
+import type { BreathExercise } from '../../shared/content-schema';
+
+import { DEFAULT_LENGTH } from '@/breathe/session';
+import { breathedOn, breatheNow } from '@/breathe/words';
 import { lessonMeta } from '@/content/labels';
 import { dayOf, latestQuote, newestLessons } from '@/content/selectors';
 import { useContent } from '@/content/store';
@@ -37,6 +42,7 @@ import { useDays } from '@/day/store';
 import { todayMove } from '@/day/todayMove';
 import { journalToday, pageAt, pageNumberText, type JournalSuggestion } from '@/journal/guided';
 import { useJournalPages } from '@/journal/usePages';
+import { useAreas } from '@/lib/areas';
 import { longDate, nextClass, showBillboard } from '@/lib/billboard';
 import { greetingFor } from '@/lib/greeting';
 import { tick } from '@/lib/haptics';
@@ -88,6 +94,7 @@ export default function HomeScreen() {
   // The pages of each journal's current start (a habit started again counts from its first page).
   const { current: journalEntries, begun } = useJournalPages();
   const weekCard = useWeek();
+  const available = useAreas();
 
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollY = useSharedValue(0);
@@ -171,6 +178,9 @@ export default function HomeScreen() {
     tick(); // a light tick in the hand
     usePractice.getState().toggleSave(hero.slug);
   };
+  // The breath of the time of day: one card in the area Breathe (Phase 7).
+  const breath = available.breathe ? breatheNow(content.breath ?? [], now) : undefined;
+  const breathedToday = breathedOn(entries, dayOf(now));
   // The day's page of the Journal: one card in the area Write.
   const page = journalToday(content.guidedJournals ?? [], journalEntries, dayOf(now), begun);
   const newest = newestLessons(content, 5, hero?.slug);
@@ -301,14 +311,20 @@ export default function HomeScreen() {
               <EmptyState sentence={strings.today.empty} aura="dusk" />
             )}
 
-            {page ? (
+            {breath ? (
               <Arrive index={3}>
+                <BreatheCard exercise={breath} done={breathedToday} />
+              </Arrive>
+            ) : null}
+
+            {page ? (
+              <Arrive index={4}>
                 <WriteCard suggestion={page} />
               </Arrive>
             ) : null}
 
             {newest.length > 0 ? (
-              <Arrive index={4} style={styles.block2}>
+              <Arrive index={5} style={styles.block2}>
                 <SectionHeader
                   title={strings.today.newFrom(teacher)}
                   actionLabel={strings.common.seeAll}
@@ -329,7 +345,7 @@ export default function HomeScreen() {
             ) : null}
 
             {saying?.quote ? (
-              <Arrive index={5}>
+              <Arrive index={6}>
                 <Card padding="xl" style={styles.saying}>
                   <Overline>{strings.today.noteFrom(teacher)}</Overline>
                   <Text variant="quote">{saying.quote}</Text>
@@ -347,6 +363,26 @@ export default function HomeScreen() {
         </View>
       </Animated.ScrollView>
     </View>
+  );
+}
+
+/**
+ * The Breathe card of Today (Phase 7): "Breathe · 3 min", the exercise of the time of day and its
+ * summary. One tap opens the player for 3 minutes. Once anything was breathed today: the sage tick
+ * and "Done today", and the card opens the Breathe tab.
+ */
+function BreatheCard({ exercise, done }: { exercise: BreathExercise; done: boolean }) {
+  const router = useRouter();
+  return (
+    <AreaCard
+      area="breathe"
+      icon={Wind}
+      overline={strings.breathe.cardOverline(DEFAULT_LENGTH)}
+      title={exercise.title}
+      line={done ? strings.breathe.doneToday : exercise.summary}
+      done={done}
+      onPress={() => (done ? router.navigate(routes.breathe) : router.push(routes.breathPlay(exercise.slug, DEFAULT_LENGTH)))}
+    />
   );
 }
 
