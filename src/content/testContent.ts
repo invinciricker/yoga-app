@@ -35,6 +35,32 @@ export const rawTestContent = {
     { slug: 'slow', kind: 'note', title: 'Why we slow down', summary: 'Nothing to prove.', published: '2026-11-15', aura: 'candle', quote: 'Slow is a speed too.', related: ['wind-down'] },
     { slug: 'old', kind: 'note', title: 'An older note', summary: 'From before.', published: '2026-11-01', aura: 'dusk', quote: 'An older saying.' },
   ],
+  // Phase 7: four breathing exercises, written in the order of their slugs, not of their `order`.
+  breath: [
+    breath('box', 'Box', 4, ['afternoon'], [{ do: 'in', seconds: 4, via: 'nose' }, { do: 'hold', seconds: 4 }, { do: 'out', seconds: 4, via: 'nose' }, { do: 'hold', seconds: 4 }]),
+    breath('even-breath', 'Even breath', 2, ['morning'], [{ do: 'in', seconds: 5, via: 'nose' }, { do: 'out', seconds: 5, via: 'nose' }]),
+    breath('long-exhale', 'Long exhale', 1, ['evening'], [{ do: 'in', seconds: 4, via: 'nose' }, { do: 'out', seconds: 6 }]),
+    breath('the-sigh', 'The sigh', 3, undefined, [
+      { do: 'in', seconds: 2, via: 'nose' },
+      { do: 'in', seconds: 1, via: 'nose', label: 'Top up' },
+      { do: 'out', seconds: 6, via: 'mouth' },
+    ]),
+  ],
 };
+
+/** A breathing exercise as content.json holds it. */
+function breath(slug: string, title: string, order: number, suggest: string[] | undefined, steps: unknown[]) {
+  return {
+    slug,
+    title,
+    summary: `About ${title.toLowerCase()}.`,
+    goodFor: 'Tests',
+    order,
+    ...(suggest ? { suggest } : {}),
+    steps,
+    how: [{ type: 'paragraph', spans: [{ text: 'Breathe.' }] }],
+    why: { level: 'promising', text: [{ type: 'paragraph', spans: [{ text: 'Because.' }] }], sources: ['A study (2022).'] },
+  };
+}
 
 export const testContent: ContentFile = contentFile.parse(rawTestContent);

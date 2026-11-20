@@ -3,6 +3,7 @@ export { AnswerChoice } from './AnswerChoice';
 export { AreaCard } from './AreaCard';
 export { Arrive } from './Arrive';
 export { Aura } from './Aura';
+export { BreathRow } from './BreathRow';
 export { Button } from './Button';
 export { Candlelight } from './Candlelight';
 export { Card } from './Card';

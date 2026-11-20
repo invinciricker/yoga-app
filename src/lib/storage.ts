@@ -30,6 +30,8 @@ export const storageKeys = {
   journalBegun: 'ywm:journal:v1:begun',
   /** The current start of each journal started again, { "habit": 2 } (Phase 6, "Start a new habit"). */
   journalCycles: 'ywm:journal:v1:cycles',
+  /** Breathe's settings, the same for every exercise: { minutes, sound, vibration } (Phase 7). Kept by "Delete my data". */
+  breathe: 'ywm:breathe:v1',
 } as const;
 
 /** Reads and parses a saved value. Returns undefined when there is none or it cannot be read. */

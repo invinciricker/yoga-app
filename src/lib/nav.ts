@@ -48,6 +48,21 @@ export const routes = {
   write: (journal: string, entry?: string): Href => ({ pathname: '/write', params: entry ? { journal, entry } : { journal } }),
   freePages: '/free-pages' as Href,
   freePage: (params: { entry?: string; prompt?: string } = {}): Href => ({ pathname: '/free-page', params }),
+  /**
+   * Breathe (Phase 7). Never under /breathe/: the tab is breathe.html in the web export, and a folder
+   * breathe/ next to it would break it there (Phase 4's lesson).
+   *   /breath/<slug>                    an exercise's page
+   *   /breath-why/<slug>                "Why this works"
+   *   /breath-play/<slug>?minutes=3     the player, always dark
+   *   /breathe-done/<slug>?minutes=3&at=<the session>   its closing screen
+   */
+  breath: (slug: string): Href => ({ pathname: '/breath/[slug]', params: { slug } }),
+  breathWhy: (slug: string): Href => ({ pathname: '/breath-why/[slug]', params: { slug } }),
+  breathPlay: (slug: string, minutes: number): Href => ({ pathname: '/breath-play/[slug]', params: { slug, minutes: String(minutes) } }),
+  breatheDone: (slug: string, minutes: number, at: string): Href => ({
+    pathname: '/breathe-done/[slug]',
+    params: { slug, minutes: String(minutes), at },
+  }),
   exportJournal: '/me/export' as Href,
 };
 

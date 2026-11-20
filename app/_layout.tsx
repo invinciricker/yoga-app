@@ -9,6 +9,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo, type ReactNode } from 'react';
 
 import { useContent } from '@/content/store';
+import { useBreathe } from '@/breathe/settings';
 import { useDays } from '@/day/store';
 import { useJournal } from '@/journal/store';
 import { useReduceMotion } from '@/lib/motion';
@@ -74,12 +75,13 @@ export default function RootLayout() {
   const contentStarted = useContent((s) => s.started);
   // True once the preferences (theme, reduce motion, welcome seen, billboard's day) have been read.
   const prefsStarted = usePrefs((s) => s.started);
-  // True once the record of the day, the saved lessons and the journal have been read, so Today's
-  // week and its Write card never pop in.
+  // True once the record of the day, the saved lessons, the journal and Breathe's settings have been
+  // read, so Today's week and its cards never pop in, and an exercise's page opens on the length chosen.
   const daysStarted = useDays((s) => s.started);
   const practiceStarted = usePractice((s) => s.started);
   const journalStarted = useJournal((s) => s.started);
-  const progressStarted = daysStarted && practiceStarted && journalStarted;
+  const breatheStarted = useBreathe((s) => s.started);
+  const progressStarted = daysStarted && practiceStarted && journalStarted && breatheStarted;
   const ready = fontsReady && contentStarted && prefsStarted && progressStarted;
 
   // Once, when the app opens: read the preferences, the person's progress and their journal; show
@@ -89,6 +91,7 @@ export default function RootLayout() {
     void useDays.getState().start();
     void usePractice.getState().start();
     void useJournal.getState().start();
+    void useBreathe.getState().start();
     void useContent.getState().start();
   }, []);
 
