@@ -12,7 +12,7 @@
  * and nothing breaks.
  */
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 export type SoundName = 'in' | 'out' | 'bell';
 
@@ -99,5 +99,6 @@ export function useBreathSounds(): BreathSounds {
     play('bell');
   }, [play]);
 
-  return { play, stopAll, ringOut };
+  // The same object on every drawing, so the player's timer is not set again each time.
+  return useMemo(() => ({ play, stopAll, ringOut }), [play, stopAll, ringOut]);
 }

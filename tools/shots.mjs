@@ -66,7 +66,7 @@ if (!process.env.CHROME_PATH) {
 const types = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml',
-  '.ttf': 'font/ttf', '.ico': 'image/x-icon',
+  '.ttf': 'font/ttf', '.ico': 'image/x-icon', '.wav': 'audio/wav',
 };
 const isFile = (path) => stat(path).then((s) => s.isFile(), () => false);
 

@@ -124,6 +124,10 @@ function Session({ exercise, minutes, show }: { exercise: BreathExercise; minute
 
   // What has been done for which step, so a resume in the middle of a step never ticks twice.
   const cuedFor = useRef('');
+  // The end happens once: its bell, its tick, and one timer to the closing screen (kept until then).
+  const ending = useRef(false);
+  const toClosing = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(toClosing.current), []);
   const discFor = useRef('');
   const lineRuns = useRef(false);
   const reduceNow = useRef(reduce);
@@ -150,7 +154,6 @@ function Session({ exercise, minutes, show }: { exercise: BreathExercise; minute
   useEffect(() => {
     if (!running) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    let rest: ReturnType<typeof setTimeout> | undefined;
     const settings = () => useBreathe.getState();
 
     const step = () => {
@@ -183,21 +186,20 @@ function Session({ exercise, minutes, show }: { exercise: BreathExercise; minute
           left.set(withTiming(0, { duration: m.left * plan.breathingMs, easing: Easing.linear }));
         }
       } else {
-        // The end: the bell, a success tick, a breath of rest, the closing screen.
+        // The end, once: the bell, a success tick, a breath of rest, the closing screen.
+        if (ending.current) return;
+        ending.current = true;
         setEnded(true);
         if (settings().sound) sounds.ringOut();
         if (settings().vibration) success();
-        rest = setTimeout(() => leave(plan.totalMs), END_REST_MS);
+        toClosing.current = setTimeout(() => leave(plan.totalMs), END_REST_MS);
         return;
       }
       timer = setTimeout(step, Math.max(0, nextChangeAt(plan, ms) - ms) + TIMER_SLACK_MS);
     };
 
     timer = setTimeout(step, 0);
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(rest);
-    };
+    return () => clearTimeout(timer);
   }, [running, plan, sounds, scale, left, leave]);
 
   // ---- Pause, go on, stop.
