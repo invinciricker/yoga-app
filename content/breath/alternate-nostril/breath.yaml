@@ -1,0 +1,35 @@
+# A breathing exercise. Written by Claude chat (the architect) on 20 Nov 2026 from published research.
+# Phase 7 copies this file, unchanged, to content/breath/alternate-nostril/breath.yaml.
+# Its format and the check's rules: docs/phases/phase-7.md, section 1 (then docs/CONTENT.md).
+# The folder name is the exercise's slug: permanent once published (the record of the day keeps it).
+#
+# A DRAFT until Maria approves it: she may want to teach it her own way (the words in "how", the
+# counts). Drafts show only in the preview app and on the web preview. To publish it, delete the
+# line "draft: true" (docs/ADDING-CONTENT.md).
+
+title: Alternate nostril
+summary: In through one side, out through the other.
+goodFor: The yoga tradition's own
+order: 5
+draft: true
+
+steps:
+  - { do: in, seconds: 4, via: nose, side: left }
+  - { do: out, seconds: 4, via: nose, side: right }
+  - { do: in, seconds: 4, via: nose, side: right }
+  - { do: out, seconds: 4, via: nose, side: left }
+
+how: |
+  Rest your right thumb beside your right nostril and your ring finger beside your left. Close the right side and breathe in through the left. Close the left, open the right, and breathe out. Breathe in through the right, then switch, and breathe out through the left. That is one round.
+
+  Keep the pressure light. If your nose is blocked, breathe normally instead.
+
+why:
+  level: traditional
+  text: |
+    This practice comes from yoga, where it is called nadi shodhana. It has been studied in many small trials, but most were small or not blinded, and reviewers keep asking for better ones. So it is hard to say what it adds to any slow, even breathing.
+
+    It is here because it belongs to the tradition this app comes from.
+  sources:
+    - "Nam, Jeong, Kim and Jang (2024). Effectiveness of alternative nostril breathing on blood pressure: a systematic review and meta-analysis of randomized controlled trials. Complementary Medicine Research, 31(5), 449."
+    - "Zaccaro, Piarulli, Laurino, Garbella, Menicucci, Neri and Gemignani (2018). How breath-control can change your life: a systematic review on psycho-physiological correlates of slow breathing. Frontiers in Human Neuroscience, 12, 353."

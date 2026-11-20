@@ -1,0 +1,29 @@
+# A breathing exercise. Written by Claude chat (the architect) on 20 Nov 2026 from published research.
+# Phase 7 copies this file, unchanged, to content/breath/even-breath/breath.yaml.
+# Its format and the check's rules: docs/phases/phase-7.md, section 1 (then docs/CONTENT.md).
+# The folder name is the exercise's slug: permanent once published (the record of the day keeps it).
+
+title: Even breath
+summary: In for five, out for five.
+goodFor: Balance, at any time
+order: 2
+suggest: [morning]
+
+steps:
+  - { do: in, seconds: 5, via: nose }
+  - { do: out, seconds: 5, via: nose }
+
+how: |
+  Breathe in through your nose for five and out through your nose for five, smoothly, with no pause at the top or the bottom. That is six breaths a minute: slower than usual, but it should still feel comfortable.
+
+  If it feels like too little air, breathe a little deeper, not faster.
+
+why:
+  level: promising
+  text: |
+    This rhythm, about six breaths a minute, is the one most often used in research on slow breathing. What it does to the body is well measured: across more than two hundred studies, heart rate variability, a sign that the calming side of the nervous system is more active, went up during the practice and after weeks of it.
+
+    What it does for how you feel is less certain. In the largest trial of this kind of breathing so far, with 400 people, it did no better for mood and wellbeing than a breathing exercise designed as a placebo. It may still help you feel steady; it is not proven to do more than any calm, slow breath.
+  sources:
+    - "Laborde, Allen, Borges and others (2022). Effects of voluntary slow breathing on heart rate and heart rate variability: a systematic review and a meta-analysis. Neuroscience and Biobehavioral Reviews, 138, 104711."
+    - "Fincham, Strauss and Cavanagh (2023). Effect of coherent breathing on mental health and wellbeing: a randomised placebo-controlled trial. Scientific Reports, 13, 22141."

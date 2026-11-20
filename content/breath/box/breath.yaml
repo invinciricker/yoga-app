@@ -1,0 +1,31 @@
+# A breathing exercise. Written by Claude chat (the architect) on 20 Nov 2026 from published research.
+# Phase 7 copies this file, unchanged, to content/breath/box/breath.yaml.
+# Its format and the check's rules: docs/phases/phase-7.md, section 1 (then docs/CONTENT.md).
+# The folder name is the exercise's slug: permanent once published (the record of the day keeps it).
+
+title: Box
+summary: In, hold, out, hold. Four counts each.
+goodFor: Steadiness and focus
+order: 4
+suggest: [afternoon]
+
+steps:
+  - { do: in, seconds: 4, via: nose }
+  - { do: hold, seconds: 4 }
+  - { do: out, seconds: 4, via: nose }
+  - { do: hold, seconds: 4 }
+
+how: |
+  Breathe in for four, hold for four, breathe out for four, and wait for four before the next breath in. Four sides of a box.
+
+  Hold the breath loosely, without squeezing your throat shut. If a hold feels uncomfortable, keep breathing slowly through it instead.
+
+why:
+  level: early
+  text: |
+    Box breathing is widely taught, but it has been studied very little on its own. In the trial that tested the sigh, box breathing was one of the exercises compared, and the sigh did better.
+
+    So the evidence is early. What can be said is that it slows the breath to about four breaths a minute, and slow breathing in general is well studied.
+  sources:
+    - "Balban, Neri, Kogon, Weed, Nouriani, Jo, Holl, Zeitzer, Spiegel and Huberman (2023). Brief structured respiration practices enhance mood and reduce physiological arousal. Cell Reports Medicine, 4(1), 100895."
+    - "Zaccaro, Piarulli, Laurino, Garbella, Menicucci, Neri and Gemignani (2018). How breath-control can change your life: a systematic review on psycho-physiological correlates of slow breathing. Frontiers in Human Neuroscience, 12, 353."
