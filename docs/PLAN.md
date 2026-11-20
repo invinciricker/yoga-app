@@ -89,6 +89,7 @@ After version 1: `docs/phases/later.md`.
 - **17 Nov 2026** · Version 2 of the plan: see "Decisions" in `docs/V2.md`.
 - **17 Nov 2026, evening** · The builder gets more freedom; Phases 3 and 4 briefed together; the architect now delivers briefs as pull requests. See "Decisions (17 Nov 2026, evening)" in `docs/V2.md`.
 - **19 Nov 2026** · Phases 5 and 6 briefed: the Journal (free pages and Gratitude, then Habit and Health). Both arrive over the air. See the two "Decisions (19 Nov 2026)" lists in `docs/V2.md`.
+- **20 Nov 2026** · Phase 7 briefed: Breathe, with a new build (sound). See "Decisions (20 Nov 2026)" in `docs/V2.md`.
 
 ## Decisions waiting for the owner
 

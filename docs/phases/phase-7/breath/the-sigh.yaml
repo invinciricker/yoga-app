@@ -1,0 +1,30 @@
+# A breathing exercise. Written by Claude chat (the architect) on 20 Nov 2026 from published research.
+# Phase 7 copies this file, unchanged, to content/breath/the-sigh/breath.yaml.
+# Its format and the check's rules: docs/phases/phase-7.md, section 1 (then docs/CONTENT.md).
+# The folder name is the exercise's slug: permanent once published (the record of the day keeps it).
+# Two "in" steps in a row are one breath in, taken in two parts: the circle grows through both.
+
+title: The sigh
+summary: Two breaths in, one long breath out.
+goodFor: Letting go of tension
+order: 3
+
+steps:
+  - { do: in, seconds: 2, via: nose }
+  - { do: in, seconds: 1, via: nose, label: Top up }
+  - { do: out, seconds: 6, via: mouth }
+
+how: |
+  Breathe in through your nose. When your lungs feel nearly full, take a short second sip of air on top, also through your nose. Then let it all go, slowly, through your mouth.
+
+  It is like the sighs your body makes by itself, done on purpose and slowly.
+
+why:
+  level: promising
+  text: |
+    In a randomised trial, people practised this for five minutes a day for a month. Their mood improved more than that of people who practised mindfulness meditation for the same time, and their breathing at rest became slower. Of the breathing exercises in the trial, this one did best.
+
+    That is one good trial, so the evidence is promising, not settled. A review of breathing exercises in general found a small to moderate effect on stress, in studies of mixed quality.
+  sources:
+    - "Balban, Neri, Kogon, Weed, Nouriani, Jo, Holl, Zeitzer, Spiegel and Huberman (2023). Brief structured respiration practices enhance mood and reduce physiological arousal. Cell Reports Medicine, 4(1), 100895."
+    - "Fincham, Strauss, Montero-Marin and Cavanagh (2023). Effect of breathwork on stress and mental health: a meta-analysis of randomised-controlled trials. Scientific Reports, 13, 432."
