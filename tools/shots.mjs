@@ -25,6 +25,11 @@
 //   :tap=<name>        press the button with that name first ("8 out of 10"), as a person would
 //   :type=<n>=<words>  type the words into the n-th field of the page (0 is the first)
 //   :as=<name>         the picture's name (an address with ?a=b makes a long one)
+//   :at=<HH>h<MM>      the phone's clock shows that time of day, today (Phase 7: "For this morning")
+//   :before=<route>    open that page first, in the same browser profile, so what it saves is there
+//                      (Phase 7: a closing screen first, so the day shows a breath done)
+//   :wrote             a page of the journal counts as written today in the record of the day (only
+//                      the record: no words), so a closing screen offers no "Write a line about it?"
 // An address may carry its own query: /write?journal=gratitude&page=d13.
 // --both takes every route twice, dark and light.
 // Every picture except ":first" starts with the welcome already seen (as on a phone after the
@@ -120,6 +125,9 @@ try {
     const first = options.includes('first');
     const big = options.includes('big');
     const demo = options.includes('demo');
+    const clock = options.find((o) => /^at=\d\dh\d\d$/.test(o))?.slice(3);
+    const before = options.find((o) => o.startsWith('before='))?.slice(7);
+    const wrote = options.includes('wrote');
     const name =
       (as ?? (route.replace(/^\/+|\/+$/g, '').replace(/[/?&=]+/g, '-') || 'home')) +
       (today ? '-today' : '') +
@@ -135,6 +143,35 @@ try {
     const page = await context.newPage();
     const viewport = big ? BIG : PHONE;
     await page.setViewport(viewport);
+    if (clock) {
+      // The time of day, today: every Date of the page is moved by the same amount.
+      const [hours, minutes] = clock.split('h').map(Number);
+      await page.evaluateOnNewDocument((h, m) => {
+        const Real = Date;
+        const wanted = new Real();
+        wanted.setHours(h, m, 0, 0);
+        const shift = wanted.getTime() - Real.now();
+        class Shifted extends Real {
+          constructor(...args) {
+            if (args.length === 0) super(Real.now() + shift);
+            else super(...args);
+          }
+          static now() {
+            return Real.now() + shift;
+          }
+        }
+        globalThis.Date = Shifted;
+      }, hours, minutes);
+    }
+    if (wrote) {
+      await page.evaluateOnNewDocument(() => {
+        if (localStorage.getItem('ywm:days:v1') !== null) return;
+        const now = new Date();
+        const two = (n) => String(n).padStart(2, '0');
+        const day = `${now.getFullYear()}-${two(now.getMonth() + 1)}-${two(now.getDate())}`;
+        localStorage.setItem('ywm:days:v1', JSON.stringify([{ day, kind: 'write', ref: 'shots-page', minutes: 2, at: now.toISOString() }]));
+      });
+    }
     if (!first) {
       // The welcome was seen (the app keeps this under the same key in the browser's storage).
       await page.evaluateOnNewDocument(() => localStorage.setItem('ywm:welcome:v1', 'true'));
@@ -169,6 +206,10 @@ try {
     if (scheme) query.set('scheme', scheme);
     if (demo) query.set('demo', 'streak');
     const joiner = route.includes('?') ? '&' : '?';
+    if (before) {
+      await page.goto(base + before, { waitUntil: 'networkidle0' });
+      await new Promise((r) => setTimeout(r, 1200)); // let it save what it saves
+    }
     await page.goto(base + route + (query.size > 0 ? `${joiner}${query}` : ''), { waitUntil: 'networkidle0' });
     await page.evaluate(() => document.fonts.ready);
     await new Promise((r) => setTimeout(r, 1200)); // let the arriving animation finish

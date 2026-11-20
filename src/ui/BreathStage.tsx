@@ -68,7 +68,12 @@ export function BreathStage({ scale, left, leftLabel, state, sound, onToggleSoun
   const insets = useSafeAreaInsets();
   const { color } = useTheme();
   const [box, setBox] = useState<{ w: number; h: number } | null>(null);
-  const geometry = box ? pacerGeometry(box.w, box.h) : undefined;
+  // The tallest the words have been (settling in, paused…): the disc keeps room for them, so on a
+  // small phone with large text the words never reach the buttons, and the disc does not jump about.
+  const [wordsHeight, setWordsHeight] = useState(0);
+  const topRoom = insets.top + space.md + size.iconButton + space.md;
+  const bottomRoom = insets.bottom + space.md + size.timeLine + space.lg + size.iconButton;
+  const geometry = box ? pacerGeometry(box.w, box.h, { top: topRoom, bottom: bottomRoom, words: wordsHeight, gap: space.xxl }) : undefined;
   const wordsTop = geometry ? geometry.cy + geometry.radius + space.xxl : 0;
   const line = useAnimatedStyle(() => ({ width: `${Math.max(0, Math.min(1, left.get())) * 100}%` }));
   const running = state.kind === 'settle' || state.kind === 'step';
@@ -81,7 +86,7 @@ export function BreathStage({ scale, left, leftLabel, state, sound, onToggleSoun
       // The words and the buttons are read one by one; the pause button says what a tap does.
       accessible={false}
     >
-      <BreathPacer scale={scale} />
+      {geometry ? <BreathPacer scale={scale} geometry={geometry} /> : null}
 
       <View style={[styles.top, { top: insets.top + space.md }]}>
         <IconButton
@@ -93,7 +98,13 @@ export function BreathStage({ scale, left, leftLabel, state, sound, onToggleSoun
       </View>
 
       {geometry ? (
-        <View style={[styles.words, { top: wordsTop }]}>
+        <View
+          style={[styles.words, { top: wordsTop }]}
+          onLayout={(e) => {
+            const h = Math.ceil(e.nativeEvent.layout.height);
+            if (h > wordsHeight) setWordsHeight(h);
+          }}
+        >
           {state.kind === 'settle' ? (
             <FadeIn id="settle">
               <Overline tone="cover">{strings.breathe.settle}</Overline>
