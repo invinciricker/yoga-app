@@ -31,7 +31,8 @@ const config: ExpoConfig = {
   slug: 'yoga-app',
   owner: EXPO_OWNER,
   scheme: 'yogawithmaria',
-  version: '0.1.0',
+  // Shown in You → About, so the owner can tell which build is on the phone. 0.2.0: Phase 7 (sound).
+  version: '0.2.0',
   orientation: 'portrait',
   // The theme follows the phone (light or dark) unless the person chooses in You → Appearance.
   userInterfaceStyle: 'automatic',
@@ -62,6 +63,20 @@ const config: ExpoConfig = {
         backgroundColor: BG_BASE,
         image: './assets/images/splash-icon.png',
         imageWidth: 200,
+      },
+    ],
+    // Sound (Phase 7: the breathing tones and the bell). The app PLAYS sounds and never records, so
+    // the microphone is switched off: without these lines the plugin adds Android's RECORD_AUDIO
+    // permission (and the iPhone's microphone question). Playback stops when the app leaves the
+    // screen, so no background playback either: without that line the plugin adds a foreground
+    // media service and its permissions. Option names: node_modules/expo-audio/plugin (SDK 58).
+    [
+      'expo-audio',
+      {
+        microphonePermission: false,
+        recordAudioAndroid: false,
+        enableBackgroundPlayback: false,
+        enableBackgroundRecording: false,
       },
     ],
   ],
