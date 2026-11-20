@@ -14,13 +14,20 @@ import { useTheme } from '@/theme/ThemeProvider';
 // How the scenes are drawn (same proportions as docs/design/mockups.html).
 const GROUND_STOPS = [0, 0.55, 1]; // where the three ground colours sit, top to bottom
 const GLOW_FADE = 0.6; // a glow is fully gone at this fraction of its radius
-const HALO_SCALE = 3; // the halo is this many times the disc
-const HALO_OPACITY = 0.35;
-const HALO_MID = { at: 0.6, opacity: 0.1 }; // the halo falls off quickly, then lingers
+export const HALO_SCALE = 3; // the halo is this many times the disc
+export const HALO_OPACITY = 0.35;
+export const HALO_MID = { at: 0.6, opacity: 0.1 }; // the halo falls off quickly, then lingers
 
-export type AuraProps = { name: AuraName };
+export type AuraProps = {
+  name: AuraName;
+  /**
+   * Leaves out the disc and its halo: only for the breathing pacer (Phase 7), which draws the
+   * scene's disc itself, large and in the middle, growing and settling with the breath.
+   */
+  withoutDisc?: boolean;
+};
 
-export function Aura({ name }: AuraProps) {
+export function Aura({ name, withoutDisc = false }: AuraProps) {
   const scene = aura[name];
   // Auras look the same in both themes: the halo is the light gold used on covers.
   const { onCover } = useTheme();
@@ -74,13 +81,17 @@ export function Aura({ name }: AuraProps) {
           ))}
 
           {/* The disc and its halo: the radius is a fraction of the width */}
-          <Circle
-            cx={scene.disc.cx * box.w}
-            cy={scene.disc.cy * box.h}
-            r={scene.disc.r * box.w * HALO_SCALE}
-            fill={`url(#${id}h)`}
-          />
-          <Circle cx={scene.disc.cx * box.w} cy={scene.disc.cy * box.h} r={scene.disc.r * box.w} fill={scene.disc.color} />
+          {withoutDisc ? null : (
+            <>
+              <Circle
+                cx={scene.disc.cx * box.w}
+                cy={scene.disc.cy * box.h}
+                r={scene.disc.r * box.w * HALO_SCALE}
+                fill={`url(#${id}h)`}
+              />
+              <Circle cx={scene.disc.cx * box.w} cy={scene.disc.cy * box.h} r={scene.disc.r * box.w} fill={scene.disc.color} />
+            </>
+          )}
         </Svg>
       ) : null}
     </View>

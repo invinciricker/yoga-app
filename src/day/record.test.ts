@@ -186,9 +186,17 @@ describe('nextStep', () => {
   const today = '2026-11-17';
   const all = { breathe: true, meditate: true, journal: true };
 
-  it('offers a line in the journal after a lesson in this phase (only the Journal is built after it)', () => {
-    expect(nextStep('move', [], today, areas)).toBe('write');
-    expect(nextStep('move', [did(today, 'page-1', 2, 'write')], today, areas)).toBeUndefined();
+  it('in Phase 7 (Breathe and the Journal built): breath after a lesson, then a line in the journal', () => {
+    expect(nextStep('move', [], today, areas)).toBe('breathe');
+    expect(nextStep('move', [did(today, 'box', 3, 'breathe')], today, areas)).toBe('write');
+    expect(nextStep('move', [did(today, 'box', 3, 'breathe'), did(today, 'page-1', 2, 'write')], today, areas)).toBeUndefined();
+    // After breathing, Meditate is not built yet: "Write a line about it?", or nothing.
+    expect(nextStep('breathe', [], today, areas)).toBe('write');
+    expect(nextStep('breathe', [did(today, 'page-1', 2, 'write')], today, areas)).toBeUndefined();
+  });
+
+  it('skips Breathe when it has nothing to show (useAreas): a line in the journal after a lesson', () => {
+    expect(nextStep('move', [], today, { ...areas, breathe: false })).toBe('write');
   });
 
   it('offers the next kind in the order move → breathe → sit → write', () => {

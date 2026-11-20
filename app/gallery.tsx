@@ -4,6 +4,9 @@
  * app's theme (System) or forces Light or Dark, without changing the app's setting.
  * "Show sample progress" fills the person's candles, a series, a saved lesson and an answer in
  * memory only (src/practice/demo.ts), to look at Today, Practice and You with progress in them.
+ * Phase 7: Breathe's card on Today (not done and done), its shelf row, and the breathing player at
+ * five moments, drawn still: the top of a breath in, a hold, the bottom of a breath out, paused, and
+ * with reduce motion.
  */
 import { useRouter } from 'expo-router';
 import { ArrowRight, Bookmark, ChevronDown, ChevronLeft, Feather, House, MapPin, Moon, PenLine, Play, Wind } from 'lucide-react-native';
@@ -12,7 +15,9 @@ import { useState, type ReactNode } from 'react';
 import type { GuidedJournal, GuidedPrompt } from '../shared/content-schema';
 
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { useSharedValue } from 'react-native-reanimated';
 
+import { DISC_MIN } from '@/breathe/session';
 import { useContent } from '@/content/store';
 import { useWeek } from '@/day/hooks';
 import { addDays, week } from '@/day/record';
@@ -28,6 +33,7 @@ import {
   AnswerChoice,
   AreaCard,
   Arrive,
+  BreathStage,
   Button,
   Card,
   Chip,
@@ -56,6 +62,7 @@ import {
   TabBar,
   Text,
   WeekCard,
+  type StageState,
   type TabItem,
 } from '@/ui';
 
@@ -139,6 +146,37 @@ const prefillPrompt: GuidedPrompt = {
   many: false,
   prefill: { from: 'lessons-today', pick: [{ atLeast: 20, option: p6.movedOptions[2] }] },
 };
+
+/**
+ * The breathing player at one moment, drawn still in a frame of the page: the disc at `scale` (a
+ * part of its largest size), the thin line at `left`.
+ */
+function PacerFrame({ label, scale: at, left: rest, state }: { label: string; scale: number; left: number; state: StageState }) {
+  const scale = useSharedValue(at);
+  const left = useSharedValue(rest);
+  return (
+    <View style={styles.block}>
+      <Text variant="meta" color="text.secondary">
+        {label}
+      </Text>
+      <ThemeScope scheme="dark">
+        <View style={styles.pacerFrame}>
+          <BreathStage
+            scale={scale}
+            left={left}
+            leftLabel={strings.breathe.timeLeft(2)}
+            state={state}
+            sound={false}
+            onToggleSound={() => {}}
+            onPause={() => {}}
+            onGoOn={() => {}}
+            onStop={() => {}}
+          />
+        </View>
+      </ThemeScope>
+    </View>
+  );
+}
 
 /** One labelled block of the gallery. */
 function Block({ label, children }: { label: string; children: ReactNode }) {
@@ -309,6 +347,33 @@ function GalleryPage({ choice, onChoose }: { choice: Choice; onChoose: (c: Choic
         {areaCards.map(({ area, icon }) => (
           <AreaCard key={area} area={area} icon={icon} {...g.areaSamples[area]} onPress={noop} />
         ))}
+      </Block>
+
+      <Block label={g.breathe.cards}>
+        <AreaCard area="breathe" icon={Wind} {...g.areaSamples.breathe} onPress={noop} />
+        <AreaCard area="breathe" icon={Wind} {...g.areaSamples.breathe} line={strings.breathe.doneToday} done onPress={noop} />
+        <ListCard>
+          <ShelfRow aura="tide" title={g.areaSamples.breathe.title} line={g.breathe.round} onPress={noop} />
+          <ShelfRow aura="tide" title={g.breathe.draftTitle} line={g.breathe.draftRound} item={{ draft: true }} onPress={noop} />
+        </ListCard>
+      </Block>
+
+      <Block label={g.breathe.pacer}>
+        <PacerFrame label={g.breathe.frames.in} scale={1} left={0.8} state={{ kind: 'step', word: strings.breathe.word.in, way: strings.breathe.via.nose, count: 4, stepKey: 'in' }} />
+        <PacerFrame label={g.breathe.frames.hold} scale={1} left={0.75} state={{ kind: 'step', word: strings.breathe.word.hold, count: 2, stepKey: 'hold' }} />
+        <PacerFrame
+          label={g.breathe.frames.out}
+          scale={DISC_MIN}
+          left={0.7}
+          state={{ kind: 'step', word: strings.breathe.word.out, way: strings.breathe.via.mouth, count: 6, stepKey: 'out' }}
+        />
+        <PacerFrame label={g.breathe.frames.paused} scale={0.7} left={0.5} state={{ kind: 'paused' }} />
+        <PacerFrame
+          label={g.breathe.frames.reduced}
+          scale={size.pacer.reduced}
+          left={0.4}
+          state={{ kind: 'step', word: strings.breathe.word.in, way: strings.breathe.via.nose, count: 2, stepKey: 'reduced' }}
+        />
       </Block>
 
       <Block label={g.journalParts}>
@@ -498,6 +563,8 @@ const styles = StyleSheet.create({
   sections: { gap: layout.sectionGap },
   header: { gap: space.lg },
   block: { gap: space.md },
+  // A frame of the breathing player, drawn still (Phase 7).
+  pacerFrame: { height: size.pacerFrame, borderRadius: radius.xl, overflow: 'hidden' },
   typeRow: { gap: space.xxs },
   cardGap: { gap: space.xs },
   swatches: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space.sm },

@@ -1,11 +1,11 @@
 /**
  * What the record of the day says about lessons: done or not, when, how far into a series, and
- * the person's history. Pure functions, tested in progress.test.ts.
+ * the person's history (lessons and, from Phase 7, breathing). Pure functions, tested in progress.test.ts.
  *
  * Lessons no longer in the content stay in the record (they keep lighting candles and counting in
  * the totals); every list made here simply skips them.
  */
-import type { ContentFile, Lesson } from '../../shared/content-schema';
+import type { BreathExercise, ContentFile, Lesson } from '../../shared/content-schema';
 
 import { dayLabel } from '@/content/labels';
 import { findLesson } from '@/content/selectors';
@@ -78,28 +78,46 @@ export function savedLessons(content: ContentFile, saved: readonly string[]): Le
   return saved.map((slug) => findLesson(content, slug)).filter((l): l is Lesson => l !== undefined);
 }
 
-/** One line of History: a lesson and the minutes recorded for it. */
-export type HistoryItem = { key: string; lesson: Lesson; minutes: number };
+/**
+ * One line of History: a lesson, or a breathing exercise (Phase 7), and the minutes recorded for it.
+ * The journal's pages are not listed here: they are read in the Journal.
+ */
+export type HistoryItem =
+  | { key: string; kind: 'move'; lesson: Lesson; minutes: number }
+  | { key: string; kind: 'breathe'; exercise: BreathExercise; minutes: number };
 export type HistoryDay = { day: string; label: string; items: HistoryItem[] };
 
+/** The line of History for one entry, or undefined when it is not listed or no longer in the content. */
+function historyItem(entry: DayEntry, key: string, content: ContentFile): HistoryItem | undefined {
+  if (entry.kind === 'move') {
+    const lesson = findLesson(content, entry.ref);
+    return lesson ? { key, kind: 'move', lesson, minutes: entry.minutes } : undefined;
+  }
+  if (entry.kind === 'breathe') {
+    const exercise = (content.breath ?? []).find((e) => e.slug === entry.ref);
+    return exercise ? { key, kind: 'breathe', exercise, minutes: entry.minutes } : undefined;
+  }
+  return undefined;
+}
+
 /**
- * History: the lessons done, grouped by day, the newest day first and the newest first within a
- * day. Days are labelled "Today", "Yesterday", then "16 November".
+ * History: the lessons done and the breathing sessions, grouped by day, the newest day first and the
+ * newest first within a day. Days are labelled "Today", "Yesterday", then "16 November".
  */
 export function historyDays(entries: readonly DayEntry[], content: ContentFile, today: string): HistoryDay[] {
-  const sorted = lessonEntries(entries)
-    .map((entry, i) => ({ entry, i, lesson: findLesson(content, entry.ref) }))
-    .filter((x): x is { entry: DayEntry; i: number; lesson: Lesson } => x.lesson !== undefined)
+  const sorted = entries
+    .map((entry, i) => ({ entry, item: historyItem(entry, `${entry.at}-${i}`, content) }))
+    .filter((x): x is { entry: DayEntry; item: HistoryItem } => x.item !== undefined)
     .sort((a, b) => (a.entry.day !== b.entry.day ? (a.entry.day < b.entry.day ? 1 : -1) : a.entry.at < b.entry.at ? 1 : -1));
 
   const days: HistoryDay[] = [];
-  for (const { entry, i, lesson } of sorted) {
+  for (const { entry, item } of sorted) {
     let group = days[days.length - 1];
     if (!group || group.day !== entry.day) {
       group = { day: entry.day, label: dayWords(entry.day, today, strings.history), items: [] };
       days.push(group);
     }
-    group.items.push({ key: `${entry.at}-${i}`, lesson, minutes: entry.minutes });
+    group.items.push(item);
   }
   return days;
 }

@@ -1,0 +1,30 @@
+# A breathing exercise. Written by Claude chat (the architect) on 20 Nov 2026 from published research.
+# Phase 7 copies this file, unchanged, to content/breath/long-exhale/breath.yaml.
+# Its format and the check's rules: docs/phases/phase-7.md, section 1 (then docs/CONTENT.md).
+# The folder name is the exercise's slug: permanent once published (the record of the day keeps it).
+
+title: Long exhale
+summary: In for four, out for six.
+goodFor: Settling, in the evening
+order: 1
+suggest: [evening]
+
+steps:
+  - { do: in, seconds: 4, via: nose }
+  - { do: out, seconds: 6 }
+
+how: |
+  Sit or lie down comfortably. Breathe in gently through your nose while the circle grows. Then let the breath go slowly while it settles, through your nose or through softly parted lips, a little longer than the breath in.
+
+  Keep it easy. If a count feels too long, breathe more softly rather than holding on.
+
+why:
+  level: promising
+  text: |
+    Slowing the breath to about six breaths a minute is one of the best-measured things you can do with your body. Across more than two hundred studies, it raised heart rate variability, a sign that the calming side of the nervous system is more active, during the practice, right after it, and after several weeks of it.
+
+    Whether a longer out-breath adds to that is less clear. Some small studies found people felt more relaxed when they breathed out for longer than they breathed in; others, including a careful study in 2024, found no difference. The slow pace itself is what the evidence supports best.
+  sources:
+    - "Laborde, Allen, Borges and others (2022). Effects of voluntary slow breathing on heart rate and heart rate variability: a systematic review and a meta-analysis. Neuroscience and Biobehavioral Reviews, 138, 104711."
+    - "Van Diest, Verstappen, Aubert, Widjaja, Vansteenwegen and Vlemincx (2014). Inhalation/exhalation ratio modulates the effect of slow breathing on heart rate variability and relaxation. Applied Psychophysiology and Biofeedback, 39, 171–180."
+    - "Meehan and Shaffer (2024). Do longer exhalations increase HRV during slow-paced breathing? Applied Psychophysiology and Biofeedback, 49(3), 407–417."

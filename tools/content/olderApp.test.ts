@@ -88,3 +88,35 @@ describe('the Phase 5 app reading the Phase 6 journals', () => {
     ]);
   });
 });
+
+/**
+ * Phase 7 (docs/phases/phase-7.md, "Watch out for" 5): the apps on phones before Phase 7 download a
+ * content.json that holds `breath`. Their reader drops keys it does not know, so the exercises are
+ * ignored and everything else loads as before. The Phase 5 schema stands for them all (Phase 6
+ * changed only the journals).
+ */
+describe('the Phase 5 app reading a content.json with breathing exercises', () => {
+  let withBreath: Record<string, unknown>;
+
+  beforeAll(async () => {
+    const dir = path.join(tmp, 'with-breath');
+    await cp(VALID, dir, { recursive: true });
+    const architect = path.join(__dirname, '..', '..', 'docs', 'phases', 'phase-7', 'breath');
+    for (const slug of ['long-exhale', 'even-breath', 'the-sigh', 'box', 'alternate-nostril']) {
+      await mkdir(path.join(dir, 'breath', slug), { recursive: true });
+      await cp(path.join(architect, `${slug}.yaml`), path.join(dir, 'breath', slug, 'breath.yaml'));
+    }
+    const result = await buildContent({ contentDir: dir, outDir: path.join(tmp, 'out-breath'), now: new Date('2026-11-20T12:00:00Z') });
+    if (!result.ok) throw new Error(result.problems.map(formatProblem).join('\n'));
+    withBreath = JSON.parse(JSON.stringify(result.preview));
+  });
+
+  it('reads the whole file, ignores the exercises, and keeps everything else', () => {
+    expect((withBreath.breath as unknown[]).length).toBe(5);
+    const read = phase5.contentFile.safeParse(withBreath);
+    expect(read.success).toBe(true);
+    expect(read.data && 'breath' in read.data).toBe(false);
+    expect(read.data?.lessons.length).toBe((withBreath.lessons as unknown[]).length);
+    expect(read.data?.guidedJournals?.map((j) => j.slug)).toEqual(['small-steps']);
+  });
+});

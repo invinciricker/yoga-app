@@ -1,7 +1,8 @@
 /**
  * The record of the day: one list of the things a person did, each on one local calendar day.
  * A day's candle is lit as soon as anything is done on it (docs/V2.md, "One day, four small things").
- * Lessons write "move" entries now; Breathe, Meditate and Journal will write theirs later.
+ * Lessons write "move" entries, the Journal "write" entries (Phase 5), Breathe "breathe" entries
+ * (Phase 7); Meditate will write "sit" entries.
  *
  * Pure functions only: give them the list and today's day, get an answer. Tested in record.test.ts.
  * Days are "YYYY-MM-DD" text in the phone's own calendar (dayOf in src/content/selectors.ts) and are
@@ -18,9 +19,8 @@ export const dayKinds: readonly DayKind[] = ['move', 'breathe', 'sit', 'write'];
 export type DayEntry = {
   /** The phone's calendar day, "2026-11-17". */
   day: string;
-  /** Only "move" exists in Phase 4. */
   kind: DayKind;
-  /** What it was: for "move", the lesson's slug. */
+  /** What it was: for "move", the lesson's slug; for "breathe", the exercise's slug. */
   ref: string;
   /** Whole minutes, at least 1. */
   minutes: number;
@@ -162,4 +162,14 @@ export function parseEntries(raw: unknown): DayEntry[] {
 /** The entry a finished lesson writes, on the day of `now` (the moment its closing screen opens). */
 export function lessonEntry(lesson: { slug: string; minutes: number }, now: Date): DayEntry {
   return { day: dayText(now), kind: 'move', ref: lesson.slug, minutes: Math.max(1, Math.round(lesson.minutes)), at: now.toISOString() };
+}
+
+/**
+ * The entry a breathing session writes, on the day of `now` (the moment its closing screen opens,
+ * so a session that ends after midnight counts on the day it ended, like a lesson). `minutes` is
+ * the whole minutes breathed, at least 1. `at` names the session: the closing screen writes only
+ * when no entry has it yet, so opening it again never writes twice.
+ */
+export function breatheEntry(slug: string, minutes: number, now: Date, at: string = now.toISOString()): DayEntry {
+  return { day: dayText(now), kind: 'breathe', ref: slug, minutes: Math.max(1, Math.round(minutes)), at };
 }

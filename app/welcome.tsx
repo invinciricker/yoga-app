@@ -27,8 +27,8 @@ import {
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { areas } from '@/config';
 import { useContent } from '@/content/store';
+import { useAreas } from '@/lib/areas';
 import { standardEasing, useReduceMotion } from '@/lib/motion';
 import { routes } from '@/lib/nav';
 import { usePrefs } from '@/lib/prefs';
@@ -59,7 +59,9 @@ function Welcome() {
   useDarkTop(true);
 
   const site = useContent((s) => s.content.site);
-  const slides = welcomeSlides(areas, { app: site.appName, teacher: site.teacherFirstName });
+  // Built and not empty: the welcome never names a room with nothing in it.
+  const available = useAreas();
+  const slides = welcomeSlides(available, { app: site.appName, teacher: site.teacherFirstName });
   const last = slides.length - 1;
 
   const [page, setPage] = useState(0);

@@ -89,7 +89,7 @@ describe('historyDays', () => {
     ];
     const days = historyDays(entries, content, today);
     expect(days.map((d) => d.label)).toEqual(['Today', 'Yesterday', '15 November']);
-    expect(days[0].items.map((i) => i.lesson.slug)).toEqual(['breath', 'wind-down']);
+    expect(days[0].items.map((i) => (i.kind === 'move' ? i.lesson.slug : ''))).toEqual(['breath', 'wind-down']);
     expect(days[2].items[0].minutes).toBe(25);
   });
 
@@ -104,8 +104,25 @@ describe('historyDays', () => {
     expect(days.map((d) => d.label)).toEqual(['Yesterday']);
   });
 
-  it('keeps only lessons (Breathe, Meditate and Journal will have their own words)', () => {
-    const breath: DayEntry = { ...did(today, 'morning'), kind: 'breathe' };
-    expect(historyDays([breath], content, today)).toEqual([]);
+  it('lists breathing sessions too, under their day, with their minutes (Phase 7)', () => {
+    const entries: DayEntry[] = [
+      did(today, 'wind-down', 12, `${today}T08:00:00.000Z`),
+      { day: today, kind: 'breathe', ref: 'long-exhale', minutes: 3, at: `${today}T20:00:00.000Z` },
+      { day: '2026-11-16', kind: 'breathe', ref: 'box', minutes: 5, at: '2026-11-16T07:00:00.000Z' },
+    ];
+    const days = historyDays(entries, content, today);
+    expect(days.map((d) => d.items.map((i) => [i.kind, i.kind === 'breathe' ? i.exercise.title : i.lesson.title, i.minutes]))).toEqual([
+      [
+        ['breathe', 'Long exhale', 3],
+        ['move', 'Evening wind-down', 12],
+      ],
+      [['breathe', 'Box', 5]],
+    ]);
+  });
+
+  it('leaves out pages written, and exercises no longer in the content', () => {
+    const write: DayEntry = { ...did(today, 'some-page'), kind: 'write' };
+    const gone: DayEntry = { ...did(today, 'an-exercise-that-is-gone'), kind: 'breathe' };
+    expect(historyDays([write, gone], content, today)).toEqual([]);
   });
 });

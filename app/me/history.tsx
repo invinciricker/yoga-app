@@ -1,7 +1,8 @@
 /**
- * You → History: the lessons done, grouped by day, the newest first ("Today", "Yesterday", then
- * "16 November"). Each line is the lesson's row with the minutes recorded. A lesson no longer in
- * the content is left out here, but it still lights its candle and counts in the totals.
+ * You → History: the lessons done and the breathing sessions (Phase 7), grouped by day, the newest
+ * first ("Today", "Yesterday", then "16 November"). A lesson is its row with the minutes recorded;
+ * a session is a small tide disc, the exercise's title and its minutes. Something no longer in the
+ * content is left out here, but it still lights its candle and counts in the totals.
  */
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
@@ -14,7 +15,7 @@ import { routes, useBack } from '@/lib/nav';
 import { historyDays } from '@/practice/progress';
 import { strings } from '@/strings';
 import { space } from '@/theme';
-import { Arrive, EmptyState, IconButton, LessonRow, Overline, Screen, Text } from '@/ui';
+import { Arrive, BreathRow, EmptyState, IconButton, LessonRow, Overline, Screen, Text } from '@/ui';
 
 export default function HistoryScreen() {
   const router = useRouter();
@@ -39,15 +40,24 @@ export default function HistoryScreen() {
               {group.label}
             </Overline>
             <View>
-              {group.items.map((item) => (
-                <LessonRow
-                  key={item.key}
-                  lesson={item.lesson}
-                  minutes={item.minutes}
-                  marks={false}
-                  onPress={() => router.push(routes.lesson(item.lesson.slug))}
-                />
-              ))}
+              {group.items.map((item) =>
+                item.kind === 'move' ? (
+                  <LessonRow
+                    key={item.key}
+                    lesson={item.lesson}
+                    minutes={item.minutes}
+                    marks={false}
+                    onPress={() => router.push(routes.lesson(item.lesson.slug))}
+                  />
+                ) : (
+                  <BreathRow
+                    key={item.key}
+                    exercise={item.exercise}
+                    line={strings.history.breathLine(item.minutes)}
+                    onPress={() => router.push(routes.breath(item.exercise.slug))}
+                  />
+                ),
+              )}
             </View>
           </Arrive>
         ))

@@ -339,6 +339,64 @@ export const strings = {
     // The text that leaves the phone when the person exports it.
     partHeader: (n: number, total: number) => `Part ${n} of ${total}`,
   },
+  // Breathe: breathing exercises with a pacer (docs/phases/phase-7.md).
+  breathe: {
+    title: 'Breathe',
+    // The one suggestion on the tab, by the time of day (src/lib/greeting.ts).
+    forPart: { morning: 'For this morning', afternoon: 'For this afternoon', evening: 'For this evening' },
+    beginFor: (minutes: number) => `Begin · ${minutes} min`,
+    doneToday: 'Done today',
+    // Today's card.
+    cardOverline: (minutes: number) => `Breathe · ${minutes} min`,
+    // A tab with no exercise yet (preview app only; the public app hides the tab).
+    empty: 'Breathing exercises will gather here.',
+    // The words of a step. A step's own label ("Top up") replaces its word.
+    word: { in: 'In', hold: 'Hold', out: 'Out' },
+    via: { nose: 'through the nose', mouth: 'through the mouth' },
+    side: { left: 'left side', right: 'right side' },
+    seconds: (n: number) => (n === 1 ? '1 second' : `${n} seconds`),
+    // The round in short: "In 4 · Out 6".
+    short: (word: string, seconds: number) => `${word} ${seconds}`,
+    // An exercise's page.
+    overline: 'Breathe',
+    oneRound: 'One round',
+    howTo: 'How to do it',
+    length: 'Length',
+    lengthChip: (minutes: number) => `${minutes} min`,
+    lengthLabel: (minutes: number) => (minutes === 1 ? '1 minute' : `${minutes} minutes`),
+    begin: 'Begin',
+    sound: 'Sound',
+    soundLine: 'A soft tone at each breath, a bell to begin and to end.',
+    vibration: 'Vibration',
+    vibrationLine: 'A light tick in the hand at each change.',
+    why: 'Why this works',
+    sources: 'The research behind it',
+    // How strong the evidence is, in plain words.
+    levels: {
+      strong: { title: 'Strong evidence', line: 'Many good studies agree.' },
+      promising: { title: 'Promising evidence', line: 'Some good studies. More are needed.' },
+      early: { title: 'Early evidence', line: 'Only a little research so far.' },
+      traditional: { title: 'A traditional practice', line: 'From a tradition, with little research of its own.' },
+    },
+    safety: 'Breathe gently and never strain. If you feel dizzy or uneasy, stop and breathe normally.',
+    gone: 'This exercise is no longer here.',
+    toBreathe: 'Back to Breathe',
+    // The player.
+    settle: 'Settle in',
+    paused: 'Paused',
+    goOn: 'Go on',
+    stop: 'Stop',
+    pause: 'Pause',
+    tapToPause: 'Tap anywhere to pause',
+    soundOn: 'Sound on',
+    soundOff: 'Sound off',
+    // Read aloud by a screen reader for the thin line at the bottom (no numbers on screen).
+    timeLeft: (minutes: number) => (minutes <= 1 ? 'Less than a minute left' : `About ${minutes} minutes left`),
+    // The closing screen.
+    closing: 'Breathe easy.',
+    closingLine: (minutes: number, title: string) => `${minutes === 1 ? '1 minute' : `${minutes} minutes`} of ${title}`,
+    close: 'Done',
+  },
   // You: the person's own page (settings now; more in later phases).
   me: {
     title: 'You',
@@ -369,6 +427,8 @@ export const strings = {
     title: 'History',
     today: 'Today',
     yesterday: 'Yesterday',
+    // A breathing session (Phase 7): "3 min · Breathe".
+    breathLine: (minutes: number) => `${minutes} min · Breathe`,
   },
   // You → Delete my data. A page of its own, not a pop-up.
   deleteData: {
@@ -458,7 +518,7 @@ export const strings = {
     sample: 'Sample progress',
     sampleSwitch: 'Show sample progress',
     sampleLine:
-      'Four days of candles, a series begun, a lesson saved, five pages of a journal and two free pages. In memory only, never saved.',
+      'Four days of candles, a series begun, a lesson saved, three minutes of breath yesterday, pages of the journals and two free pages. In memory only, never saved.',
     // The words of the sample pages, as a person might write them (preview app and web only).
     samplePages: {
       answers: {
@@ -504,6 +564,21 @@ export const strings = {
     fillSample: 'Today I was glad of ___ because ___.',
     recallLabel: 'On your first page you wrote',
     recallSample: ['Tea on the balcony', 'A long call with my sister'],
+    // Phase 7: Breathe.
+    breathe: {
+      cards: 'Breathe: Today’s card, not done and done, and the shelf',
+      round: 'In 4 · Out 6',
+      draftTitle: 'Alternate nostril',
+      draftRound: 'In 4 · Out 4 · In 4 · Out 4',
+      pacer: 'Breathe: the player',
+      frames: {
+        in: 'The top of a breath in',
+        hold: 'A hold',
+        out: 'The bottom of a breath out',
+        paused: 'Paused',
+        reduced: 'Reduce motion: the disc stays still, only the words change',
+      },
+    },
     // Phase 6: dots and a choice filled in from today's practice.
     phase6: {
       label: 'Journal: the week as dots, and today’s practice',

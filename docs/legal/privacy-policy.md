@@ -6,7 +6,7 @@
 # Later phases add their own paragraph when they start sending something:
 #   Phase 9 (the answer to "How did that feel?" goes to Maria's totals), Phase 10 (notifications).
 #   Phase 5 adds the journal to "What stays on your phone".
-updated: 2026-11-19
+updated: 2026-11-20
 ---
 
 # Privacy
@@ -21,7 +21,7 @@ You never sign up. The app does not ask for your name, your email address or you
 
 ## What stays on your phone
 
-What you do in the app stays on your phone: the lessons you finished and your candles, your saved lessons, your answers to "How did that feel?", everything you write in the Journal, and your settings. None of it is sent anywhere. **You → Delete my data** erases it, and so does uninstalling the app.
+What you do in the app stays on your phone: the lessons and breathing exercises you finished, your candles, your saved lessons, your answers to "How did that feel?", everything you write in the Journal, and your settings. None of it is sent anywhere. **You → Delete my data** erases it, and so does uninstalling the app.
 
 If backup is switched on in your phone's settings, Android may include this app's data in your phone's own backup to your Google account. That backup is yours: we cannot see it.
 
@@ -31,7 +31,7 @@ What you write in the Journal is kept only on this phone. It is never sent anywh
 
 ## What the app downloads
 
-The lessons, pictures and notes, and the small page that holds the video player, are downloaded from GitHub Pages, a website service run by GitHub. Like any website, it receives your phone's internet address when the app asks for them, under [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+The lessons, breathing exercises, pictures and notes, and the small page that holds the video player, are downloaded from GitHub Pages, a website service run by GitHub. Like any website, it receives your phone's internet address when the app asks for them, under [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 
 ## Videos
 

@@ -78,7 +78,7 @@ export async function fetchFresh(
  * series or note), read from the bundled copy. On a phone this is never called.
  * "journal" is the key of Maria's notes in content.json, a permanent data name (docs/V2.md).
  */
-export function slugsForStaticPages(kind: 'lessons' | 'series' | 'journal' | 'guidedJournals'): { slug: string }[] {
+export function slugsForStaticPages(kind: 'lessons' | 'series' | 'journal' | 'guidedJournals' | 'breath'): { slug: string }[] {
   const content = accept(bundledFallback());
   return content ? (content[kind] ?? []).map((item) => ({ slug: item.slug })) : [];
 }
