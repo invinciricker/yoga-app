@@ -5,6 +5,9 @@
  * Today's lesson counts 25 minutes (docs/phases/phase-6.md, section 5), so the Health journal's
  * "How much did you move today?" shows its answer filled in from today's practice.
  *
+ * Phase 7: also a 3-minute "Long exhale" yesterday (History shows it), and nothing breathed today
+ * (Today offers its Breathe card).
+ *
  * The saved lesson is one not done, so its bookmark shows in the lists (a tick would hide it).
  * The last two days use other lessons when there are some, else the series' two again.
  */
@@ -20,6 +23,9 @@ export const SAMPLE_TODAY_MINUTES = 25;
 
 /** A lesson that does not exist, for content with no lessons at all: lists simply skip it. */
 const nothing = { slug: 'sample-lesson', minutes: 12 };
+
+/** The minutes of yesterday's sample breathing session. */
+export const SAMPLE_BREATH_MINUTES = 3;
 
 export function sampleProgress(content: ContentFile, today: string): { entries: DayEntry[]; practice: Practice } {
   // The first series with two lessons or more: its first two are done.
@@ -42,6 +48,14 @@ export function sampleProgress(content: ContentFile, today: string): { entries: 
     const day = addDays(today, -ago);
     return { day, kind: 'move', ref: lesson.slug, minutes: ago === 0 ? SAMPLE_TODAY_MINUTES : lesson.minutes, at: `${day}T18:30:00.000Z` };
   });
+
+  // Yesterday evening, three minutes of Long exhale (or of the first exercise there is).
+  const exercises = content.breath ?? [];
+  const breath = exercises.find((e) => e.slug === 'long-exhale') ?? exercises[0];
+  if (breath) {
+    const yesterday = addDays(today, -1);
+    entries.push({ day: yesterday, kind: 'breathe', ref: breath.slug, minutes: SAMPLE_BREATH_MINUTES, at: `${yesterday}T20:15:00.000Z` });
+  }
 
   const answered = pick(inSeries[1], inSeries[0], others[0]).slug;
   return {

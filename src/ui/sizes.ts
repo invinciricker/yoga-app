@@ -89,4 +89,5 @@ export const size = {
   },
   timeLine: 2, // the thin line along the bottom of the player that shows how much is left
   timeLineTrack: 0.18, // the strength of the line's spent part
+  pacerFrame: 600, // a still frame of the player in the design gallery
 } as const;

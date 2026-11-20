@@ -518,7 +518,7 @@ export const strings = {
     sample: 'Sample progress',
     sampleSwitch: 'Show sample progress',
     sampleLine:
-      'Four days of candles, a series begun, a lesson saved, five pages of a journal and two free pages. In memory only, never saved.',
+      'Four days of candles, a series begun, a lesson saved, three minutes of breath yesterday, pages of the journals and two free pages. In memory only, never saved.',
     // The words of the sample pages, as a person might write them (preview app and web only).
     samplePages: {
       answers: {
@@ -564,6 +564,21 @@ export const strings = {
     fillSample: 'Today I was glad of ___ because ___.',
     recallLabel: 'On your first page you wrote',
     recallSample: ['Tea on the balcony', 'A long call with my sister'],
+    // Phase 7: Breathe.
+    breathe: {
+      cards: 'Breathe: Today’s card, not done and done, and the shelf',
+      round: 'In 4 · Out 6',
+      draftTitle: 'Alternate nostril',
+      draftRound: 'In 4 · Out 4 · In 4 · Out 4',
+      pacer: 'Breathe: the player',
+      frames: {
+        in: 'The top of a breath in',
+        hold: 'A hold',
+        out: 'The bottom of a breath out',
+        paused: 'Paused',
+        reduced: 'Reduce motion: the disc stays still, only the words change',
+      },
+    },
     // Phase 6: dots and a choice filled in from today's practice.
     phase6: {
       label: 'Journal: the week as dots, and today’s practice',

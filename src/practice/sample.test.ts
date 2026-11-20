@@ -9,8 +9,13 @@ const today = '2026-11-17';
 describe('sampleProgress', () => {
   it('lights four days in a row ending today', () => {
     const { entries } = sampleProgress(content, today);
-    expect(entries.map((e) => e.day)).toEqual(['2026-11-14', '2026-11-15', '2026-11-16', '2026-11-17']);
+    expect(entries.filter((e) => e.kind === 'move').map((e) => e.day)).toEqual(['2026-11-14', '2026-11-15', '2026-11-16', '2026-11-17']);
     expect(streak(entries, today)).toBe(4);
+  });
+
+  it('breathes three minutes of Long exhale yesterday, and nothing today (Phase 7)', () => {
+    const { entries } = sampleProgress(content, today);
+    expect(entries.filter((e) => e.kind === 'breathe').map((e) => [e.day, e.ref, e.minutes])).toEqual([['2026-11-16', 'long-exhale', 3]]);
   });
 
   it('does a lesson of 25 minutes today (Phase 6: the pre-filled answer shows)', () => {
