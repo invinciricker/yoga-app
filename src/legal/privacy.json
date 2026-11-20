@@ -1,12 +1,12 @@
 {
   "title": "Privacy",
-  "updated": "19 November 2026",
+  "updated": "20 November 2026",
   "blocks": [
     {
       "type": "paragraph",
       "spans": [
         {
-          "text": "Last updated: 19 November 2026",
+          "text": "Last updated: 20 November 2026",
           "italic": true
         }
       ]
@@ -41,7 +41,7 @@
       "type": "paragraph",
       "spans": [
         {
-          "text": "What you do in the app stays on your phone: the lessons you finished and your candles, your saved lessons, your answers to \"How did that feel?\", everything you write in the Journal, and your settings. None of it is sent anywhere. "
+          "text": "What you do in the app stays on your phone: the lessons and breathing exercises you finished, your candles, your saved lessons, your answers to \"How did that feel?\", everything you write in the Journal, and your settings. None of it is sent anywhere. "
         },
         {
           "text": "You → Delete my data",
@@ -89,7 +89,7 @@
       "type": "paragraph",
       "spans": [
         {
-          "text": "The lessons, pictures and notes, and the small page that holds the video player, are downloaded from GitHub Pages, a website service run by GitHub. Like any website, it receives your phone's internet address when the app asks for them, under "
+          "text": "The lessons, breathing exercises, pictures and notes, and the small page that holds the video player, are downloaded from GitHub Pages, a website service run by GitHub. Like any website, it receives your phone's internet address when the app asks for them, under "
         },
         {
           "text": "GitHub's privacy statement",
