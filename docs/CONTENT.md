@@ -12,6 +12,7 @@ content/
   lessons/<slug>/lesson.md        a lesson
   journal/<slug>/entry.md         a tip or a note
   guided-journals/<slug>/journal.yaml   a guided journal (Gratitude…): its pages and their questions
+  breath/<slug>/breath.yaml       a breathing exercise (Phase 7): its steps, how to do it, why it works
 ```
 
 - A **slug** is the folder's name: lowercase letters, digits and single dashes (`evening-wind-down`). It is the lesson's permanent address. It never changes after publication: reactions, saved lessons and progress on people's phones are filed under it.
@@ -170,6 +171,43 @@ Everything below is optional, and an app older than Phase 6 survives it (see "Ol
 
 **Older apps.** The app reads the journals apart from the rest, and leniently: a journal it cannot read is left out (the lessons still load), a prompt of a kind it does not know is skipped, and a page left with nothing says "This page needs a newer version of the app." and offers a way past it. So a later phase may add kinds of prompt without breaking the phones that have not updated. A Phase 5 app meeting the Phase 6 journals leaves out every `dots` and every prompt with `showIf: { round }`, ignores hints, weeks, `prefill`, `carry` and `again`, and keeps everything else (proved by `tools/content/olderApp.test.ts`). An app that meets a `prefill` with a `from` it does not know, or a `numbering` it does not know, shows a plain choice and plain numbers.
 
+## A breathing exercise: `content/breath/<slug>/breath.yaml`
+
+Added 20 Nov 2026 (Phase 7). The whole file is YAML, like a guided journal. The folder's name is the exercise's slug, **permanent once published**: the record of the day keeps it on people's phones. The five exercises written by the architect are the full examples.
+
+```yaml
+title: Long exhale                  # 40 characters at most
+summary: In for four, out for six.  # the line on cards and rows, 80 at most
+goodFor: Settling, in the evening   # 40 at most
+order: 1                            # its place on the Breathe tab, 1 first
+suggest: [evening]                  # optional: offered first at that time of day: morning | afternoon | evening
+# draft: true                       # only the preview app shows it
+steps:                              # ONE round of the exercise, repeated for the length chosen: 2 to 8 steps
+  - { do: in, seconds: 4, via: nose }
+  - { do: out, seconds: 6 }
+  # do: in | hold | out
+  # seconds: a whole number from 1 to 12; a hold 8 at most
+  # via: nose | mouth (optional)
+  # side: left | right (optional, only through the nose)
+  # label: replaces the word "In", "Hold" or "Out" on screen, 16 characters at most ("Top up")
+how: |                              # how to do it, Markdown, 1200 at most
+  Sit or lie down comfortably…
+why:                                # "Why this works", one tap away
+  level: promising                  # strong | promising | early | traditional
+  text: |                           # Markdown, 1500 at most: what the research found, plainly, including when it is weak
+    Slowing the breath…
+  sources:                          # 1 to 6, plain text, 400 at most each
+    - "Author (2022). Title. Journal, 138, 104711."
+```
+
+**Breaths.** Two steps `in` in a row are one breath in, taken in two parts (the sigh: "in", then "top up"): the circle grows through both. A breath is one run of steps `in`, then whatever follows until the next breath in.
+
+**The app shows the level** in plain words: *Strong evidence* ("Many good studies agree."), *Promising evidence* ("Some good studies. More are needed."), *Early evidence* ("Only a little research so far."), *A traditional practice* ("From a tradition, with little research of its own.").
+
+**The check refuses**, one plain sentence each: a folder name that is not a slug; a step that is not a whole number of seconds from 1 to 12; a hold over 8 seconds; fewer than 2 or more than 8 steps; a round with no `in` or no `out`; more than ten breaths a minute (a breath lasting under 6 seconds: "No fast breathing", `docs/V2.md`); a `side` through the mouth; a `label` over 16 characters; an unknown `do`, `via`, `side`, `level` or time of day; a missing `title`, `summary`, `goodFor`, `order`, `steps`, `how` or `why`; pictures, tables or HTML in the Markdown; and **more than 6 exercises without `draft`** (`docs/V2.md`, limit 2).
+
+**Older apps.** `breath` is optional in `content.json`, and an app built before Phase 7 ignores it (its reader drops keys it does not know). A Phase 7 app reads the exercises leniently: an exercise whose steps it cannot read entirely (a `do` it does not know) is left out whole, because a pacer must never skip a step; a `via`, `side` or `level` it does not know is left out of the words, not the exercise; unknown lines are ignored. The app checks the rules of the breath again: nothing fast ever reaches the pacer.
+
 ## Maria's page: `content/studio/studio.md`
 
 Everything is optional except `name`; a block with nothing in it is not shown.
@@ -240,6 +278,7 @@ The build (`tools/content/build.ts`, Phase 1) writes `content/v1/content.json` a
 5. Sort lessons and journal entries by `published` (newest first), then by title. A series lists its lesson slugs by `order`.
 6. `content.json` leaves out everything with `draft: true` (and a series left with no lesson). `preview.json` keeps drafts, with `draft: true` on them.
    Guided journals (Phase 5) go under the key `guidedJournals`, sorted by `order` then slug, with their defaults filled in and every `intro` and `note` text turned into blocks; drafts in `preview.json` only.
+   Breathing exercises (Phase 7) go under the key `breath`, sorted by `order` then slug, with `how` and `why.text` turned into blocks; drafts in `preview.json` only.
 7. Print a summary: counts, the list of drafts, the list of samples. With `--release`, exit with an error if any sample remains.
 8. Warn when `content.json` is larger than 400 KB: it is time to ask the architect about splitting it.
 

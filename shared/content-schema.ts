@@ -343,6 +343,108 @@ export const guidedJournalSource = z.object({
   sections: z.array(sectionSource).min(1),
 }).strict();
 
+/**
+ * content/breath/<slug>/breath.yaml: a breathing exercise (added 20 Nov 2026, Phase 7). The whole
+ * file is YAML. The folder's name is the exercise's slug, PERMANENT once published: the record of
+ * the day keeps it on people's phones. Explained for humans in docs/CONTENT.md ("A breathing
+ * exercise"); how many may be published at once is checked by tools/content/breath.ts.
+ *
+ * The rules of the breath (docs/V2.md: "nowhere in the app: fast breathing, a breath hold longer
+ * than 8 seconds") are the same for the check and for the app: `breathRoundProblems` below.
+ */
+export const breathActions = ['in', 'hold', 'out'] as const;
+export const partsOfDay = ['morning', 'afternoon', 'evening'] as const;
+export const evidenceLevels = ['strong', 'promising', 'early', 'traditional'] as const;
+/** A step lasts a whole number of seconds from 1 to this. */
+export const MAX_STEP_SECONDS = 12;
+/** A hold lasts this at most. */
+export const MAX_HOLD_SECONDS = 8;
+/** One breath (in, perhaps held, out) lasts this at least: ten breaths a minute at most. */
+export const MIN_BREATH_SECONDS = 6;
+/** Exercises published at once (docs/V2.md, "Limits that keep it calm", 2). Drafts do not count. */
+export const MAX_PUBLISHED_BREATH = 6;
+
+/** The few lines of a step the safety rules read. */
+type StepShape = { do: string; seconds: number };
+
+/**
+ * How many breaths one round of an exercise holds: each run of steps "in" begins one (the sigh's
+ * "in" then "top up" is one breath, taken in two parts). The round repeats, so a round that ends
+ * on "in" and starts on "in" counts that run once.
+ */
+export function breathsInRound(steps: readonly StepShape[]): number {
+  return steps.filter((step, i) => step.do === 'in' && steps[(i - 1 + steps.length) % steps.length].do !== 'in').length;
+}
+
+/**
+ * What breaks the rules of the breath, one plain sentence each (empty when nothing does): a step
+ * outside 1 to 12 whole seconds, a hold over 8, a round without a breath in or out, and more than
+ * ten breaths a minute (each breath of a round lasting under 6 seconds on average).
+ */
+export function breathRoundProblems(steps: readonly StepShape[]): string[] {
+  const out: string[] = [];
+  steps.forEach((step, i) => {
+    const which = `Step ${i + 1} (${step.do})`;
+    if (!Number.isInteger(step.seconds) || step.seconds < 1 || step.seconds > MAX_STEP_SECONDS) {
+      out.push(`${which} lasts ${step.seconds} seconds: a step is a whole number of seconds from 1 to ${MAX_STEP_SECONDS}.`);
+    } else if (step.do === 'hold' && step.seconds > MAX_HOLD_SECONDS) {
+      out.push(`${which} holds the breath for ${step.seconds} seconds: a hold is ${MAX_HOLD_SECONDS} seconds at most.`);
+    }
+  });
+  const has = (action: string) => steps.some((step) => step.do === action);
+  if (!has('in')) out.push('The round has no step "in": every round needs a breath in.');
+  if (!has('out')) out.push('The round has no step "out": every round needs a breath out.');
+  const breaths = breathsInRound(steps);
+  const seconds = steps.reduce((sum, step) => sum + step.seconds, 0);
+  if (breaths > 0 && seconds < MIN_BREATH_SECONDS * breaths) {
+    const perMinute = Math.round(((60 * breaths) / seconds) * 10) / 10;
+    out.push(
+      `One round is ${seconds} seconds for ${breaths === 1 ? 'one breath' : `${breaths} breaths`}: that is ${perMinute} breaths a minute, and the app never asks for more than ${60 / MIN_BREATH_SECONDS}. No fast breathing: make the steps longer.`,
+    );
+  }
+  return out;
+}
+
+const breathStepSource = z.object({
+  do: z.enum(breathActions),
+  /** A whole number from 1 to 12; a hold 8 at most (breathRoundProblems). */
+  seconds: z.number(),
+  via: z.enum(['nose', 'mouth']).optional(),
+  /** Only through the nose: alternate nostril breathing. */
+  side: z.enum(['left', 'right']).optional(),
+  /** Replaces the word "In", "Hold" or "Out" ("Top up"). */
+  label: z.string().min(1).max(16).optional(),
+}).strict()
+  .refine((step) => step.side === undefined || step.via !== 'mouth', {
+    message: 'a "side" is only for breathing through the nose: remove "side", or change "via" to nose',
+  });
+
+export const breathSource = z.object({
+  title: z.string().min(1).max(40),
+  /** The line on cards and rows ("In for four, out for six."). */
+  summary: z.string().min(1).max(80),
+  /** "Settling, in the evening". */
+  goodFor: z.string().min(1).max(40),
+  /** Its place on the Breathe tab, 1 first. */
+  order: z.number().int().min(1),
+  /** Offered first at that time of day, on the tab and on Today. */
+  suggest: z.array(z.enum(partsOfDay)).min(1).max(3).optional(),
+  draft: z.boolean().default(false),
+  /** One round of the exercise, repeated for the length chosen. */
+  steps: z.array(breathStepSource).min(2).max(8),
+  /** How to do it: Markdown. */
+  how: z.string().min(1).max(1200),
+  /** "Why this works", one tap away: how strong the evidence is, in plain words, and the sources. */
+  why: z.object({
+    level: z.enum(evidenceLevels),
+    text: z.string().min(1).max(1500),
+    sources: z.array(z.string().min(1).max(400)).min(1).max(6),
+  }).strict(),
+}).strict()
+  .superRefine((exercise, ctx) => {
+    for (const message of breathRoundProblems(exercise.steps)) ctx.addIssue({ code: 'custom', message, path: ['steps'] });
+  });
+
 // ------------------------------------------------------------------ what the app downloads (content.json)
 /** A picture prepared by the build: several widths of the same image, biggest last. Paths are relative to content.json. */
 export const image = z.object({
@@ -553,6 +655,49 @@ function withReadablePrompts(journal: unknown): unknown {
   };
 }
 
+/**
+ * A breathing exercise as the app receives it (added 20 Nov 2026, Phase 7): the source with its
+ * slug, the defaults filled in, `how` and `why.text` turned into blocks. Read LENIENTLY
+ * (`readableBreath` below): unknown fields are ignored, and an exercise whose steps this version
+ * cannot read entirely (a `do` it does not know, for example) is left out WHOLE, because a pacer
+ * must never skip a step. Lines that only label a step (`via`, `side`) or the evidence (`level`)
+ * are dropped when a later version writes something this one does not know, never the exercise.
+ * The rules of the breath are checked again here: nothing fast ever reaches the pacer.
+ */
+export const breathStep = z.object({
+  do: z.enum(breathActions),
+  seconds: z.number(),
+  via: z.enum(['nose', 'mouth']).optional().catch(undefined),
+  side: z.enum(['left', 'right']).optional().catch(undefined),
+  label: z.string().optional().catch(undefined),
+});
+export const breathExercise = z.object({
+  slug,
+  title: z.string(),
+  summary: z.string(),
+  goodFor: z.string(),
+  order: z.number(),
+  /** Parts of the day; one this version does not know never matches. */
+  suggest: z.array(z.string()).default([]).catch([]),
+  draft: z.boolean().default(false),
+  steps: z.array(breathStep).min(2),
+  how: z.array(block),
+  why: z.object({
+    level: z.enum(evidenceLevels).optional().catch(undefined),
+    text: z.array(block),
+    sources: z.array(z.string()).default([]),
+  }),
+}).refine((exercise) => breathRoundProblems(exercise.steps).length === 0);
+
+/** The exercises of a downloaded file that this version can read; see breathExercise above. Never throws. */
+export function readableBreath(raw: unknown): unknown[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((exercise: unknown) => {
+    const checked = breathExercise.safeParse(exercise);
+    return checked.success ? [checked.data] : [];
+  });
+}
+
 /** content/v1/content.json (published items) and content/v1/preview.json (drafts included). */
 export const contentFile = z.object({
   schemaVersion: z.literal(SCHEMA_VERSION),
@@ -573,6 +718,11 @@ export const contentFile = z.object({
    * still pass; read leniently, so a journal this version cannot read never stops the rest.
    */
   guidedJournals: z.preprocess(readableJournals, z.array(guidedJournal)).optional(),
+  /**
+   * Added 20 Nov 2026 (Phase 7): the breathing exercises, by `order`. Optional, so files built before
+   * still pass; read leniently, so an exercise this version cannot read never stops the rest.
+   */
+  breath: z.preprocess(readableBreath, z.array(breathExercise)).optional(),
 });
 
 export type Level = z.infer<typeof level>;
@@ -591,4 +741,9 @@ export type ShowIf = NonNullable<GuidedPrompt['showIf']>;
 export type GuidedPage = z.infer<typeof guidedPage>;
 export type GuidedSection = z.infer<typeof guidedSection>;
 export type GuidedJournal = z.infer<typeof guidedJournal>;
+export type BreathAction = (typeof breathActions)[number];
+export type PartOfDayName = (typeof partsOfDay)[number];
+export type EvidenceLevel = (typeof evidenceLevels)[number];
+export type BreathStep = z.infer<typeof breathStep>;
+export type BreathExercise = z.infer<typeof breathExercise>;
 export type ContentFile = z.infer<typeof contentFile>;
