@@ -20,7 +20,7 @@ async function main(): Promise<boolean> {
     return false;
   }
   console.log(
-    `Content is fine: ${loaded.lessons.length} lessons, ${loaded.series.length} series, ${loaded.journal.length} journal entries, ${loaded.guidedJournals.length} guided journal${loaded.guidedJournals.length === 1 ? "" : "s"}.`,
+    `Content is fine: ${loaded.lessons.length} lessons, ${loaded.series.length} series, ${loaded.journal.length} journal entries, ${loaded.guidedJournals.length} guided journal${loaded.guidedJournals.length === 1 ? "" : "s"}, ${loaded.breath.length} breathing exercise${loaded.breath.length === 1 ? "" : "s"}.`,
   );
   const { drafts, samples } = listDraftsAndSamples(loaded);
   printLists(drafts, samples);

@@ -288,14 +288,17 @@ export function carryProblems(slug: string, data: Source, journals: ReadonlyMap<
   return out;
 }
 
-/** Markdown → blocks, for a journal (no pictures: a journal has no folder of photos). */
-function textBlocks(markdown: string, where: string, problems: string[]): Block[] {
+/**
+ * Markdown → blocks, for a journal or a breathing exercise (no pictures: neither has a folder of
+ * photos). `what` names the text in the sentence about a picture.
+ */
+export function textBlocks(markdown: string, where: string, problems: string[], what = "a journal's text"): Block[] {
   const { blocks, problems: found } = markdownToBlocks(markdown);
   for (const p of found) problems.push(`${where}: ${p.message}`);
   const out: Block[] = [];
   for (const block of blocks) {
     if (block.type === 'picture') {
-      problems.push(`${where}: A picture cannot be used in a journal's text.`);
+      problems.push(`${where}: A picture cannot be used in ${what}.`);
     } else {
       out.push(block);
     }
